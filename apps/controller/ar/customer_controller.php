@@ -231,7 +231,7 @@ class CustomerController extends AppController {
     public function getJsonCustomer($cbi = 0){
         $filter = isset($_POST['q']) ? strval($_POST['q']) : '';
         $cust = new Customer();
-        $cust = $cust->GetJSonCustomer(0,$filter);
+        $cust = $cust->GetJSonCustomer($cbi,$filter);
         echo json_encode($cust);
     }
 }

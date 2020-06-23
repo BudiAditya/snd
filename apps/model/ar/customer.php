@@ -226,7 +226,7 @@ WHERE id = ?id';
     }
 
     public function GetJSonCustomer($cabangId = 0, $filter = null,$sort = 'a.cus_name',$order = 'ASC') {
-        $sql = "SELECT a.id,a.cus_name,a.cus_code,a.addr1,b.area_name,a.term,a.credit_limit,a.is_pkp,b.zone_id FROM m_customer as a Left Join m_sales_area b ON a.area_id = b.id Where a.is_deleted = 0";
+        $sql = "SELECT a.id,a.cus_name,a.cus_code,a.addr1,b.area_name,a.term,a.credit_limit,a.is_pkp,b.zone_id FROM m_customer as a Left Join m_sales_area b ON a.area_id = b.id Where a.is_deleted = 0 And a.is_aktif = 1";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = $cabangId";
         }

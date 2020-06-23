@@ -76,7 +76,7 @@
                 <td><input type="text" id="CusCode" name="CusCode" value="<?php print($customer->CusCode); ?>" size="15" readonly/></td>
             </tr>
             <tr>
-                <td class="bold right"><label for="Addr1">Alamat Customer :</label></td>
+                <td class="bold right"><label for="Addr1">Alamat :</label></td>
                 <td colspan="3"><input type="text" id="Addr1" name="Addr1" value="<?php print($customer->Addr1); ?>" size="63" required/></td>
             </tr>
             <tr>

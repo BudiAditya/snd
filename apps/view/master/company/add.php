@@ -168,6 +168,15 @@
                             <td>Kode Area Castrol </td>
                             <td><input type="text" name="CasDistArea" size="10" maxlength="10" class="text2 bold" id="CasDistArea" value="<?php print($company->CasDistArea); ?>" required/></td>
                         </tr>
+                        <tr>
+                            <td>OTP Login</td>
+                            <td><select name="IsOtp" id="IsOtp">
+                                    <option value="0" <?php print($company->IsOtp == 0 ? 'selected="selected"' : '');?>>0 - Non-Aktif</option>
+                                    <option value="1" <?php print($company->IsOtp == 1 ? 'selected="selected"' : '');?>>1 - Aktif</option>
+                                </select>
+
+                            </td>
+                        </tr>
                     </table>
                 </td>
             </tr>

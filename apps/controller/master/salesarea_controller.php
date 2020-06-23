@@ -18,15 +18,14 @@ class SalesAreaController extends AppController {
 
 		$settings["columns"][] = array("name" => "a.id", "display" => "ID", "width" => 0);
 		$settings["columns"][] = array("name" => "a.area_code", "display" => "Kode", "width" => 50);
-		$settings["columns"][] = array("name" => "a.area_name", "display" => "Nama Area", "width" => 150);
-        $settings["columns"][] = array("name" => "d.name", "display" => "Zone Harga", "width" => 100);
-        $settings["columns"][] = array("name" => "b.name", "display" => "Kota", "width" => 150);
-        $settings["columns"][] = array("name" => "c.name", "display" => "Propinsi", "width" => 150);
+		$settings["columns"][] = array("name" => "a.area_name", "display" => "Sales Area", "width" => 150);
+        $settings["columns"][] = array("name" => "b.name", "display" => "Propinsi", "width" => 150);
+        $settings["columns"][] = array("name" => "c.name", "display" => "Zone Harga", "width" => 100);
 
 		$settings["filters"][] = array("name" => "a.area_code", "display" => "Kode");
 		$settings["filters"][] = array("name" => "a.area_name", "display" => "Nama Area");
-        $settings["filters"][] = array("name" => "d.name", "display" => "Zone Harga");
-        $settings["filters"][] = array("name" => "b.name", "display" => "Kota");
+        $settings["filters"][] = array("name" => "c.name", "display" => "Zone Harga");
+        $settings["filters"][] = array("name" => "b.name", "display" => "Propinsi");
 
 		if (!$router->IsAjaxRequest) {
 			$acl = AclManager::GetInstance();
@@ -51,9 +50,9 @@ class SalesAreaController extends AppController {
 			$settings["singleSelect"] = true;
 
 		} else {
-		    $sql = "m_sales_area AS a Join m_city b On a.city_id = b.id Join m_province c ON b.province_id = c.id Join m_zone d On a.zone_id = d.id";
+		    $sql = "m_sales_area AS a Join m_province b ON a.prop_id = b.id Join m_zone c On a.zone_id = c.id Join m_cabang d ON a.cabang_id = d.id";
 			$settings["from"] = $sql;
-            $settings["where"] = " a.company_id = ".$this->userCompanyId." And a.is_deleted = 0";
+            $settings["where"] = " d.company_id = ".$this->userCompanyId." And a.is_deleted = 0";
 		}
 
 		$dispatcher = Dispatcher::CreateInstance();
@@ -69,31 +68,36 @@ class SalesAreaController extends AppController {
         $salesarea = new SalesArea();
         $log = new UserAdmin();
         if (count($this->postData) > 0) {
-            $salesarea->CompanyId = $this->userCompanyId;
+            $salesarea->CabangId = $this->GetPostValue("CabangId");
             $salesarea->AreaCode = $this->GetPostValue("AreaCode");
             $salesarea->AreaName = $this->GetPostValue("AreaName");
-            $salesarea->CityId = $this->GetPostValue("CityId");
+            $salesarea->PropId = $this->GetPostValue("PropId");
             $salesarea->ZoneId = $this->GetPostValue("ZoneId");
             if ($this->ValidateData($salesarea)) {
                 $salesarea->CreatebyId = $this->userUid;
                 $rs = $salesarea->Insert();
                 if ($rs == 1) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Add New Item Jenis -> Jenis: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Success');
-                    $this->persistence->SaveState("info", sprintf("Data Jenis: %s (%s) sudah berhasil disimpan", $salesarea->AreaName, $salesarea->AreaCode));
+                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Add New Sales Area -> Area: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Success');
+                    $this->persistence->SaveState("info", sprintf("Data Area: %s (%s) sudah berhasil disimpan", $salesarea->AreaName, $salesarea->AreaCode));
                     redirect_url("master.salesarea");
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Add New Item Jenis -> Jenis: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Failed');
+                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Add New Sales Area -> Area: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Failed');
                     $this->Set("error", "Gagal pada saat menyimpan data.. Message: " . $this->connector->GetErrorMessage());
                 }
             }
         }
         $loader = new SalesArea();
-        $citylist = $loader->getCityList();
+        $proplist = $loader->getPropList();
         $loader = new SalesArea();
         $zonelist = $loader->getZoneList();
-        $this->Set("citylist", $citylist);
+        $this->Set("proplist", $proplist);
         $this->Set("zonelist", $zonelist);
         $this->Set("salesarea", $salesarea);
+        //load cabang list
+        require_once(MODEL . "master/cabang.php");
+        $loader = new Cabang();
+        $cabangs = $loader->LoadByCompanyId($this->userCompanyId);
+        $this->Set("cabangs", $cabangs);
 	}
 
 	public function edit($id = null) {
@@ -105,20 +109,20 @@ class SalesAreaController extends AppController {
         $salesarea = new SalesArea();
         if (count($this->postData) > 0) {
             $salesarea->Id = $id;
-            $salesarea->CompanyId = $this->userCompanyId;
+            $salesarea->CabangId = $this->GetPostValue("CabangId");
             $salesarea->AreaCode = $this->GetPostValue("AreaCode");
             $salesarea->AreaName = $this->GetPostValue("AreaName");
-            $salesarea->CityId = $this->GetPostValue("CityId");
+            $salesarea->PropId = $this->GetPostValue("PropId");
             $salesarea->ZoneId = $this->GetPostValue("ZoneId");
             if ($this->ValidateData($salesarea)) {
                 $salesarea->UpdatebyId = $this->userUid;
                 $rs = $salesarea->Update($id);
                 if ($rs == 1) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Update Item Jenis -> Jenis: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Success');
+                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Update Sales Area -> Area: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Success');
                     $this->persistence->SaveState("info", sprintf("Perubahan data satuan: %s (%s) sudah berhasil disimpan", $salesarea->AreaName, $salesarea->AreaCode));
                     redirect_url("master.salesarea");
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Update Item Jenis -> Jenis: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Failed');
+                    $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Update Sales Area -> Area: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Failed');
                     $this->Set("error", "Gagal pada saat merubah data satuan. Message: " . $this->connector->GetErrorMessage());
                 }
             }
@@ -130,12 +134,17 @@ class SalesAreaController extends AppController {
             }
         }
         $loader = new SalesArea();
-        $citylist = $loader->getCityList();
+        $proplist = $loader->getPropList();
         $loader = new SalesArea();
         $zonelist = $loader->getZoneList();
-        $this->Set("citylist", $citylist);
+        $this->Set("proplist", $proplist);
         $this->Set("zonelist", $zonelist);
         $this->Set("salesarea", $salesarea);
+        //load cabang list
+        require_once(MODEL . "master/cabang.php");
+        $loader = new Cabang();
+        $cabangs = $loader->LoadByCompanyId($this->userCompanyId);
+        $this->Set("cabangs", $cabangs);
 	}
 
 	public function delete($id = null) {
@@ -152,10 +161,10 @@ class SalesAreaController extends AppController {
         }
         $rs = $salesarea->Void($id);
         if ($rs == 1) {
-            $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Delete Item Jenis -> Jenis: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Success');
-            $this->persistence->SaveState("info", sprintf("Jenis Barang: %s (%s) sudah dihapus", $salesarea->AreaName, $salesarea->AreaCode));
+            $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Delete Sales Area -> Area: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Success');
+            $this->persistence->SaveState("info", sprintf("Area Barang: %s (%s) sudah dihapus", $salesarea->AreaName, $salesarea->AreaCode));
         } else {
-            $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Delete Item Jenis -> Jenis: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Failed');
+            $log = $log->UserActivityWriter($this->userCabangId,'master.salesarea','Delete Sales Area -> Area: '.$salesarea->AreaCode.' - '.$salesarea->AreaName,'-','Failed');
             $this->persistence->SaveState("error", sprintf("Gagal menghapus jenis barang: %s (%s). Error: %s", $salesarea->AreaName, $salesarea->AreaCode, $this->connector->GetErrorMessage()));
         }
 		redirect_url("master.salesarea");

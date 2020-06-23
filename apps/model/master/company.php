@@ -21,6 +21,7 @@ class Company extends EntityBase {
     public $RevAccId = 0;
     public $CasDistCode;
     public $CasDistArea;
+    public $IsOtp = 0;
 
 	public function __construct($id = null) {
 		parent::__construct();
@@ -55,6 +56,7 @@ class Company extends EntityBase {
         $this->RevAccId = $row["rev_acc_id"];
         $this->CasDistCode = $row["cas_dist_code"];
         $this->CasDistArea = $row["cas_dist_area"];
+        $this->IsOtp = $row["is_otp"];
 	}
 
     public function LoadAll($orderBy = "a.company_code", $includeDeleted = false) {
@@ -119,8 +121,8 @@ class Company extends EntityBase {
 
 	public function Insert() {
 		$this->connector->CommandText =
-'INSERT INTO sys_company(cas_dist_code,cas_dist_area,rev_acc_id,ar_acc_id,ap_acc_id,company_code,company_name,address,city,province,telephone,facsimile,npwp,personincharge,pic_status,start_date,ppn_in_acc_id,ppn_out_acc_id)
-VALUES(?cas_dist_code,?cas_dist_area,?rev_acc_id,?ar_acc_id,?ap_acc_id,?company_code,?company_name,?address,?city,?province,?telephone,?facsimile,?npwp,?personincharge,?pic_status,?start_date,?ppn_in_acc_id,?ppn_out_acc_id)';
+'INSERT INTO sys_company(is_otp,cas_dist_code,cas_dist_area,rev_acc_id,ar_acc_id,ap_acc_id,company_code,company_name,address,city,province,telephone,facsimile,npwp,personincharge,pic_status,start_date,ppn_in_acc_id,ppn_out_acc_id)
+VALUES(?is_otp,?cas_dist_code,?cas_dist_area,?rev_acc_id,?ar_acc_id,?ap_acc_id,?company_code,?company_name,?address,?city,?province,?telephone,?facsimile,?npwp,?personincharge,?pic_status,?start_date,?ppn_in_acc_id,?ppn_out_acc_id)';
 		$this->connector->AddParameter("?company_code", $this->CompanyCode);
         $this->connector->AddParameter("?company_name", $this->CompanyName);
         $this->connector->AddParameter("?address", $this->Address);
@@ -139,6 +141,7 @@ VALUES(?cas_dist_code,?cas_dist_area,?rev_acc_id,?ar_acc_id,?ap_acc_id,?company_
         $this->connector->AddParameter("?rev_acc_id", $this->RevAccId);
         $this->connector->AddParameter("?cas_dist_code", $this->CasDistCode,"varchar");
         $this->connector->AddParameter("?cas_dist_area", $this->CasDistArea,"varchar");
+        $this->connector->AddParameter("?is_otp", $this->IsOtp);
 		return $this->connector->ExecuteNonQuery();
 	}
 
@@ -162,7 +165,8 @@ VALUES(?cas_dist_code,?cas_dist_area,?rev_acc_id,?ar_acc_id,?ap_acc_id,?company_
 	rev_acc_id = ?rev_acc_id,
 	start_date = ?start_date,
 	cas_dist_code = ?cas_dist_code,
-	cas_dist_area = ?cas_dist_area
+	cas_dist_area = ?cas_dist_area,
+	is_otp = ?is_otp
 WHERE id = ?id';
 		$this->connector->AddParameter("?company_code", $this->CompanyCode);
         $this->connector->AddParameter("?company_name", $this->CompanyName);
@@ -182,6 +186,7 @@ WHERE id = ?id';
         $this->connector->AddParameter("?rev_acc_id", $this->RevAccId);
         $this->connector->AddParameter("?cas_dist_code", $this->CasDistCode,"varchar");
         $this->connector->AddParameter("?cas_dist_area", $this->CasDistArea,"varchar");
+        $this->connector->AddParameter("?is_otp", $this->IsOtp);
 		$this->connector->AddParameter("?id", $id);
 		return $this->connector->ExecuteNonQuery();
 	}

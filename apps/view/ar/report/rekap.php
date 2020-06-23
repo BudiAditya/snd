@@ -78,7 +78,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 </select>
             </td>
             <td>
-                <button type="submit" formaction="<?php print($helper->site_url("ar.mutasi")); ?>"><b>Proses</b></button>
+                <button type="submit" formaction="<?php print($helper->site_url("ar.report/rekap")); ?>"><b>Proses</b></button>
                 <input type="button" class="button" onclick="printDiv('printArea')" value="Print"/>
             </td>
         </tr>

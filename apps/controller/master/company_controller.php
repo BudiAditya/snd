@@ -79,6 +79,7 @@ class CompanyController extends AppController {
             $company->RevAccId = $this->GetPostValue("RevAccId");
             $company->CasDistCode = $this->GetPostValue("CasDistCode");
             $company->CasDistArea = $this->GetPostValue("CasDistArea");
+            $company->IsOtp = $this->GetPostValue("IsOtp");
 			if ($this->DoInsert($company)) {
 				$log = $log->UserActivityWriter($this->userCabangId,'master.company','Add New Company -> Kode: '.$company->CompanyCode.' - '.$company->CompanyName,'-','Success');
 				$this->persistence->SaveState("info", sprintf("Data Perusahaan: '%s' Dengan Kode: %s telah berhasil disimpan.", $company->CompanyName, $company->CompanyCode));
@@ -144,6 +145,7 @@ class CompanyController extends AppController {
             $company->RevAccId = $this->GetPostValue("RevAccId");
             $company->CasDistCode = $this->GetPostValue("CasDistCode");
             $company->CasDistArea = $this->GetPostValue("CasDistArea");
+            $company->IsOtp = $this->GetPostValue("IsOtp");
 			if ($this->DoUpdate($company)) {
 				$log = $log->UserActivityWriter($this->userCabangId,'master.company','Update Company -> Kode: '.$company->CompanyCode.' - '.$company->CompanyName,'-','Success');
 				$this->persistence->SaveState("info", sprintf("Data Perusahaan: '%s' Dengan Kode: %s telah berhasil diupdate.", $company->CompanyName, $company->CompanyCode));

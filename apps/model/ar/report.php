@@ -1,6 +1,6 @@
 <?php
 
-class Mutasi extends EntityBase {
+class Report extends EntityBase {
 
     public function Load4Reports($cabangId = 0, $customerId = 0, $stDate,$enDate, $cabIds = null) {
         $stDate = date('Y-m-d',$stDate);

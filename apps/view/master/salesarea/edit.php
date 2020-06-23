@@ -23,35 +23,54 @@
 	<legend><span class="bold">Ubah Data Sales Area</span></legend>
 	<form action="<?php print($helper->site_url("master.salesarea/edit/".$salesarea->Id)); ?>" method="post">
 		<table cellspacing="0" cellpadding="0" class="tablePadding" style="margin: 0;">
-			<tr>
-				<td class="bold right"><label for="AreaCode">Kode Area :</label></td>
-				<td><input type="text" id="AreaCode" name="AreaCode" value="<?php print($salesarea->AreaCode); ?>" size="5" required/></td>
-			</tr>
-			<tr>
-				<td class="bold right"><label for="AreaName">Nama Area :</label></td>
-				<td><input type="text" id="AreaName" name="AreaName" value="<?php print($salesarea->AreaName); ?>" size="20" required/></td>
-			</tr>
-			<tr>
-				<td class="bold right"><label for="CityId">Nama Kota :</label></td>
-				<td><select id="CityId" name="CityId" required>
-						<option value="0"></option>
-						<?php
-                        if ($citylist != null) {
-                            while ($row = $citylist->FetchAssoc()) {
-                                if ($row["id"] == $salesarea->CityId) {
-                                    printf('<option value="%d" selected="selected">%s - %s</option>', $row["id"], $row["city_name"],$row["prop_name"]);
+            <tr>
+                <td class="bold right"><label for="AreaCode">Kode :</label></td>
+                <td><input type="text" id="AreaCode" name="AreaCode" value="<?php print($salesarea->AreaCode); ?>" style="width: 100px" required/></td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="AreaName">Kota/Area :</label></td>
+                <td><input type="text" id="AreaName" name="AreaName" value="<?php print($salesarea->AreaName); ?>" style="width: 200px" required/></td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="PropId">Propinsi :</label></td>
+                <td><select id="PropId" name="PropId" required style="width: 200px">
+                        <option value="0"></option>
+                        <?php
+                        if ($proplist != null) {
+                            while ($row = $proplist->FetchAssoc()) {
+                                if ($row["id"] == $salesarea->PropId) {
+                                    printf('<option value="%d" selected="selected">%s - %s</option>', $row["id"], $row["prop_code"],$row["prop_name"]);
                                 } else {
-                                    printf('<option value="%d">%s - %s</option>', $row["id"], $row["city_name"],$row["prop_name"]);
+                                    printf('<option value="%d">%s - %s</option>', $row["id"], $row["prop_code"],$row["prop_name"]);
                                 }
                             }
                         }
-						?>
-					</select>
-				</td>
-			</tr>
+                        ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="CabangId">Cabang :</label></td>
+                <td><select id="CabangId" name="CabangId" required style="width: 200px">
+                        <option value="0"></option>
+                        <?php
+                        /** @var $cabangs Cabang[] */
+                        if ($cabangs != null) {
+                            foreach ($cabangs as $cab){
+                                if ($cab->Id == $salesarea->CabangId) {
+                                    printf('<option value="%d" selected="selected">%s - %s</option>', $cab->Id, $cab->Kode, $cab->Cabang);
+                                } else {
+                                    printf('<option value="%d">%s - %s</option>', $cab->Id, $cab->Kode, $cab->Cabang);
+                                }
+                            }
+                        }
+                        ?>
+                    </select>
+                </td>
+            </tr>
             <tr>
                 <td class="bold right"><label for="ZoneId">Zona Harga :</label></td>
-                <td><select id="ZoneId" name="ZoneId" required>
+                <td><select id="ZoneId" name="ZoneId" required style="width: 200px">
                         <option value="0"></option>
                         <?php
                         if ($zonelist != null) {
@@ -69,9 +88,9 @@
             </tr>
 			<tr>
 				<td>&nbsp;</td>
-				<td><button type="submit" class="button">Update</button>
+				<td><button type="submit" class="button">UPDATE</button>
                     &nbsp&nbsp
-                    <a href="<?php print($helper->site_url("master.salesarea")); ?>" class="button">Batal</a>
+                    <a href="<?php print($helper->site_url("master.salesarea")); ?>" class="button">KEMBALI</a>
                 </td>
 			</tr>
 		</table>

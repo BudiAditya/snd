@@ -60,21 +60,6 @@
             $("#InvoiceDate").customDatePicker({ showOn: "focus" });
             $("#FpDate").customDatePicker({ showOn: "focus" });
 
-            $('#CustomerId').combogrid({
-                panelWidth:600,
-                url: "<?php print($helper->site_url("ar.customer/getJsonCustomer"));?>",
-                idField:'id',
-                textField:'cus_name',
-                mode:'remote',
-                fitColumns:true,
-                columns:[[
-                    {field:'cus_code',title:'Kode',width:50},
-                    {field:'cus_name',title:'Nama Customer',width:150},
-                    {field:'addr1',title:'Alamat',width:150},
-                    {field:'area_name',title:'Area',width:60}
-                ]]
-            });
-
             $("#bTambah").click(function(){
                 if (confirm('Buat Invoice baru?')){
                     location.href="<?php print($helper->site_url("ar.invoice/add")); ?>";
@@ -154,7 +139,7 @@ $bpdf = base_url('public/images/button/').'pdf.png';
         </tr>
         <tr>
             <td>Customer</td>
-            <td><input class="easyui-combogrid" id="CustomerId" name="CustomerId" style="width: 250px" value="<?php print($invoice->CustomerId);?>" disabled/></td>
+            <td><input class="easyui-textbox" id="CustomerId" name="CustomerId" style="width: 250px" value="<?php print($custdata->CusCode .' - '.$custdata->CusName);?>" disabled/></td>
             <td>Salesman</td>
             <td><select class="easyui-combobox" id="SalesId" name="SalesId" style="width: 150px" disabled>
                     <option value=""></option>
@@ -184,7 +169,7 @@ $bpdf = base_url('public/images/button/').'pdf.png';
         <tr>
             <td>Keterangan</td>
             <td><b><input type="text" class="f1 easyui-textbox" id="InvoiceDescs" name="InvoiceDescs" style="width: 250px" value="<?php print($invoice->InvoiceDescs != null ? $invoice->InvoiceDescs : '-'); ?>" disabled/></b></td>
-            <td>Gudang *</td>
+            <td>Gudang</td>
             <td>
                 <select class="easyui-combobox" id="GudangId" name="GudangId" style="width: 150px" disabled>
                     <option value="">- Pilih Gudang -</option>

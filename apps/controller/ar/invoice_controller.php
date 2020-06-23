@@ -388,6 +388,7 @@ class InvoiceController extends AppController {
         require_once(MODEL . "master/salesman.php");
         require_once(MODEL . "inventory/expedition.php");
         require_once(MODEL . "master/kasbank.php");
+        require_once(MODEL . "ar/customer.php");
         $acl = AclManager::GetInstance();
         $loader = null;
         $invoice = new Invoice();
@@ -428,6 +429,9 @@ class InvoiceController extends AppController {
         $loader = new KasBank();
         $coakas = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("coakas", $coakas);
+        //load customer
+        $loader = new Customer($invoice->CustomerId);
+        $this->Set("custdata", $loader);
     }
 
     public function delete($invoiceId) {
