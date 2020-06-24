@@ -195,10 +195,10 @@ class Invoice extends EntityBase {
         return $result;
     }
 
-    public function LoadByMonth($companyId,$tahun,$bulan) {
+    public function LoadByMonth($companyId,$year,$bulan) {
         $this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.company_id = ?companyId And Year(a.invoice_date) = ?tahun And Month(a.invoice_date) = ?bulan And a.is_deleted = 0 And a.invoice_status = 2";
         $this->connector->AddParameter("?companyId", $companyId);
-        $this->connector->AddParameter("?tahun", $tahun);
+        $this->connector->AddParameter("?tahun", $year);
         $this->connector->AddParameter("?bulan", $bulan);
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -414,7 +414,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4Reports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4Reports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 1 & 4
         $sql = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
@@ -444,8 +444,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($salesId > 0){
             $sql.= " and a.sales_id = ".$salesId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         $sql.= " Order By a.invoice_date,a.invoice_no,a.id";
         $this->connector->CommandText = $sql;
@@ -455,7 +458,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4ReportsDetail($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4ReportsDetail($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 2
         $sql = "SELECT a.*,c.item_code,d.brand_name,c.item_name,b.sales_qty,b.price,b.disc_formula,b.disc_amount,b.sub_total,b.ppn_amount FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail b On a.id = b.invoice_id JOIN m_items c ON b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
         $sql.= " WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
@@ -489,8 +492,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($entityId > 0){
             $sql.= " and d.entity_id = ".$entityId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         if ($principalId > 0){
             $sql.= " and c.principal_id = ".$principalId;
@@ -506,7 +512,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4ReportsRekapItem($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4ReportsRekapItem($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 3
         $sql = "SELECT d.entity_id,d.brand_name,c.item_code,c.item_name,c.s_uom_qty,c.qty_convert,b.price, coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
@@ -541,8 +547,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($entityId > 0){
             $sql.= " and d.entity_id = ".$entityId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         if ($principalId > 0){
             $sql.= " and c.principal_id = ".$principalId;
@@ -558,7 +567,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4ReportsRekapItem1($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4ReportsRekapItem1($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 5
         $sql = "SELECT d.entity_id,d.brand_name,c.item_code, c.item_name, c.s_uom_code as satuan, c.s_uom_qty, c.qty_convert, coalesce(sum(b.sales_qty),0) as sum_qty";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
@@ -593,8 +602,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($entityId > 0){
             $sql.= " and d.entity_id = ".$entityId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         if ($principalId > 0){
             $sql.= " and c.principal_id = ".$principalId;
@@ -716,7 +728,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function GetInvoiceSumByYear($tahun){
+    public function GetInvoiceSumByYear($year){
         $query = "SELECT COALESCE(SUM(CASE WHEN month(a.invoice_date) = 1 THEN a.total_amount ELSE 0 END), 0) January
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 2 THEN a.total_amount ELSE 0 END), 0) February
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 3 THEN a.total_amount ELSE 0 END), 0) March
@@ -729,7 +741,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 10 THEN a.total_amount ELSE 0 END), 0) October
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 11 THEN a.total_amount ELSE 0 END), 0) November
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 12 THEN a.total_amount ELSE 0 END), 0) December
-			    FROM vw_ar_invoice_master a Where year(a.invoice_date) = $tahun And a.invoice_status <> 3 And a.is_deleted = 0";
+			    FROM vw_ar_invoice_master a Where year(a.invoice_date) = $year And a.invoice_status <> 3 And a.is_deleted = 0";
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $row = $rs->FetchAssoc();
@@ -748,7 +760,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $data;
     }
 
-    public function GetReceiptSumByYear($tahun){
+    public function GetReceiptSumByYear($year){
         $query = "SELECT COALESCE(SUM(CASE WHEN month(a.receipt_date) = 1 THEN a.receipt_amount ELSE 0 END), 0) January
 				,COALESCE(SUM(CASE WHEN month(a.receipt_date) = 2 THEN a.receipt_amount ELSE 0 END), 0) February
 				,COALESCE(SUM(CASE WHEN month(a.receipt_date) = 3 THEN a.receipt_amount ELSE 0 END), 0) March
@@ -761,7 +773,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 				,COALESCE(SUM(CASE WHEN month(a.receipt_date) = 10 THEN a.receipt_amount ELSE 0 END), 0) October
 				,COALESCE(SUM(CASE WHEN month(a.receipt_date) = 11 THEN a.receipt_amount ELSE 0 END), 0) November
 				,COALESCE(SUM(CASE WHEN month(a.receipt_date) = 12 THEN a.receipt_amount ELSE 0 END), 0) December
-			    FROM vw_ar_receipt_master a Where year(a.receipt_date) = $tahun And a.receipt_status <> 3 And a.is_deleted = 0";
+			    FROM vw_ar_receipt_master a Where year(a.receipt_date) = $year And a.receipt_status <> 3 And a.is_deleted = 0";
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $row = $rs->FetchAssoc();
@@ -780,7 +792,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $data;
     }
 
-    public function LoadSalesOmsetReports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadSalesOmsetReports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 6
         $sql = "Select a.sales_id,a.sales_name,coalesce(sum(a.base_amount-a.disc_amount),0) as sum_dpp,coalesce(sum(a.ppn_amount),0) as sum_ppn,coalesce(sum(a.paid_amount),0) as paid_amount,coalesce(sum(a.return_amount),0) as return_amount";
         $sql.= " FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
@@ -811,8 +823,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($salesId > 0){
             $sql.= " and a.sales_id = ".$salesId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         $sql.= " Group By a.sales_id,a.sales_name";
         $this->connector->CommandText = $sql;
@@ -822,7 +837,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function LoadOmsetByEntityReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadOmsetByEntityReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 7
         $sql = "SELECT d.entity_id,e.entity_code,e.entity_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
@@ -854,8 +869,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($entityId > 0){
             $sql.= " and d.entity_id = ".$entityId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         if ($principalId > 0){
             $sql.= " and c.principal_id = ".$principalId;
@@ -871,7 +889,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function LoadOmsetBySalesDetailReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadOmsetBySalesDetailReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 8
         $sql = "SELECT a.sales_id,a.sales_name,d.entity_id,e.entity_code,e.entity_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
@@ -903,8 +921,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($entityId > 0){
             $sql.= " and d.entity_id = ".$entityId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         if ($principalId > 0){
             $sql.= " and c.principal_id = ".$principalId;
@@ -920,7 +941,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function LoadOmsetByPrincipleReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$cityId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadOmsetByPrincipleReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 9
         $sql = "SELECT c.principal_id,c.principal_code,c.principal_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join vw_ic_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
@@ -952,8 +973,11 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($entityId > 0){
             $sql.= " and d.entity_id = ".$entityId;
         }
-        if ($cityId > 0){
-            $sql.= " and a.city_id = ".$cityId;
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
         }
         if ($principalId > 0){
             $sql.= " and c.principal_id = ".$principalId;
@@ -969,8 +993,14 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function GetJSonPenjualanByEntity($tahun){
-        $query = "Select a.entity_code as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_entity_by_year a Where a.tahun = $tahun Order By a.sumPenjualan";
+    public function GetJSonPenjualanByEntity($type,$year,$month){
+        if ($type == 1) {
+            $query = "Select a.entity_code as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_entity_by_year a Where a.tahun = $year Order By a.sumPenjualan";
+        }elseif ($type == 2){
+            $query = "Select a.entity_code as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_entity_by_month a Where a.tahun = $year And a.bulan = $month Order By a.sumPenjualan";
+        }else{
+            $query = "Select a.entity_code as kode,sum(a.sumPenjualan) as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_entity_by_month a Where a.tahun = $year And a.bulan <= $month GROUP BY a.entity_code Order By a.sumPenjualan";
+        }
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -982,8 +1012,14 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function GetJSonPenjualanByPrincipal($tahun){
-        $query = "Select a.principal_name as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_principle_by_year a Where a.tahun = $tahun Order By a.sumPenjualan";
+    public function GetJSonPenjualanByPrincipal($type,$year,$month){
+        if ($type == 1) {
+            $query = "Select a.principal_name as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_principle_by_year a Where a.tahun = $year Order By a.sumPenjualan";
+        }elseif ($type == 2){
+            $query = "Select a.principal_name as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_principle_by_month a Where a.tahun = $year And a.bulan = $month Order By a.sumPenjualan";
+        }else{
+            $query = "Select a.principal_name as kode,sum(a.sumPenjualan) as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_principle_by_month a Where a.tahun = $year And a.bulan <= $month GROUP BY a.principal_name Order By a.sumPenjualan";
+        }
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -995,8 +1031,14 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function GetJSonPenjualanByCity($tahun){
-        $query = "Select a.city_name as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_city_by_year a Where a.tahun = $tahun Order By a.sumPenjualan";
+    public function GetJSonPenjualanByArea($type,$year,$month){
+        if ($type == 1) {
+            $query = "Select a.area_name as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_salesarea_by_year a Where a.tahun = $year Order By a.sumPenjualan";
+        }elseif ($type == 2){
+            $query = "Select a.area_name as kode,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_salesarea_by_month a Where a.tahun = $year And a.bulan = $month Order By a.sumPenjualan";
+        }else{
+            $query = "Select a.area_name as kode,sum(a.sumPenjualan) as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_salesarea_by_month a Where a.tahun = $year And a.bulan <= $month GROUP BY a.area_name Order By a.sumPenjualan";
+        }
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -1008,8 +1050,14 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function GetJSonPenjualanBySalesman($tahun){
-        $query = "Select a.sales_name as nama,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_salesman_by_year a Where a.tahun = $tahun Order By a.sumPenjualan";
+    public function GetJSonPenjualanBySalesman($type,$year,$month){
+        if ($type == 1) {
+            $query = "Select a.sales_name as nama,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_salesman_by_year a Where a.tahun = $year Order By a.sumPenjualan";
+        }elseif ($type == 2){
+            $query = "Select a.sales_name as nama,a.sumPenjualan as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_salesman_by_month a Where a.tahun = $year And a.bulan = $month Order By a.sumPenjualan";
+        }else{
+            $query = "Select a.sales_name as nama,sum(a.sumPenjualan) as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_salesman_by_month a Where a.tahun = $year And a.bulan <= $month GROUP BY a.sales_name Order By sum(a.sumPenjualan)";
+        }
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -1021,10 +1069,38 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function LoadSalesOmsetByYear($companyId,$tahun) {
-        $sql = "Select a.sales_id,a.sales_name,coalesce(sum(a.total_amount),0) as omset FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 And a.invoice_status <> 3 And year(a.invoice_date) = $tahun";
-        if ($companyId > 0){
-            $sql.= " and a.company_id = ".$companyId;
+    public function LoadEntityOmset($type,$year,$month) {
+        if ($type == 1) {
+            $sql = "Select a.entity_code,a.entity_name,a.sumPenjualan as omset FROM vw_ar_invoice_sum_by_entity_by_year AS a WHERE a.tahun = $year Order By a.sumPenjualan";
+        }elseif ($type == 2){
+            $sql = "Select a.entity_code,a.entity_name,a.sumPenjualan as omset FROM vw_ar_invoice_sum_by_entity_by_month AS a WHERE a.tahun = $year And a.bulan = $month Order By a.sumPenjualan";
+        }else{
+            $sql = "Select a.entity_code,a.entity_name,sum(a.sumPenjualan) as omset FROM vw_ar_invoice_sum_by_entity_by_month AS a WHERE a.tahun = $year And a.bulan <= $month Group By a.entity_code,a.entity_name Order By sum(a.sumPenjualan)";
+        }
+        $this->connector->CommandText = $sql;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function LoadPrincipalOmset($type,$year,$month) {
+        if ($type == 1) {
+            $sql = "Select a.principal_code, a.principal_name,a.sumPenjualan as omset FROM vw_ar_invoice_sum_by_principle_by_year AS a WHERE a.tahun = $year Order By a.sumPenjualan";
+        }elseif ($type == 2) {
+            $sql = "Select a.principal_code, a.principal_name,a.sumPenjualan as omset FROM vw_ar_invoice_sum_by_principle_by_month AS a WHERE a.tahun = $year And a.bulan = $month Order By a.sumPenjualan";
+        }else{
+            $sql = "Select a.principal_code, a.principal_name,sum(a.sumPenjualan) as omset FROM vw_ar_invoice_sum_by_principle_by_month AS a WHERE a.tahun = $year And a.bulan <= $month Group By a.principal_code, a.principal_name Order By sum(a.sumPenjualan)";
+        }
+        $this->connector->CommandText = $sql;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function LoadSalesOmset($type,$year,$month) {
+        $sql = "Select a.sales_id,a.sales_name,coalesce(sum(a.total_amount),0) as omset FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 And a.invoice_status <> 3 And year(a.invoice_date) = $year";
+        if ($type == 2){
+            $sql.= " And month(a.invoice_date) = ".$month;
+        }elseif ($type == 3){
+            $sql.= " And month(a.invoice_date) <= ".$month;
         }
         $sql.= " Group By a.sales_id,a.sales_name Order By sum(a.total_amount)";
         $this->connector->CommandText = $sql;
@@ -1032,31 +1108,42 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function LoadPrincipalOmsetByYear($companyId,$tahun) {
-        $sql = "Select a.principal_code, a.principal_name,coalesce(sum(a.total_amount),0) as omset FROM vw_ar_invoice_sum_by_principle_by_year AS a WHERE a.tahun = $tahun Order By a.principal_name";
-        $this->connector->CommandText = $sql;
-        $rs = $this->connector->ExecuteQuery();
-        return $rs;
-    }
-
-    public function LoadCityOmsetByYear($companyId,$tahun) {
-        $sql = "Select a.city_name,coalesce(sum(a.total_amount),0) as omset FROM vw_ar_invoice_sum_by_city_by_year AS a WHERE a.tahun = $tahun Order By a.city_name";
-        $this->connector->CommandText = $sql;
-        $rs = $this->connector->ExecuteQuery();
-        return $rs;
-    }
-
-
-    public function LoadTop10Customer($companyId,$tahun) {
-        $sql = "Select a.customer_code,a.customer_name, a.sum_trx as omset From vw_ar_invoice_sum_by_customer_trx_by_year a Where a.trx_year = $tahun Order By a.sum_trx Desc Limit 0,10;";
+    public function LoadAreaOmset($type,$year,$month) {
+        if ($type == 1) {
+            $sql = "Select a.area_code,a.area_name,a.sumPenjualan as omset FROM vw_ar_invoice_sum_by_salesarea_by_year AS a WHERE a.tahun = $year Order By a.sumPenjualan";
+        }elseif ($type == 2){
+            $sql = "Select a.area_code,a.area_name,a.sumPenjualan as omset FROM vw_ar_invoice_sum_by_salesarea_by_month AS a WHERE a.tahun = $year And a.bulan = $month Order By a.sumPenjualan";
+        }else{
+            $sql = "Select a.area_code,a.area_name,sum(a.sumPenjualan) as omset FROM vw_ar_invoice_sum_by_salesarea_by_month AS a WHERE a.tahun = $year And a.bulan <= $month Group By a.area_code,a.area_name Order By sum(a.sumPenjualan)";
+        }
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs;
     }
 
 
-    public function GetJSonTop10Customer($tahun){
-        $query = "Select a.customer_name as kode, a.sum_trx as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_customer_trx_by_year a Where a.trx_year = $tahun Order By a.sum_trx Desc Limit 0,10;";
+    public function LoadTop10Customer($type,$year,$month) {
+        if ($type == 1) {
+            $sql = "Select a.customer_code,a.customer_name, a.sum_trx as omset From vw_ar_invoice_sum_by_customer_trx_by_year a Where a.trx_year = $year Order By a.sum_trx Desc Limit 0,10;";
+        }elseif ($type == 2){
+            $sql = "Select a.customer_code,a.customer_name, a.sum_trx as omset From vw_ar_invoice_sum_by_customer_trx_by_month a Where a.trx_year = $year And a.trx_month = $month Order By a.sum_trx Desc Limit 0,10;";
+        }else{
+            $sql = "Select a.customer_code,a.customer_name, sum(a.sum_trx) as omset From vw_ar_invoice_sum_by_customer_trx_by_month a Where a.trx_year = $year And a.trx_month <= $month Group By a.customer_code,a.customer_name Order By sum(a.sum_trx) Desc Limit 0,10;";
+        }
+        $this->connector->CommandText = $sql;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+
+    public function GetJSonTop10Customer($type,$year,$month){
+        if ($type == 1) {
+            $query = "Select a.customer_code as kode, a.sum_trx as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_customer_trx_by_year a Where a.trx_year = $year Order By a.sum_trx Desc Limit 0,10;";
+        }elseif ($type == 2){
+            $query = "Select a.customer_code as kode, a.sum_trx as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_customer_trx_by_month a Where a.trx_year = $year And a.trx_month = $month Order By a.sum_trx Desc Limit 0,10;";
+        }else{
+            $query = "Select a.customer_code as kode, sum(a.sum_trx) as nilai,zfc_random_color() as warna From vw_ar_invoice_sum_by_customer_trx_by_month a Where a.trx_year = $year And a.trx_month = $month Group By a.customer_code Order By sum(a.sum_trx) Desc Limit 0,10;";
+        }
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -1068,16 +1155,28 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function LoadTop10Item($companyId,$tahun) {
-        $sql = "Select a.item_code,a.item_name,a.nilai From vw_ar_omset_by_item_by_year a Where a.tahun = $tahun Order By a.nilai Desc Limit 0,10;";
+    public function LoadTop10Item($type,$year,$month) {
+        if ($type == 1) {
+            $sql = "Select a.item_code,a.item_name,a.nilai From vw_ar_omset_by_item_by_year a Where a.tahun = $year Order By a.nilai Desc Limit 0,10;";
+        }elseif ($type == 2){
+            $sql = "Select a.item_code,a.item_name,a.nilai From vw_ar_omset_by_item_by_month a Where a.tahun = $year And a.bulan = $month Order By a.nilai Desc Limit 0,10;";
+        }else{
+            $sql = "Select a.item_code,a.item_name,sum(a.nilai) as nilai From vw_ar_omset_by_item_by_month a Where a.tahun = $year And a.bulan <= $month Group By a.item_code,a.item_name Order By sum(a.nilai) Desc Limit 0,10;";
+        }
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs;
     }
 
 
-    public function GetJSonTop10Item($tahun){
-        $query = "Select a.item_code as kode, a.nilai,zfc_random_color() as warna From vw_ar_omset_by_item_by_year a Where a.tahun = $tahun Order By a.nilai Desc Limit 0,10;";
+    public function GetJSonTop10Item($type,$year,$month){
+        if ($type == 1) {
+            $query = "Select a.item_code as kode, a.nilai,zfc_random_color() as warna From vw_ar_omset_by_item_by_year a Where a.tahun = $year Order By a.nilai Desc Limit 0,10;";
+        }elseif ($type == 2){
+            $query = "Select a.item_code as kode, a.nilai,zfc_random_color() as warna From vw_ar_omset_by_item_by_month a Where a.tahun = $year And a.bulan = $month Order By a.nilai Desc Limit 0,10;";
+        }else{
+            $query = "Select a.item_code as kode, sum(a.nilai) as nilai,zfc_random_color() as warna From vw_ar_omset_by_item_by_month a Where a.tahun = $year And a.bulan <= $month Group By a.item_code Order By sum(a.nilai) Desc Limit 0,10;";
+        }
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $result = array();
