@@ -149,7 +149,11 @@ class UserAdminController extends AppController {
         $loader = new Karyawan();
         $karyawans = $loader->LoadAll();
 		$loader = new UserAdmin();
-		$userLvl = $loader->GetUserLevel($this->userLevel);
+		if ($this->userLevel == 5) {
+            $userLvl = $loader->GetUserLevel($this->userLevel,'<=');
+        }else{
+            $userLvl = $loader->GetUserLevel($this->userLevel);
+        }
 		$this->Set("companies", $companies);
 		$this->Set("cabangs", $cabangs);
         $this->Set("karyawans", $karyawans);
@@ -269,7 +273,11 @@ class UserAdminController extends AppController {
         $karyawans = $loader->LoadAll();
 		$cabang = new Cabang();
 		$loader = new UserAdmin();
-		$userLvl = $loader->GetUserLevel($this->userLevel);
+        if ($this->userLevel == 5) {
+            $userLvl = $loader->GetUserLevel($this->userLevel,'<=');
+        }else{
+            $userLvl = $loader->GetUserLevel($this->userLevel);
+        }
 		$this->Set("companies", $companies);
 		$this->Set("cabangs", $cabang->LoadAll());
 		$this->Set("userAdmin", $userAdmin);
