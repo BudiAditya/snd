@@ -1,8 +1,8 @@
 <?php
 
-require_once("invoice_detail.php");
+require_once("invocas_detail.php");
 
-class Invoice extends EntityBase {
+class Invocas extends EntityBase {
 	private $editableDocId = array(1, 2, 3, 4);
 
 	public static $InvoiceStatusCodes = array(
@@ -147,7 +147,7 @@ class Invoice extends EntityBase {
 	 * @return Invoice
 	 */
 	public function LoadById($id) {
-		$this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.id = ?id";
+		$this->connector->CommandText = "SELECT a.* FROM vw_cas_invoice_master AS a WHERE a.id = ?id";
 		$this->connector->AddParameter("?id", $id);
 		$rs = $this->connector->ExecuteQuery();
 		if ($rs == null || $rs->GetNumRows() == 0) {
@@ -158,7 +158,7 @@ class Invoice extends EntityBase {
 	}
 
     public function FindById($id) {
-        $this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.id = ?id";
+        $this->connector->CommandText = "SELECT a.* FROM vw_cas_invoice_master AS a WHERE a.id = ?id";
         $this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteQuery();
         if ($rs == null || $rs->GetNumRows() == 0) {
@@ -169,7 +169,7 @@ class Invoice extends EntityBase {
     }
 
 	public function LoadByInvoiceNo($invoiceNo,$cabangId) {
-		$this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.invoice_no = ?invoiceNo And a.cabang_id = ?cabangId";
+		$this->connector->CommandText = "SELECT a.* FROM vw_cas_invoice_master AS a WHERE a.invoice_no = ?invoiceNo And a.cabang_id = ?cabangId";
 		$this->connector->AddParameter("?invoiceNo", $invoiceNo);
         $this->connector->AddParameter("?cabangId", $cabangId);
 		$rs = $this->connector->ExecuteQuery();
@@ -181,7 +181,7 @@ class Invoice extends EntityBase {
 	}
 
     public function LoadByCompanyId($companyId) {
-        $this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.company_id = ?companyId";
+        $this->connector->CommandText = "SELECT a.* FROM vw_cas_invoice_master AS a WHERE a.company_id = ?companyId";
         $this->connector->AddParameter("?companyId", $companyId);
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -196,7 +196,7 @@ class Invoice extends EntityBase {
     }
 
     public function LoadByMonth($companyId,$year,$bulan) {
-        $this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.company_id = ?companyId And Year(a.invoice_date) = ?tahun And Month(a.invoice_date) = ?bulan And a.is_deleted = 0 And a.invoice_status = 2";
+        $this->connector->CommandText = "SELECT a.* FROM vw_cas_invoice_master AS a WHERE a.company_id = ?companyId And Year(a.invoice_date) = ?tahun And Month(a.invoice_date) = ?bulan And a.is_deleted = 0 And a.invoice_status = 2";
         $this->connector->AddParameter("?companyId", $companyId);
         $this->connector->AddParameter("?tahun", $year);
         $this->connector->AddParameter("?bulan", $bulan);
@@ -213,7 +213,7 @@ class Invoice extends EntityBase {
     }
 
     public function LoadByCabangId($cabangId) {
-        $this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a.cabang_id = ?cabangId";
+        $this->connector->CommandText = "SELECT a.* FROM vw_cas_invoice_master AS a.cabang_id = ?cabangId";
         $this->connector->AddParameter("?cabangId", $cabangId);
         $rs = $this->connector->ExecuteQuery();
         $result = array();
@@ -228,7 +228,7 @@ class Invoice extends EntityBase {
     }
 
     public function GetUnpaidInvoices($cabangId = 0,$customerId = 0,$invoiceNo = null) {
-        $sql = "SELECT a.* FROM vw_ar_invoice_master AS a";
+        $sql = "SELECT a.* FROM vw_cas_invoice_master AS a";
         $sql.= " Where a.invoice_status > 0 and a.is_deleted = 0 and a.balance_amount > 0 And a.invoice_no = ?invoiceNo";
         if ($cabangId > 0){
             $sql.= " And a.cabang_id = ?cabangId";
@@ -249,7 +249,7 @@ class Invoice extends EntityBase {
     }
 
 	public function Insert() {
-        $sql = "INSERT INTO t_ar_invoice_master (db_acc_id,expedition_id,fp_date,nsf_pajak,gudang_id,cabang_id, invoice_no, invoice_date, customer_id, sales_id, invoice_descs, ex_so_id, base_amount, disc_amount, ppn_amount, pph_amount, other_costs, other_costs_amount, payment_type, credit_terms, invoice_status, createby_id, create_time)";
+        $sql = "INSERT INTO t_cas_ar_invoice_master (db_acc_id,expedition_id,fp_date,nsf_pajak,gudang_id,cabang_id, invoice_no, invoice_date, customer_id, sales_id, invoice_descs, ex_so_id, base_amount, disc_amount, ppn_amount, pph_amount, other_costs, other_costs_amount, payment_type, credit_terms, invoice_status, createby_id, create_time)";
         $sql.= "VALUES(?db_acc_id,?expedition_id, ?fp_date, ?nsf_pajak, ?gudang_id, ?cabang_id, ?invoice_no, ?invoice_date, ?customer_id, ?sales_id, ?invoice_descs, ?ex_so_id, ?base_amount, ?disc_amount, ?ppn_amount, ?pph_amount, ?other_costs, ?other_costs_amount, ?payment_type, ?credit_terms, ?invoice_status, ?createby_id, now())";
 		$this->connector->CommandText = $sql;
         $this->connector->AddParameter("?cabang_id", $this->CabangId);
@@ -287,7 +287,7 @@ class Invoice extends EntityBase {
 
 	public function Update($id) {
 		$this->connector->CommandText =
-"UPDATE t_ar_invoice_master SET
+"UPDATE t_cas_ar_invoice_master SET
 	cabang_id = ?cabang_id
 	, gudang_id = ?gudang_id
 	, invoice_no = ?invoice_no
@@ -355,7 +355,7 @@ WHERE id = ?id";
         }
 
         //hapus data invoice_
-        $this->connector->CommandText = "Delete From t_ar_invoice_master WHERE id = ?id";
+        $this->connector->CommandText = "Delete From t_cas_ar_invoice_master WHERE id = ?id";
 		$this->connector->AddParameter("?id", $id);
 		return $this->connector->ExecuteNonQuery();
 	}
@@ -371,7 +371,7 @@ WHERE id = ?id";
             $this->connector->ExecuteNonQuery();
         }
         //mark as void data invoice_
-        $this->connector->CommandText = "Update t_ar_invoice_master a Set a.invoice_status = 3 WHERE a.id = ?id";
+        $this->connector->CommandText = "Update t_cas_ar_invoice_master a Set a.invoice_status = 3 WHERE a.id = ?id";
         $this->connector->AddParameter("?id", $id);
         $rsz =  $this->connector->ExecuteNonQuery();
         //update so status
@@ -397,17 +397,17 @@ WHERE id = ?id";
     }
     
     public function RecalculateInvoiceMaster($invoiceId){
-        $sql = 'Update t_ar_invoice_master a Set a.base_amount = 0, a.ppn_amount = 0, a.pph_amount = 0, a.disc_amount = 0,a.other_costs_amount = 0 Where a.id = ?invoiceId;';
+        $sql = 'Update t_cas_ar_invoice_master a Set a.base_amount = 0, a.ppn_amount = 0, a.pph_amount = 0, a.disc_amount = 0,a.other_costs_amount = 0 Where a.id = ?invoiceId;';
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteNonQuery();
-        $sql = 'Update t_ar_invoice_master a
-Join (Select c.invoice_id, coalesce(sum(c.sub_total),0) As subTotal, coalesce(sum(c.disc_amount),0) as sumDiscount, coalesce(sum(c.ppn_amount),0) as sumPpn, coalesce(sum(c.pph_amount),0) as sumPph, coalesce(sum(c.by_angkut),0) as sumByAngkut From t_ar_invoice_detail c Group By c.invoice_id) b
+        $sql = 'Update t_cas_ar_invoice_master a
+Join (Select c.invoice_id, coalesce(sum(c.sub_total),0) As subTotal, coalesce(sum(c.disc_amount),0) as sumDiscount, coalesce(sum(c.ppn_amount),0) as sumPpn, coalesce(sum(c.pph_amount),0) as sumPph, coalesce(sum(c.by_angkut),0) as sumByAngkut From t_cas_ar_invoice_detail c Group By c.invoice_id) b
 On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDiscount, a.ppn_amount = b.sumPpn, a.pph_amount = b.sumPph, a.other_costs_amount = b.sumByangkut Where a.id = ?invoiceId;';
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteNonQuery();
-        $sql = 'Update t_ar_invoice_master a Set a.paid_amount = (a.base_amount - a.disc_amount) + a.ppn_amount + a.pph_amount + a.other_costs_amount Where a.id = ?invoiceId And a.payment_type = 0;';
+        $sql = 'Update t_cas_ar_invoice_master a Set a.paid_amount = (a.base_amount - a.disc_amount) + a.ppn_amount + a.pph_amount + a.other_costs_amount Where a.id = ?invoiceId And a.payment_type = 0;';
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteNonQuery();
@@ -416,7 +416,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 
     public function Load4Reports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 1 & 4
-        $sql = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
+        $sql = "SELECT a.* FROM vw_cas_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
         }else{
@@ -460,7 +460,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 
     public function Load4ReportsDetail($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 2
-        $sql = "SELECT a.*,c.item_code,d.brand_name,c.item_name,b.sales_qty,b.price,b.disc_formula,b.disc_amount,b.sub_total,b.ppn_amount FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail b On a.id = b.invoice_id JOIN m_items c ON b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
+        $sql = "SELECT a.*,c.item_code,d.brand_name,c.item_name,b.sales_qty,b.price,b.disc_formula,b.disc_amount,b.sub_total,b.ppn_amount FROM vw_cas_invoice_master AS a Join t_cas_ar_invoice_detail b On a.id = b.invoice_id JOIN m_items c ON b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
         $sql.= " WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -515,7 +515,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     public function Load4ReportsRekapItem($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 3
         $sql = "SELECT d.entity_id,d.brand_name,c.item_code,c.item_name,c.s_uom_qty,c.qty_convert,b.price, coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
-        $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
+        $sql.= " FROM vw_cas_invoice_master AS a Join t_cas_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
         $sql.= " WHERE a.is_deleted = 0 And a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -570,7 +570,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     public function Load4ReportsRekapItem1($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 5
         $sql = "SELECT d.entity_id,d.brand_name,c.item_code, c.item_name, c.s_uom_code as satuan, c.s_uom_qty, c.qty_convert, coalesce(sum(b.sales_qty),0) as sum_qty";
-        $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
+        $sql.= " FROM vw_cas_invoice_master AS a Join t_cas_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
         $sql.= " WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -623,7 +623,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function GetJSonInvoices($cabangId,$customerId) {
-        $sql = "SELECT a.id,a.invoice_no,a.invoice_date,a.ppn_pct FROM t_ar_invoice_master as a Where a.invoice_status <> 3 And a.is_deleted = 0 And a.cabang_id = ".$cabangId." And a.customer_id = ".$customerId;
+        $sql = "SELECT a.id,a.invoice_no,a.invoice_date,a.ppn_pct FROM t_cas_ar_invoice_master as a Where a.invoice_status <> 3 And a.is_deleted = 0 And a.cabang_id = ".$cabangId." And a.customer_id = ".$customerId;
         $this->connector->CommandText = $sql;
         $data['count'] = $this->connector->ExecuteQuery()->GetNumRows();
         $sql.= " Order By a.invoice_no Asc";
@@ -638,8 +638,8 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function GetJSonInvoiceItems($invoiceId = 0) {
-        $sql = "SELECT a.id,a.item_id,b.item_code,b.item_name as item_descs,a.sales_qty - a.return_qty as qty_jual,b.s_uom_code as satuan,round(a.sub_total/a.sales_qty,2) as price,a.disc_formula,a.disc_amount,a.ppn_pct,a.pph_pct,c.gudang_id,a.item_hpp,b.l_uom_code as bsatbesar,b.s_uom_code as bsatkecil,b.s_uom_qty as bisisatkecil,a.is_free FROM t_ar_invoice_detail AS a";
-        $sql.= " JOIN m_items AS b ON a.item_id = b.id Join t_ar_invoice_master c On a.invoice_id = c.id Where c.invoice_status <> 3 And (a.sales_qty - coalesce(a.return_qty,0)) > 0 And a.invoice_id = ".$invoiceId;
+        $sql = "SELECT a.id,a.item_id,b.item_code,b.item_name as item_descs,a.sales_qty - a.return_qty as qty_jual,b.s_uom_code as satuan,round(a.sub_total/a.sales_qty,2) as price,a.disc_formula,a.disc_amount,a.ppn_pct,a.pph_pct,c.gudang_id,a.item_hpp,b.l_uom_code as bsatbesar,b.s_uom_code as bsatkecil,b.s_uom_qty as bisisatkecil,a.is_free FROM t_cas_ar_invoice_detail AS a";
+        $sql.= " JOIN m_items AS b ON a.item_id = b.id Join t_cas_ar_invoice_master c On a.invoice_id = c.id Where c.invoice_status <> 3 And (a.sales_qty - coalesce(a.return_qty,0)) > 0 And a.invoice_id = ".$invoiceId;
         $this->connector->CommandText = $sql;
         $data['count'] = $this->connector->ExecuteQuery()->GetNumRows();
         $sql.= " Order By b.item_code Asc";
@@ -654,7 +654,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function GetInvoiceItemCount($invoiceId){
-        $this->connector->CommandText = "Select count(*) As valresult From t_ar_invoice_detail as a Where a.invoice_id = ?invoiceId;";
+        $this->connector->CommandText = "Select count(*) As valresult From t_cas_ar_invoice_detail as a Where a.invoice_id = ?invoiceId;";
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteQuery();
         $row = $rs->FetchAssoc();
@@ -681,12 +681,12 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 
     //function post po detail into invoice detail
     public function PostPoDetail2Invoice($id,$invoiceo,$pono){
-        $sql = "Update t_ar_invoice_master a Join t_ar_so_master b On a.ex_so_id = b.so_no";
+        $sql = "Update t_cas_ar_invoice_master a Join t_ar_so_master b On a.ex_so_id = b.so_no";
         $sql.= " Set a.payment_type = b.payment_type, a.credit_terms = b.credit_terms, a.ppn_pct = b.ppn_pct, a.ppn_amount = b.ppn_amount, a.disc_pct = b.disc_pct, a.disc_amount = b.disc_amount, a.disc2_pct = b.disc2_pct, a.disc2_amount = b.disc2_amount, a.other_costs = b.other_costs, a.other_costs_amount = b.other_costs_amount";
         $sql.= " Where a.id = $id";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteNonQuery();
-        $sql = "Insert Into t_ar_invoice_detail (invoice_id,cabang_id,invoice_no,item_id,item_code,item_descs,invoice_qty,price,disc_formula,disc_amount,sub_total)";
+        $sql = "Insert Into t_cas_ar_invoice_detail (invoice_id,cabang_id,invoice_no,item_id,item_code,item_descs,invoice_qty,price,disc_formula,disc_amount,sub_total)";
         $sql.= " Select $id,a.cabang_id,'".$invoiceo."',a.item_id,a.item_code,a.item_descs,a.order_qty,a.price,a.disc_formula,a.disc_amount,a.sub_total From t_ar_so_detail AS a Where a.so_no = '".$pono."' Order By a.id";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteNonQuery();
@@ -706,7 +706,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function GetInvoiceItemRow($invoiceId){
-        $this->connector->CommandText = "Select count(*) As valresult From t_ar_invoice_detail as a Where a.invoice_id = ?invoiceId;";
+        $this->connector->CommandText = "Select count(*) As valresult From t_cas_ar_invoice_detail as a Where a.invoice_id = ?invoiceId;";
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteQuery();
         $row = $rs->FetchAssoc();
@@ -714,7 +714,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function GetJSonInvoicesByGudang($gudangId,$customerId) {
-        $sql = "SELECT a.id,a.invoice_no,a.invoice_date,a.base_amount,a.disc_amount,a.ppn_amount,a.pph_amount FROM t_ar_invoice_master as a Where a.invoice_status <> 3 And a.is_deleted = 0 And a.gudang_id = ".$gudangId." And a.customer_id = ".$customerId;
+        $sql = "SELECT a.id,a.invoice_no,a.invoice_date,a.base_amount,a.disc_amount,a.ppn_amount,a.pph_amount FROM t_cas_ar_invoice_master as a Where a.invoice_status <> 3 And a.is_deleted = 0 And a.gudang_id = ".$gudangId." And a.customer_id = ".$customerId;
         $this->connector->CommandText = $sql;
         $data['count'] = $this->connector->ExecuteQuery()->GetNumRows();
         $sql.= " Order By a.invoice_no Asc";
@@ -741,7 +741,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 10 THEN a.total_amount ELSE 0 END), 0) October
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 11 THEN a.total_amount ELSE 0 END), 0) November
 				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 12 THEN a.total_amount ELSE 0 END), 0) December
-			    FROM vw_ar_invoice_master a Where year(a.invoice_date) = $year And a.invoice_status <> 3 And a.is_deleted = 0";
+			    FROM vw_cas_invoice_master a Where year(a.invoice_date) = $year And a.invoice_status <> 3 And a.is_deleted = 0";
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $row = $rs->FetchAssoc();
@@ -795,7 +795,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     public function LoadSalesOmsetReports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 6
         $sql = "Select a.sales_id,a.sales_name,coalesce(sum(a.base_amount-a.disc_amount),0) as sum_dpp,coalesce(sum(a.ppn_amount),0) as sum_ppn,coalesce(sum(a.paid_amount),0) as paid_amount,coalesce(sum(a.return_amount),0) as return_amount";
-        $sql.= " FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
+        $sql.= " FROM vw_cas_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
         }else{
@@ -840,7 +840,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     public function LoadOmsetByEntityReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 7
         $sql = "SELECT d.entity_id,e.entity_code,e.entity_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
-        $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
+        $sql.= " FROM vw_cas_invoice_master AS a Join t_cas_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
         $sql.= " WHERE a.is_deleted = 0 And a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -892,7 +892,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     public function LoadOmsetBySalesDetailReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 8
         $sql = "SELECT a.sales_id,a.sales_name,d.entity_id,e.entity_code,e.entity_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
-        $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
+        $sql.= " FROM vw_cas_invoice_master AS a Join t_cas_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
         $sql.= " WHERE a.is_deleted = 0 And a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -944,7 +944,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     public function LoadOmsetByPrincipleReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 9
         $sql = "SELECT c.principal_id,c.principal_code,c.principal_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
-        $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join vw_ic_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
+        $sql.= " FROM vw_cas_invoice_master AS a Join t_cas_ar_invoice_detail AS b On a.id = b.invoice_id Join vw_ic_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
         $sql.= " WHERE a.is_deleted = 0 And a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -1096,7 +1096,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function LoadSalesOmset($type,$year,$month) {
-        $sql = "Select a.sales_id,a.sales_name,coalesce(sum(a.total_amount),0) as omset FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 And a.invoice_status <> 3 And year(a.invoice_date) = $year";
+        $sql = "Select a.sales_id,a.sales_name,coalesce(sum(a.total_amount),0) as omset FROM vw_cas_invoice_master AS a WHERE a.is_deleted = 0 And a.invoice_status <> 3 And year(a.invoice_date) = $year";
         if ($type == 2){
             $sql.= " And month(a.invoice_date) = ".$month;
         }elseif ($type == 3){

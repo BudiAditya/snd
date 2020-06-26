@@ -94,11 +94,14 @@ class HomeController extends AppController {
                                         if ($userAdmin->IsForceAccountingPeriod) {
                                             redirect_url("main/set_periode");
                                         } else {
-                                            //if ($acl->CheckUserAccess("ar.dashboard", "view")) {
-                                            //    redirect_url("ar/dashboard");
-                                            //} else {
+                                            /*
+                                            if ($acl->CheckUserAccess("ar.statistic", "view")) {
+                                                redirect_url("ar/statistic");
+                                            } else {
                                                 redirect_url("main");
-                                            //}
+                                            }
+                                            */
+                                            redirect_url("main");
                                         }
                                     }else{
                                         redirect_url("main/change_password/1");

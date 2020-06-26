@@ -66,19 +66,19 @@
 
 	<table cellpadding="0" cellspacing="0" class="tablePadding" style="margin: 0 auto;">
 		<tr class="bold center">
-			<td class="bN bE bS bW">No.</td>
-			<td class="bN bE bS">Kode</td>
-			<td class="bN bE bS">Nama Debtor/Customer</td>
-            <td class="bN bE bS">Terms</td>
-			<td class="bN bE bS">1 - 30</td>
-			<td class="bN bE bS">31 - 60</td>
-			<td class="bN bE bS">61 - 90</td>
-			<td class="bN bE bS">91 - 120</td>
-			<td class="bN bE bS">121 - 150</td>
-			<td class="bN bE bS">&gt; 150</td>
-            <td class="bN bE bS">Total</td>
-            <td class="bN bE bS">Credit Limit</td>
-            <td class="bN bE bS">Over Limit</td>
+			<td class="bT bL bB">No.</td>
+			<td class="bT bL bB">Kode</td>
+			<td class="bT bL bB">Nama Debtor/Customer</td>
+            <td class="bT bL bB">Terms</td>
+			<td class="bT bL bB">1 - 30</td>
+			<td class="bT bL bB">31 - 60</td>
+			<td class="bT bL bB">61 - 90</td>
+			<td class="bT bL bB">91 - 120</td>
+			<td class="bT bL bB">121 - 150</td>
+			<td class="bT bL bB">&gt; 150</td>
+            <td class="bT bL bB">Total</td>
+            <td class="bT bL bB">Credit Limit</td>
+            <td class="bT bL bB bR">Over Limit</td>
 		</tr>
 		<?php
 		$counter = 0;
@@ -109,31 +109,31 @@
 			$link = $helper->site_url(sprintf("ar.report/detail_aging?date=%s&debtorId=%d&output=web", date(SQL_DATEONLY, $date), $row["id"]));
 		?>
 		<tr class="<?php print($className); ?>">
-			<td class="right bE bS bW"><?php print($counter); ?>.</td>
-			<td class="bE bS"><?php print($row["cus_code"]); ?></td>
-            <td class="bE bS" nowrap><a href="<?php print($link); ?>" target="_blank"><?php print($row["cus_name"]); ?></a></td>
-            <td class="bE bS right"><?php print($row["term"]); ?></td>
-			<td class="right bE bS"><?php print(number_format($row["sum_piutang_1"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($row["sum_piutang_2"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($row["sum_piutang_3"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($row["sum_piutang_4"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($row["sum_piutang_5"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($row["sum_piutang_6"], 2)); ?></td>
-            <td class="right bE bS"><?php print(number_format($subtotal, 2)); ?></td>
-            <td class="right bE bS"><?php print(number_format($row["credit_limit"], 2)); ?></td>
-            <td class="right bE bS" <?php print($balance > 0 ? 'style="color:red"' : '');?>><b><?php print($balance > 0 ? number_format($balance, 2) : ''); ?></b></td>
+			<td class="right bL bB"><?php print($counter); ?>.</td>
+			<td class="bL bB"><?php print($row["cus_code"]); ?></td>
+            <td class="bL bB" nowrap><a href="<?php print($link); ?>" target="_blank"><?php print($row["cus_name"]); ?></a></td>
+            <td class="bL bB right"><?php print($row["term"]); ?></td>
+			<td class="right bL bB"><?php print(number_format($row["sum_piutang_1"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($row["sum_piutang_2"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($row["sum_piutang_3"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($row["sum_piutang_4"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($row["sum_piutang_5"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($row["sum_piutang_6"], 2)); ?></td>
+            <td class="right bL bB"><?php print(number_format($subtotal, 2)); ?></td>
+            <td class="right bL bB"><?php print(number_format($row["credit_limit"], 2)); ?></td>
+            <td class="right bL bB bR" <?php print($balance > 0 ? 'style="color:red"' : '');?>><b><?php print($balance > 0 ? number_format($balance, 2) : ''); ?></b></td>
 		</tr>
 		<?php } ?>
 		<tr class="bold">
-			<td colspan="4" class="right bE bS bW">GRAND TOTAL : </td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_1"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_2"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_3"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_4"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_5"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_6"], 2)); ?></td>
-            <td class="right bE bS"><?php print(number_format($sums["piutang_1"]+$sums["piutang_2"]+$sums["piutang_3"]+$sums["piutang_4"]+$sums["piutang_5"]+$sums["piutang_6"], 2)); ?></td>
-            <td class="right bE bS" colspan="2">&nbsp;</td>
+			<td colspan="4" class="right bL bB bR">GRAND TOTAL : </td>
+			<td class="right bL bB"><?php print(number_format($sums["piutang_1"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($sums["piutang_2"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($sums["piutang_3"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($sums["piutang_4"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($sums["piutang_5"], 2)); ?></td>
+			<td class="right bL bB"><?php print(number_format($sums["piutang_6"], 2)); ?></td>
+            <td class="right bL bB"><?php print(number_format($sums["piutang_1"]+$sums["piutang_2"]+$sums["piutang_3"]+$sums["piutang_4"]+$sums["piutang_5"]+$sums["piutang_6"], 2)); ?></td>
+            <td class="right bL bB bR" colspan="2">&nbsp;</td>
 		</tr>
 	</table>
 

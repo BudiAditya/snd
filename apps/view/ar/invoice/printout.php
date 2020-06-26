@@ -83,7 +83,7 @@ foreach ($report as $idx => $invoice) {
                 <table cellpadding="1" cellspacing="1" style="width:300px">
                     <tr>
                         <td colspan="3">
-                            <b><?php print($cabang->NamaCabang);?></b>
+                            <?php print($cabang->NamaCabang);?>
                             <br>
                             <?php print($cabang->Alamat.' - '.$cabang->Kota);?>
 							<br>
@@ -97,7 +97,7 @@ foreach ($report as $idx => $invoice) {
             <td valign="top">
                 <table cellpadding="1" cellspacing="1" style="width:300px">
                     <tr>
-                        <td width="25%"><b><font size="+1"><?php print($kop);?></font></b></td>
+                        <td width="25%"><font size="+1"><?php print($kop);?></font></td>
                     </tr>
                     <tr>
                         <td width="25%"><u>Kepada Yth:</u></td>
@@ -156,79 +156,78 @@ foreach ($report as $idx => $invoice) {
         print('<br>Mohon diterima dengan baik barang-barang pesanan bapak/ibu sebagai berikut:<br>');
     }
     ?>
-    <table cellpadding="2" cellspacing="0" style="width:850px" class="tableBorder" bgcolor="white">
+    <table cellpadding="2" cellspacing="0" style="width:850px;" bgcolor="white">
         <?php if ($doctype == 'invoice'){ ?>
             <tr align="center">
-                <td rowspan="2" width="3%">No.</td>
-                <td rowspan="2" width="5%">BRAND</td>
-                <td rowspan="2" width="30%">NAMA PRODUK</td>
-                <td colspan="2" width="18%">QTY</td>
-                <td rowspan="2" width="10%">HARGA SATUAN</td>
-                <td colspan="2" width="10%">DISKON</td>
-                <td rowspan="2" width="10%">DPP</td>
-                <td rowspan="2" width="8%">PPN</td>
-                <td rowspan="2" width="10%">JUMLAH</td>
+                <td class="bT bB bL" rowspan="2" width="3%">No.</td>
+                <td class="bT bB bL" rowspan="2" width="5%">BRAND</td>
+                <td class="bT bB bL bR" rowspan="2" width="30%">NAMA PRODUK</td>
+                <td class="bT" colspan="2" width="18%">QTY</td>
+                <td class="bT bB bL" rowspan="2" width="10%">HARGA SATUAN</td>
+                <td class="bT bL" colspan="2" width="10%">DISKON</td>
+                <td class="bT bB bL" rowspan="2" width="10%">DPP</td>
+                <td class="bT bB bL" rowspan="2" width="8%">PPN</td>
+                <td class="bT bB bL bR" rowspan="2" width="10%">JUMLAH</td>
             </tr>
             <tr align="center">
-                <td width="5%" style="border-left: 0px;">L</td>
-                <td width="5%">S</td>
-                <td width="4%">%</td>
-                <td width="6%">Rp</td>
+                <td class="bT bB bL" width="5%" style="border-left: 0px;">L</td>
+                <td class="bT bB bL" width="5%">S</td>
+                <td class="bT bB bL" width="4%">%</td>
+                <td class="bT bB bL" width="6%">Rp</td>
             </tr>
         <?php }else { ?>
             <tr align="center">
-                <td rowspan="2" width="5%">No.</td>
-                <td rowspan="2" width="10%">BRAND</td>
-                <td rowspan="2" width="31%">NAMA PRODUK</td>
-                <td colspan="3" width="24%">QTY</td>
-                <td rowspan="2" width="25%">KETERANGAN</td>
+                <td class="bT bB bL" rowspan="2" width="5%">No.</td>
+                <td class="bT bB bL" rowspan="2" width="10%">BRAND</td>
+                <td class="bT bB bL" rowspan="2" width="31%">NAMA PRODUK</td>
+                <td class="bT bB bL" colspan="3" width="24%">QTY</td>
+                <td class="bT bB bL" rowspan="2" width="25%">KETERANGAN</td>
             </tr>
             <tr align="center">
-                <td width="8%" style="border-left: 0px;">L</td>
-                <td width="8%">S</td>
-                <td width="8%">T</td>
+                <td class="bT bB bL" width="8%" style="border-left: 0px;">L</td>
+                <td class="bT bB bL" width="8%">S</td>
+                <td class="bT bB bL" width="8%">T</td>
             </tr>
         <?php
         }
         $qjns = 0;
         $qqty = 0;
         $nmr = 1;
-        $brs = 14;
+        $brs = 35;
         $lqty = 0;
         $sqty = 0;
         foreach($invoice->Details as $idx => $detail) {
-            print('<tr>');
-            printf('<td align="center">%s. </td>',$nmr++);
-            printf('<td> %s</td>',$detail->EntityCode);
-            printf('<td> %s</td>',$detail->ItemDescs);
+            if (strlen($detail->ItemDescs) > 35){$brs--;}
+            print('<tr valign="top">');
+            printf('<td class="bL" align="center">%s. </td>',$nmr++);
+            printf('<td class="bL"> %s</td>',$detail->EntityCode);
+            printf('<td class="bL bR"> %s</td>',$detail->ItemDescs);
+            printf('<td align="center">%s</td>',$detail->Lqty > 0 ? number_format($detail->Lqty) : '');
+            printf('<td class="bL" align="center">%s</td>', $detail->Sqty > 0 ? number_format($detail->Sqty) : '');
             if ($doctype == 'invoice') {
                 if ($detail->IsFree == 0) {
-                    printf('<td align="center">%s</td>',number_format($detail->Lqty));
-                    printf('<td align="center">%s</td>',number_format($detail->Sqty));
-                    printf('<td align="right">%s</td>', number_format($detail->Price, 2));
+                    printf('<td class="bL" align="right">%s</td>', number_format($detail->Price, 2));
                     if ($detail->DiscAmount > 0) {
-                        printf('<td align="right">%s</td>', $detail->DiscFormula);
-                        printf('<td align="right">%s</td>', number_format($detail->DiscAmount));
+                        printf('<td class="bL" align="right">%s</td>', $detail->DiscFormula);
+                        printf('<td class="bL" align="right">%s</td>', number_format($detail->DiscAmount));
                     } else {
-                        print('<td>&nbsp;</td>');
-                        print('<td>&nbsp;</td>');
+                        print('<td class="bL">&nbsp;</td>');
+                        print('<td class="bL">&nbsp;</td>');
                     }
-                    printf('<td align="right">%s</td>', number_format($detail->SubTotal-$detail->DiscAmount));
-                    printf('<td align="right">%s</td>', number_format($detail->PpnAmount));
-                    printf('<td align="right">%s</td>', number_format($detail->SubTotal + $detail->PpnAmount - $detail->DiscAmount));
+                    printf('<td class="bL" align="right">%s</td>', number_format($detail->SubTotal-$detail->DiscAmount));
+                    printf('<td class="bL" align="right">%s</td>', number_format($detail->PpnAmount));
+                    printf('<td class="bL bR" align="right">%s</td>', number_format($detail->SubTotal + $detail->PpnAmount - $detail->DiscAmount));
                 } else {
-                    printf('<td align="center">%s</td>',number_format($detail->Lqty));
-                    printf('<td align="center">%s</td>',number_format($detail->Sqty));
-                    print('<td align="center">*Bonus*</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
+                    print('<td class="bL" align="center">*Bonus*</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL bR">&nbsp;</td>');
                 }
             }else{
-                printf('<td align="right">%s %s</td>',number_format($detail->Lqty),$doctype == 'invoice' ? '' : $detail->SatBesar);
-                printf('<td align="right">%s %s</td>',number_format($detail->Sqty),$doctype == 'invoice' ? '' : $detail->SatKecil);
-                printf('<td align="right">%s %s</td>',number_format($detail->SalesQty),$doctype == 'invoice' ? '' : $detail->SatKecil);
+                printf('<td class="bL" align="right">%s %s</td>',number_format($detail->Lqty),$doctype == 'invoice' ? '' : $detail->SatBesar);
+                printf('<td class="bL" align="right">%s %s</td>',number_format($detail->Sqty),$doctype == 'invoice' ? '' : $detail->SatKecil);
+                printf('<td class="bL" align="right">%s %s</td>',number_format($detail->SalesQty),$doctype == 'invoice' ? '' : $detail->SatKecil);
                 if ($detail->IsFree == 0) {
-                    print('<td>&nbsp;</td>');
+                    print('<td class="bL bR">&nbsp;</td>');
                 }else{
-                    print('<td>* Bonus *</td>');
+                    print('<td class="bL bR">* Bonus *</td>');
                 }
             }
             print('</tr>');
@@ -241,63 +240,65 @@ foreach ($report as $idx => $invoice) {
             for ($x = $nmr; $x <= $brs; $x++) {
                 print('<tr>');
                 if ($doctype == 'invoice') {
-                    print('<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
+                    print('<td class="bL">&nbsp;</td><td class="bL">&nbsp;</td class="bL"><td class="bL bR">&nbsp;</td><td>&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL bR">&nbsp;</td>');
                 }else{
-                    print('<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
+                    print('<td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL bR">&nbsp;</td>');
                 }
                 print('</tr>');
             }
         }
         print('<tr>');
         if ($doctype == 'invoice') {
-            printf('<td>&nbsp;</td><td class="center" colspan="2">T O T A L</td><td class="center">%s</td><td class="center">%s</td><td colspan="3"></td><td class="right">%s</td><td class="right">%s</td><td class="right">%s</td>', $lqty, $sqty, number_format($invoice->BaseAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
+            printf('<td class="bL bT bB">&nbsp;</td><td  class="bL bR bT bB center" colspan="2">T O T A L</td><td class="center bT bB">%s</td><td class="bL bT bB center">%s</td><td class="bL bT bB" colspan="3"></td><td class="bL bT bB right">%s</td><td class="bL bT bB right">%s</td><td class="bL bR bT bB right">%s</td>', $lqty, $sqty, number_format($invoice->BaseAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
         }else{
             printf('<td>&nbsp;</td><td colspan="2" align="right">Total: &nbsp;</td><td class="bold center">%d</td><td class="bold center">%d</td><td class="bold center">%d</td><td>&nbsp;</td>', $lqty, $sqty, $qqty);
         }
         print('</tr>');
         if ($doctype == 'invoice') {
             print('<tr>');
-            print('<td colspan="6" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub><u>CATATAN:</u></sub></td>');
-            print('<td colspan="3" style="border-left: 0px;border-right: 0px;border-bottom: 0px">PENERIMA,</td>');
-            print('<td colspan="3" style="border-left: 0px;border-right: 0px;border-bottom: 0px">HORMAT KAMI,</td>');
+            print('<td colspan="6"><sub><u>CATATAN:</u></sub></td>');
+            print('<td colspan="3">PENERIMA,</td>');
+            print('<td colspan="3">HORMAT KAMI,</td>');
             print('</tr>');
             print('<tr>');
-            print('<td colspan="11" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub>- PEMBAYARAN DENGAN CHEQUE/BG DIANGGAP LUNAS SETELAH DAPAT DIUANGKAN.</sub></td>');
+            print('<td colspan="11"><sub>- PEMBAYARAN DENGAN CHEQUE/BG DIANGGAP LUNAS SETELAH DAPAT DIUANGKAN.</sub></td>');
             print('</tr>');
             print('<tr>');
-            print('<td colspan="11" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub>- BARANG YANG SUDAH DIBELI TIDAK DAPAT DIKEMBALIKAN.</sub></td>');
+            print('<td colspan="11"><sub>- PEMBAYARAN DENGAN TRANSFER HANYA DITUJUKAN KE REK BANK PT CASULUT.</sub></td>');
             print('</tr>');
             print('<tr>');
-            print('<td colspan="11" style="border-left: 0px;border-right: 0px;border-bottom: 0px">&nbsp;</td>');
+            print('<td colspan="11"><sub>- BARANG YANG SUDAH DIBELI TIDAK DAPAT DIKEMBALIKAN.</sub></td>');
             print('</tr>');
             print('<tr>');
-            print('<td colspan="6" style="border-left: 0px;border-right: 0px;border-bottom: 0px">&nbsp;</td>');
-            print('<td colspan="3" style="border-left: 0px;border-right: 0px;border-bottom: 0px">_________________</td>');
-            print('<td colspan="3" style="border-left: 0px;border-right: 0px;border-bottom: 0px">_________________</td>');
             print('</tr>');
             print('<tr>');
-            printf('<td colspan="6" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub><i>Admin: %s - Printed by: %s - %s</i></sub></td>', $invoice->AdminName, $userName, date('d-m-Y h:i:s'));
-            print('<td colspan="3" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub>(TTD + CAP TOKO)</sub></td>');
-            print('<td colspan="3" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub>(Tidak sah tanpa stempel)</sub></td>');
+            print('<td colspan="6">&nbsp;</td>');
+            print('<td colspan="3">_________________</td>');
+            print('<td colspan="3">_________________</td>');
+            print('</tr>');
+            print('<tr>');
+            printf('<td colspan="6"><sub><i>Admin: %s - Printed by: %s - %s</i></sub></td>', $invoice->AdminName, $userName, date('d-m-Y h:i:s'));
+            print('<td colspan="3"><sub>(TTD + CAP TOKO)</sub></td>');
+            print('<td colspan="3"><sub>(Tidak sah tanpa stempel)</sub></td>');
             print('</tr>');
         }else{
             print('<tr>');
-            print('<td colspan="2" style="border-left: 0px;border-right: 0px;border-bottom: 0px">GUDANG,</td>');
-            print('<td align="center" style="border-left: 0px;border-right: 0px;border-bottom: 0px">DISERAHKAN,</td>');
-            print('<td colspan="2" style="border-left: 0px;border-right: 0px;border-bottom: 0px">DITERIMA,</td>');
-            printf('<td colspan="2" align="right" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub><i>Admin: %s %s</i></sub></td>',$invoice->AdminName,date('d-m-Y h:i:s'));
+            print('<td colspan="2">GUDANG,</td>');
+            print('<td align="center">DISERAHKAN,</td>');
+            print('<td colspan="2">DITERIMA,</td>');
+            printf('<td colspan="2" align="right"><sub><i>Admin: %s %s</i></sub></td>',$invoice->AdminName,date('d-m-Y h:i:s'));
             print('</tr>');
-            print('<tr><td colspan="7" style="border-left: 0px;border-right: 0px;border-bottom: 0px">&nbsp;</td></tr>');
-            print('<tr><td colspan="7" style="border-left: 0px;border-right: 0px;border-bottom: 0px">&nbsp;</td></tr>');
-            print('<tr><td colspan="7" style="border-left: 0px;border-right: 0px;border-bottom: 0px">&nbsp;</td></tr>');
+            print('<tr><td colspan="7">&nbsp;</td></tr>');
+            print('<tr><td colspan="7">&nbsp;</td></tr>');
+            print('<tr><td colspan="7">&nbsp;</td></tr>');
             print('<tr>');
-            print('<td colspan="2" style="border-left: 0px;border-right: 0px;border-bottom: 0px">_________________</td>');
-            print('<td align="center" style="border-left: 0px;border-right: 0px;border-bottom: 0px">_________________</td>');
-            print('<td colspan="2" style="border-left: 0px;border-right: 0px;border-bottom: 0px">_________________</td>');
+            print('<td colspan="2">_________________</td>');
+            print('<td align="center">_________________</td>');
+            print('<td colspan="2">_________________</td>');
             print('</tr>');
-            print('<td colspan="2" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub>(Ka. Gudang)</sub></td>');
-            print('<td align="center" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub>(Sales/Kanvaser)</sub></td>');
-            print('<td colspan="2" style="border-left: 0px;border-right: 0px;border-bottom: 0px"><sub>(TTD + Stempel)</sub></td>');
+            print('<td colspan="2"><sub>(Ka. Gudang)</sub></td>');
+            print('<td align="center"><sub>(Sales/Kanvaser)</sub></td>');
+            print('<td colspan="2"><sub>(TTD + Stempel)</sub></td>');
             print('</tr>');
         }
         ?>

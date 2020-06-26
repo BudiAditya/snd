@@ -31,16 +31,15 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
         <tr class="left">
             <th colspan="6">
                 Sales Area :
-                <select name="CityId" id="CityId" style="width: 130px">
+                <select name="SalesAreaId" id="SalesAreaId" style="width: 130px">
                     <option value="0">-- Semua --</option>
                     <?php
-                    if ($citylist != null) {
-                        while ($row = $citylist->FetchAssoc()) {
-                            if ($row["id"] == $CityId) {
-                                printf('<option value="%d" selected="selected">%s</option>', $row["id"], $row["city_name"]);
-                            } else {
-                                printf('<option value="%d">%s</option>', $row["id"], $row["city_name"]);
-                            }
+                    /** @var $areaList SalesArea[] **/
+                    foreach ($areaList as $area){
+                        if ($area->Id == $SalesAreaId){
+                            printf('<option value="%d" selected="selected">%s</option>',$area->Id,$area->AreaName);
+                        }else {
+                            printf('<option value="%d">%s</option>', $area->Id, $area->AreaName);
                         }
                     }
                     ?>
@@ -63,8 +62,8 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <select name="PrincipalId" id="PrincipalId" style="width: 200px">
                     <option value="0">-- Semua --</option>
                     <?php
-                    /** @var $principalist ItemPrincipal[] **/
-                    foreach ($principalist as $eti){
+                    /** @var $principaList ItemPrincipal[] **/
+                    foreach ($principaList as $eti){
                         if ($eti->Id == $PrincipalId){
                             printf('<option value="%d" selected="selected">%s</option>',$eti->Id,$eti->PrincipalName);
                         }else {
@@ -77,8 +76,8 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <select name="BrandId" id="BrandId" style="width: 130px">
                     <option value="0">-- Semua --</option>
                     <?php
-                    /** @var $brandlist ItemBrand[] **/
-                    foreach ($brandlist as $eti){
+                    /** @var $brandList ItemBrand[] **/
+                    foreach ($brandList as $eti){
                         if ($eti->Id == $BrandId){
                             printf('<option value="%d" selected="selected">%s</option>',$eti->Id,$eti->BrandName);
                         }else {

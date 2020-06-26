@@ -52,9 +52,9 @@ class WarehouseController extends AppController {
 		} else {
 			$settings["from"] = "m_warehouse AS a Join m_cabang AS b ON a.cabang_id = b.id";
 			if ($this->userLevel < 4) {
-                $settings["where"] = "a.cabang_id = " . $this->userCabangId;
+                $settings["where"] = "a.is_trx = 1 And a.cabang_id = " . $this->userCabangId;
             }else{
-                $settings["where"] = "b.company_id = " . $this->userCompanyId;
+                $settings["where"] = "a.is_trx = 1 And b.company_id = " . $this->userCompanyId;
             }
 		}
 

@@ -40,19 +40,19 @@ body {
 	padding: 3px 6px;
 }
 
-.bN {
+.bT {
 	border-top: #000000 solid 1px;
 }
 
-.bE {
+.bR {
 	border-right: #000000 solid 1px;
 }
 
-.bS {
+.bB {
 	border-bottom: #000000 solid 1px;
 }
 
-.bW {
+.bL {
 	border-left: #000000 solid 1px;
 }
 

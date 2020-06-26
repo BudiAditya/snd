@@ -83,17 +83,17 @@
 
 	<table cellpadding="0" cellspacing="0" class="tablePadding" style="margin: 0 auto;">
 		<tr class="bold center">
-			<td class="bN bE bS bW">No.</td>
-			<td class="bN bE bS">No. Invoice</td>
-			<td class="bN bE bS">Tanggal</td>
-			<td class="bN bE bS">Nilai Piutang</td>
-			<td class="bN bE bS">1 - 30</td>
-			<td class="bN bE bS">31 - 60</td>
-			<td class="bN bE bS">61 - 90</td>
-			<td class="bN bE bS">91 - 120</td>
-			<td class="bN bE bS">121 - 150</td>
-			<td class="bN bE bS">&gt; 150</td>
-			<td class="bN bE bS">Total</td>
+			<td class="bT bR bT bL">No.</td>
+			<td class="bT bR bT">No. Invoice</td>
+			<td class="bT bR bT">Tanggal</td>
+			<td class="bT bR bT">Nilai Piutang</td>
+			<td class="bT bR bT">1 - 30</td>
+			<td class="bT bR bT">31 - 60</td>
+			<td class="bT bR bT">61 - 90</td>
+			<td class="bT bR bT">91 - 120</td>
+			<td class="bT bR bT">121 - 150</td>
+			<td class="bT bR bT">&gt; 150</td>
+			<td class="bT bR bT">Total</td>
 		</tr>
 		<?php
 		$counter = 0;
@@ -157,34 +157,34 @@
 				// Counter nomor ketika ganti debtor ter-reset
 				$counter = 1;
 				$prevDebtorId = $row["customer_id"];
-				printf("<tr class='bold'><td class='right bE bS bW' colspan='3'>Debtor: %s</td><td class='bE bS' colspan='8'>%s</td></tr>\n", $row["customer_code"], $row["customer_name"]);
+				printf("<tr class='bold'><td class='right bR bT bL' colspan='3'>Debtor: %s</td><td class='bR bT' colspan='8'>%s</td></tr>\n", $row["customer_code"], $row["customer_name"]);
 			}
 			$className = $counter % 2 == 0 ? "itemRow evenRow" : "itemRow oddRow";
 		?>
 		<tr class="<?php print($className); ?>">
-			<td class="right bE bS bW"><?php print($counter); ?>.</td>
-			<td class="bE bS"><a href="<?php print($helper->site_url("ar.invoice/view/" . $row["id"])); ?>" target="_blank"><?php print($row["invoice_no"]); ?></a></td>
-			<td class="bE bS"><?php print(date(SQL_DATEONLY, $date)); ?></td>
-			<td class="right bE bS"><?php print(number_format($amount, 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($piutang1, 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($piutang2, 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($piutang3, 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($piutang4, 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($piutang5, 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($piutang6, 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($piutang1 + $piutang2 + $piutang3 + $piutang4 + $piutang5 + $piutang6, 2)); ?></td>
+			<td class="right bR bT bL"><?php print($counter); ?>.</td>
+			<td class="bR bT"><a href="<?php print($helper->site_url("ar.invoice/view/" . $row["id"])); ?>" target="_blank"><?php print($row["invoice_no"]); ?></a></td>
+			<td class="bR bT"><?php print(date(SQL_DATEONLY, $date)); ?></td>
+			<td class="right bR bT"><?php print(number_format($amount, 2)); ?></td>
+			<td class="right bR bT"><?php print(number_format($piutang1, 2)); ?></td>
+			<td class="right bR bT"><?php print(number_format($piutang2, 2)); ?></td>
+			<td class="right bR bT"><?php print(number_format($piutang3, 2)); ?></td>
+			<td class="right bR bT"><?php print(number_format($piutang4, 2)); ?></td>
+			<td class="right bR bT"><?php print(number_format($piutang5, 2)); ?></td>
+			<td class="right bR bT"><?php print(number_format($piutang6, 2)); ?></td>
+			<td class="right bR bT"><?php print(number_format($piutang1 + $piutang2 + $piutang3 + $piutang4 + $piutang5 + $piutang6, 2)); ?></td>
 		</tr>
 		<?php } ?>
 		<tr class="bold">
-			<td colspan="3" class="right bE bS bW">GRAND TOTAL : </td>
-			<td class="right bE bS"><?php print(number_format($sums["dokumen"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_1"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_2"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_3"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_4"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_5"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["piutang_6"], 2)); ?></td>
-			<td class="right bE bS"><?php print(number_format($sums["total"], 2)); ?></td>
+			<td colspan="3" class="right bR bT bL bB">GRAND TOTAL : </td>
+			<td class="right bR bT bB"><?php print(number_format($sums["dokumen"], 2)); ?></td>
+			<td class="right bR bT bB"><?php print(number_format($sums["piutang_1"], 2)); ?></td>
+			<td class="right bR bT bB"><?php print(number_format($sums["piutang_2"], 2)); ?></td>
+			<td class="right bR bT bB"><?php print(number_format($sums["piutang_3"], 2)); ?></td>
+			<td class="right bR bT bB"><?php print(number_format($sums["piutang_4"], 2)); ?></td>
+			<td class="right bR bT bB"><?php print(number_format($sums["piutang_5"], 2)); ?></td>
+			<td class="right bR bT bB"><?php print(number_format($sums["piutang_6"], 2)); ?></td>
+			<td class="right bR bT bB"><?php print(number_format($sums["total"], 2)); ?></td>
 		</tr>
 	</table>
 

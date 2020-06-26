@@ -616,7 +616,7 @@
                             }else{
                                 var url = "<?php print($helper->site_url('ar.invoice/add_detail/'));?>" + invoiceId;
                             }
-                            var urx = "<?php print($helper->site_url("ar.invoice/add/")); ?>" + invoiceId;
+                            var urx = "<?php print($helper->site_url("ar.invoice/edit/")); ?>" + invoiceId;
                             $('#frmDetail').form('submit', {
                                 url: url,
                                 onSubmit: function () {
@@ -642,7 +642,7 @@
                     }else{
                         var url = "<?php print($helper->site_url('ar.invoice/add_detail/'));?>" + invoiceId;
                     }
-                    var urx = "<?php print($helper->site_url("ar.invoice/add/")); ?>" + invoiceId;
+                    var urx = "<?php print($helper->site_url("ar.invoice/edit/")); ?>" + invoiceId;
                     $('#frmDetail').form('submit', {
                         url: url,
                         onSubmit: function () {

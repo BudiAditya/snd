@@ -1,5 +1,5 @@
 <?php
-class InvoiceController extends AppController {
+class InvocasController extends AppController {
     private $userCompanyId;
     private $userCabangId;
     private $userLevel;
@@ -9,7 +9,7 @@ class InvoiceController extends AppController {
     private $userCabIds;
 
     protected function Initialize() {
-        require_once(MODEL . "ar/invoice.php");
+        require_once(MODEL . "tvd/invocas.php");
         require_once(MODEL . "master/user_admin.php");
         $this->userCompanyId = $this->persistence->LoadState("company_id");
         $this->userCabangId = $this->persistence->LoadState("cabang_id");
@@ -52,51 +52,36 @@ class InvoiceController extends AppController {
 
         if (!$router->IsAjaxRequest) {
             $acl = AclManager::GetInstance();
-            $settings["title"] = "Daftar Invoice Penjualan";
+            $settings["title"] = "Daftar Invoice Penjualan Castrol";
 
-            if ($acl->CheckUserAccess("ar.invoice", "add")) {
-                $settings["actions"][] = array("Text" => "<b>Add</b>", "Url" => "ar.invoice/add/0", "Class" => "bt_add", "ReqId" => 0);
+            if ($acl->CheckUserAccess("tvd.invocas", "add")) {
+                $settings["actions"][] = array("Text" => "<b>Add</b>", "Url" => "tvd.invocas/add/0", "Class" => "bt_add", "ReqId" => 0);
             }
-            if ($acl->CheckUserAccess("ar.invoice", "add")) {
-                $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "<b>Create From S/O</b>", "Url" => "ar.invoice/create", "Class" => "bt_create_new", "ReqId" => 0);
-                $settings["actions"][] = array("Text" => "separator", "Url" => null);
-            }
-            if ($acl->CheckUserAccess("ar.invoice", "edit")) {
-                $settings["actions"][] = array("Text" => "<b>Edit</b>", "Url" => "ar.invoice/edit/%s", "Class" => "bt_edit", "ReqId" => 1,
+
+            if ($acl->CheckUserAccess("tvd.invocas", "edit")) {
+                $settings["actions"][] = array("Text" => "<b>Edit</b>", "Url" => "tvd.invocas/edit/%s", "Class" => "bt_edit", "ReqId" => 1,
                     "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu sebelum proses edit.\nPERHATIAN: Pilih tepat 1 data rekonsil",
                     "Confirm" => "");
             }
-            if ($acl->CheckUserAccess("ar.invoice", "delete")) {
-                $settings["actions"][] = array("Text" => "<b>Void</b>", "Url" => "ar.invoice/void/%s", "Class" => "bt_delete", "ReqId" => 1);
+            if ($acl->CheckUserAccess("tvd.invocas", "delete")) {
+                $settings["actions"][] = array("Text" => "<b>Void</b>", "Url" => "tvd.invocas/void/%s", "Class" => "bt_delete", "ReqId" => 1);
             }
-            if ($acl->CheckUserAccess("ar.invoice", "view")) {
-                $settings["actions"][] = array("Text" => "<b>View</b>", "Url" => "ar.invoice/view/%s", "Class" => "bt_view", "ReqId" => 1,
+            if ($acl->CheckUserAccess("tvd.invocas", "view")) {
+                $settings["actions"][] = array("Text" => "<b>View</b>", "Url" => "tvd.invocas/view/%s", "Class" => "bt_view", "ReqId" => 1,
                     "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data rekonsil","Confirm" => "");
             }
             $settings["actions"][] = array("Text" => "separator", "Url" => null);
-            if ($acl->CheckUserAccess("ar.invoice", "print")) {
-                $settings["actions"][] = array("Text" => "Print Invoice", "Url" => "ar.invoice/printout/invoice","Class" => "bt_print", "Target" => "_blank", "ReqId" => 2, "Confirm" => "Pastikan Data sudah di-approve\nCetak Invoice yang dipilih?");
-                //$settings["actions"][] = array("Text" => "Print Surat Jalan", "Url" => "ar.invoice/printout/suratjalan","Class" => "bt_print", "Target" => "_blank", "ReqId" => 2, "Confirm" => "Pastikan Data sudah di-approve\nCetak Surat Jalan yang dipilih?");
+            if ($acl->CheckUserAccess("tvd.invocas", "print")) {
+                $settings["actions"][] = array("Text" => "Print Invoice", "Url" => "tvd.invocas/printout/invoice","Class" => "bt_print", "Target" => "_blank", "ReqId" => 2, "Confirm" => "Pastikan Data sudah di-approve\nCetak Invoice yang dipilih?");
+                //$settings["actions"][] = array("Text" => "Print Surat Jalan", "Url" => "tvd.invocas/printout/suratjalan","Class" => "bt_print", "Target" => "_blank", "ReqId" => 2, "Confirm" => "Pastikan Data sudah di-approve\nCetak Surat Jalan yang dipilih?");
             }
 
             $settings["actions"][] = array("Text" => "separator", "Url" => null);
-            if ($acl->CheckUserAccess("ar.invoice", "view")) {
-                $settings["actions"][] = array("Text" => "Laporan", "Url" => "ar.invoice/report", "Class" => "bt_report", "ReqId" => 0);
+            if ($acl->CheckUserAccess("tvd.invocas", "view")) {
+                $settings["actions"][] = array("Text" => "Laporan", "Url" => "tvd.invocas/report", "Class" => "bt_report", "ReqId" => 0);
             }
-
-            if ($acl->CheckUserAccess("ar.invoice", "approve")) {
-                $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "Approve Penjualan", "Url" => "ar.invoice/approve", "Class" => "bt_approve", "ReqId" => 2,
-                    "Error" => "Mohon memilih Data Penjualan terlebih dahulu sebelum proses approval.",
-                    "Confirm" => "Apakah anda menyetujui data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-                $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "ar.invoice/unapprove", "Class" => "bt_reject", "ReqId" => 2,
-                    "Error" => "Mohon memilih Data Penjualan terlebih dahulu sebelum proses pembatalan.",
-                    "Confirm" => "Apakah anda mau membatalkan approval data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-            }
-
         } else {
-            $settings["from"] = "vw_ar_invoice_master AS a";
+            $settings["from"] = "vw_cas_invoice_master AS a";
             if ($_GET["query"] == "") {
                 $_GET["query"] = null;
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.invoice_date) = ".$this->trxYear." And month(a.invoice_date) = ".$this->trxMonth;
@@ -125,19 +110,19 @@ class InvoiceController extends AppController {
             $invoice = $invoice->LoadById($invoiceId);
             if($invoice == null){
                 $this->persistence->SaveState("error", "Maaf Data Invoice dimaksud tidak ada pada database. Mungkin sudah dihapus!");
-                redirect_url("ar.invoice");
+                redirect_url("tvd.invocas");
             }
             if($invoice->InvoiceStatus == 2){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
-                redirect_url("ar.invoice");
+                redirect_url("tvd.invocas");
             }
             if($invoice->InvoiceStatus == 3){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -VOID-",$invoice->InvoiceNo));
-                redirect_url("ar.invoice/view/".$invoiceId);
+                redirect_url("tvd.invocas/view/".$invoiceId);
             }
             if ($invoice->CreatebyId <> AclManager::GetInstance()->GetCurrentUser()->Id && $this->userLevel == 1){
                 $this->persistence->SaveState("error", sprintf("Maaf Anda tidak boleh mengubah data ini!",$invoice->InvoiceNo));
-                redirect_url("ar.invoice");
+                redirect_url("tvd.invocas");
             }
         }
         // load details
@@ -149,7 +134,7 @@ class InvoiceController extends AppController {
         $cabang = $loader->LoadById($this->userCabangId);
         if ($cabang->CabType == 2){
             $this->persistence->SaveState("error", "Maaf Cabang %s dalam mode Gudang, tidak boleh digunakan untuk transaksi!",$cabang->Kode);
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         $cabCode = $cabang->Kode;
         $cabName = $cabang->Cabang;
@@ -235,7 +220,7 @@ class InvoiceController extends AppController {
                     $invoice->CreatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
                     $rs = $invoice->Insert();
                     if ($rs == 1) {
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add New Invoice', $invoice->InvoiceNo, 'Success');
+                        $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add New Invoice', $invoice->InvoiceNo, 'Success');
                         printf("OK|A|%d|%s|%s",$invoice->Id,$invoice->InvoiceNo,'Success!');
                     }else{
                         if ($this->connector->IsDuplicateError()) {
@@ -243,7 +228,7 @@ class InvoiceController extends AppController {
                         } else {
                             $err = "Maaf error saat simpan data. Message: " . $this->connector->GetErrorMessage();
                         }
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add New Invoice', $invoice->InvoiceNo, 'Failed');
+                        $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add New Invoice', $invoice->InvoiceNo, 'Failed');
                         printf("ER|A|%d|%s|%s",$invoice->Id,'0',$err);
                     }
                 }else{
@@ -254,7 +239,7 @@ class InvoiceController extends AppController {
                     $rs = $invoice->Update($invoiceId);
                     if ($rs == 1) {
                         //$rs = $invoice->RecalculateInvoiceMaster($invoiceId);
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Update Invoice', $invoice->InvoiceNo, 'Success');
+                        $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Update Invoice', $invoice->InvoiceNo, 'Success');
                         printf("OK|U|%d|%s|%s",$invoice->Id,$invoice->InvoiceNo,'Success!');
                     }else{
                         if ($this->connector->IsDuplicateError()) {
@@ -262,7 +247,7 @@ class InvoiceController extends AppController {
                         } else {
                             $err = "Maaf error saat update data. Message: " . $this->connector->GetErrorMessage();
                         }
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Update Invoice', $invoice->InvoiceNo, 'Failed');
+                        $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Update Invoice', $invoice->InvoiceNo, 'Failed');
                         printf("ER|U|%d|%s|%s",$invoice->Id,'0',$err);
                     }
                 }
@@ -324,19 +309,19 @@ class InvoiceController extends AppController {
             $invoice = $invoice->LoadById($invoiceId);
             if($invoice == null){
                 $this->persistence->SaveState("error", "Maaf Data Invoice dimaksud tidak ada pada database. Mungkin sudah dihapus!");
-                redirect_url("ar.invoice");
+                redirect_url("tvd.invocas");
             }
             if($invoice->InvoiceStatus == 2){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
-                redirect_url("ar.invoice");
+                redirect_url("tvd.invocas");
             }
             if($invoice->InvoiceStatus == 3){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -VOID-",$invoice->InvoiceNo));
-                redirect_url("ar.invoice/view/".$invoiceId);
+                redirect_url("tvd.invocas/view/".$invoiceId);
             }
             if ($invoice->CreatebyId <> AclManager::GetInstance()->GetCurrentUser()->Id && $this->userLevel == 1){
                 $this->persistence->SaveState("error", sprintf("Maaf Anda tidak boleh mengubah data ini!",$invoice->InvoiceNo));
-                redirect_url("ar.invoice");
+                redirect_url("tvd.invocas");
             }
         }
         // load details
@@ -348,7 +333,7 @@ class InvoiceController extends AppController {
         $cabang = $loader->LoadById($this->userCabangId);
         if ($cabang->CabType == 2){
             $this->persistence->SaveState("error", "Maaf Cabang %s dalam mode Gudang, tidak boleh digunakan untuk transaksi!",$cabang->Kode);
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         $cabCode = $cabang->Kode;
         $cabName = $cabang->Cabang;
@@ -395,7 +380,7 @@ class InvoiceController extends AppController {
         $invoice = $invoice->LoadById($invoiceId);
         if($invoice == null){
             $this->persistence->SaveState("error", "Maaf Data Invoice dimaksud tidak ada pada database. Mungkin sudah dihapus!");
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         // load details
         $invoice->LoadDetails();
@@ -442,23 +427,23 @@ class InvoiceController extends AppController {
         $invoice = $invoice->FindById($invoiceId);
         if($invoice == null){
             $this->Set("error", "Maaf Data Invoice dimaksud tidak ada pada database. Mungkin sudah dihapus!");
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         // periksa status po
         $ExSoId = $invoice->ExSoId;
         if($invoice->InvoiceStatus < 2){
             $invoice->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
             if ($invoice->Delete($invoiceId,$ExSoId) == 1) {
-                $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Success');
+                $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Delete Invoice',$invoice->InvoiceNo,'Success');
                 $this->persistence->SaveState("info", sprintf("Data Invoice No: %s sudah berhasil dihapus", $invoice->InvoiceNo));
             }else{
-                $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Failed');
+                $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Delete Invoice',$invoice->InvoiceNo,'Failed');
                 $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s gagal dihapus", $invoice->InvoiceNo));
             }
         }else{
             $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s sudah berstatus -TERBAYAR-", $invoice->InvoiceNo));
         }
-        redirect_url("ar.invoice");
+        redirect_url("tvd.invocas");
     }
 
     public function void($invoiceId) {
@@ -469,19 +454,19 @@ class InvoiceController extends AppController {
         $invoice = $invoice->FindById($invoiceId);
         if($invoice == null){
             $this->Set("error", "Maaf Data Invoice dimaksud tidak ada pada database. Mungkin sudah dihapus!");
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         if($invoice->InvoiceStatus == 3){
             $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -VOID-",$invoice->InvoiceNo));
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         if($invoice->InvoiceStatus == 2){
             $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -APPROVED-",$invoice->InvoiceNo));
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         if($invoice->BaseAmount > 0){
             $this->persistence->SaveState("error", sprintf("Maaf hapus dulu detail Invoice No. %s sebelum diproses!",$invoice->InvoiceNo));
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
 
         $ExSoId = $invoice->ExSoId;
@@ -489,16 +474,16 @@ class InvoiceController extends AppController {
         if($invoice->InvoiceStatus < 2){
             $invoice->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
             if ($invoice->Void($invoiceId,$ExSoId) == 1) {
-                $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Success');
+                $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Delete Invoice',$invoice->InvoiceNo,'Success');
                 $this->persistence->SaveState("info", sprintf("Data Invoice No: %s sudah berhasil batalkan", $invoice->InvoiceNo));
             }else{
-                $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Failed');
+                $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Delete Invoice',$invoice->InvoiceNo,'Failed');
                 $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s gagal dibatalkan", $invoice->InvoiceNo));
             }
         }else{
             $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s sudah berstatus -TERBAYAR-", $invoice->InvoiceNo));
         }
-        redirect_url("ar.invoice");
+        redirect_url("tvd.invocas");
     }
 
     public function add_detail($invoiceId = 0) {
@@ -649,11 +634,11 @@ class InvoiceController extends AppController {
                         $rz = $this->connector->ExecuteNonQuery();
                     }
                     $this->connector->CommitTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
+                    $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
                     echo json_encode(array());
                 } else {
                     $this->connector->RollbackTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
+                    $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
                     echo json_encode(array('errorMsg' =>$errors));
                 }
             }
@@ -844,11 +829,11 @@ class InvoiceController extends AppController {
                         $rz = $this->connector->ExecuteNonQuery();
                     }
                     $this->connector->CommitTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
+                    $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
                     echo json_encode(array());
                 } else {
                     $this->connector->RollbackTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
+                    $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
                     echo json_encode(array('errorMsg' =>$errors));
                 }
             }
@@ -897,11 +882,11 @@ class InvoiceController extends AppController {
         }
         if($flagSuccess){
             $this->connector->CommitTransaction();
-            $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice detail -> Item Code: '.$invoicedetail->ItemCode.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Success');
+            $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Delete Invoice detail -> Item Code: '.$invoicedetail->ItemCode.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Success');
             printf("Data Detail Invoice ID: %d berhasil dihapus!",$id);
         }else{
             $this->connector->RollbackTransaction();
-            $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice detail -> Item Code: '.$invoicedetail->ItemCode.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Failed');
+            $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Delete Invoice detail -> Item Code: '.$invoicedetail->ItemCode.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Failed');
             printf("Maaf, Data Detail Invoice ID: %d gagal dihapus!",$id);
         }
     }
@@ -996,7 +981,7 @@ class InvoiceController extends AppController {
             $this->Set("cabang", $cabang);
             $this->Set("customer", $customer);
         }else{
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
     }
 
@@ -1007,7 +992,7 @@ class InvoiceController extends AppController {
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Harap pilih data yang akan dicetak !");
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
             return;
         }
         $jdt = 0;
@@ -1028,7 +1013,7 @@ class InvoiceController extends AppController {
         if ($jdt == 0){
             //$errors[] = sprintf("Data Invoice yg dipilih tidak memenuhi syarat!");
             $this->persistence->SaveState("error", "Data Invoice yg dipilih tidak memenuhi syarat!");
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
         }
         $cabang = new Cabang($this->userCabangId);
         $this->Set("cabang", $cabang);
@@ -1268,7 +1253,7 @@ class InvoiceController extends AppController {
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di approve !");
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
             return;
         }
         $uid = AclManager::GetInstance()->GetCurrentUser()->Id;
@@ -1283,10 +1268,10 @@ class InvoiceController extends AppController {
             if($invoice->InvoiceStatus == 1){
                 $rs = $invoice->Approve($invoice->Id,$uid);
                 if ($rs) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Approve Invoice',$invoice->InvoiceNo,'Success');
+                    $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Approve Invoice',$invoice->InvoiceNo,'Success');
                     $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-approve.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Approve Invoice',$invoice->InvoiceNo,'Failed');
+                    $log = $log->UserActivityWriter($this->userCabangId,'tvd.invocas','Approve Invoice',$invoice->InvoiceNo,'Failed');
                     $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
                 }
             }else{
@@ -1299,14 +1284,14 @@ class InvoiceController extends AppController {
         if (count($errors) > 0) {
             $this->persistence->SaveState("error", "<ul><li>" . implode("</li><li>", $errors) . "</li></ul>");
         }
-        redirect_url("ar.invoice");
+        redirect_url("tvd.invocas");
     }
 
     public function unapprove() {
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di approve !");
-            redirect_url("ar.invoice");
+            redirect_url("tvd.invocas");
             return;
         }
         $uid = AclManager::GetInstance()->GetCurrentUser()->Id;
@@ -1326,10 +1311,10 @@ class InvoiceController extends AppController {
                 }else {
                     $rs = $invoice->Unapprove($invoice->Id, $uid);
                     if ($rs) {
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Success');
+                        $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Un-approve Invoice', $invoice->InvoiceNo, 'Success');
                         $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-batalkan.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
                     } else {
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Failed');
+                        $log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Un-approve Invoice', $invoice->InvoiceNo, 'Failed');
                         $errors[] = sprintf("Maaf, Gagal proses pembatalan Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
                     }
                 }
@@ -1349,7 +1334,7 @@ class InvoiceController extends AppController {
         if (count($errors) > 0) {
             $this->persistence->SaveState("error", "<ul><li>" . implode("</li><li>", $errors) . "</li></ul>");
         }
-        redirect_url("ar.invoice");
+        redirect_url("tvd.invocas");
     }
 
     public function create(){
@@ -1567,11 +1552,11 @@ class InvoiceController extends AppController {
                             $this->connector->CommandText = "Update t_ar_order a Set a.send_qty = a.send_qty + $qti Where a.id = ".$row["id"];
                             $rz = $this->connector->ExecuteNonQuery();
                             $this->connector->CommitTransaction();
-                            //$log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $detail->ItemCode . ' = ' . $detail->SalesQty, $invoice->InvoiceNo, 'Success');
+                            //$log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add Invoice detail -> Item Code: ' . $detail->ItemCode . ' = ' . $detail->SalesQty, $invoice->InvoiceNo, 'Success');
                             //echo json_encode(array());
                         } else {
                             $this->connector->RollbackTransaction();
-                            //$log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $detail->ItemCode . ' = ' . $detail->SalesQty, $invoice->InvoiceNo, 'Failed');
+                            //$log = $log->UserActivityWriter($this->userCabangId, 'tvd.invocas', 'Add Invoice detail -> Item Code: ' . $detail->ItemCode . ' = ' . $detail->SalesQty, $invoice->InvoiceNo, 'Failed');
                             //echo json_encode(array('errorMsg' =>$errors));
                         }
                     }
@@ -1594,7 +1579,7 @@ class InvoiceController extends AppController {
                 }
             }
         }
-        redirect_url("ar.invoice/create");
+        redirect_url("tvd.invocas/create");
     }
 }
 
