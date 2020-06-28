@@ -28,21 +28,18 @@ class InvocasController extends AppController {
         $settings["columns"][] = array("name" => "a.cabang_code", "display" => "Cabang", "width" => 50);
         $settings["columns"][] = array("name" => "a.invoice_date", "display" => "Tanggal", "width" => 60);
         $settings["columns"][] = array("name" => "a.invoice_no", "display" => "No. Invoice", "width" => 100);
+        $settings["columns"][] = array("name" => "a.customer_code", "display" => "Kode", "width" => 50);
         $settings["columns"][] = array("name" => "a.customer_name", "display" => "Nama Customer", "width" => 200);
-        //$settings["columns"][] = array("name" => "a.invoice_descs", "display" => "Keterangan", "width" => 150);
-        $settings["columns"][] = array("name" => "if(a.payment_type = 0,'Cash','Credit')", "display" => "Cara Bayar", "width" => 55);
-        $settings["columns"][] = array("name" => "a.due_date", "display" => "JTP", "width" => 60);
-        $settings["columns"][] = array("name" => "format(a.total_amount,0)", "display" => "Nilai Penjualan", "width" => 70, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.return_amount,0)", "display" => "Retur", "width" => 70, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.paid_amount,0)", "display" => "Terbayar", "width" => 70, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.balance_amount,0)", "display" => "OutStanding", "width" => 70, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.base_amount,0)", "display" => "Jumlah", "width" => 70, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.disc_amount,0)", "display" => "Diskon", "width" => 70, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.base_amount - a.disc_amount,0)", "display" => "DPP", "width" => 70, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.ppn_amount,0)", "display" => "PPN", "width" => 70, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.total_amount,0)", "display" => "Total", "width" => 70, "align" => "right");
         $settings["columns"][] = array("name" => "a.sales_name", "display" => "Salesman", "width" => 100);
-        $settings["columns"][] = array("name" => "if(a.invoice_status = 0,'Draft',if(a.invoice_status = 1,'Posted',if(a.invoice_status = 2,'Approved','Void')))", "display" => "Status", "width" => 50);
 
         $settings["filters"][] = array("name" => "a.invoice_no", "display" => "No. Invoice");
         $settings["filters"][] = array("name" => "a.invoice_date", "display" => "Tanggal");
         $settings["filters"][] = array("name" => "a.customer_name", "display" => "Nama Customer");
-        $settings["filters"][] = array("name" => "if(a.invoice_status = 0,'Draft',if(a.invoice_status = 1,'Posted',if(a.invoice_status = 2,'Approved','Void')))", "display" => "Status");
         $settings["filters"][] = array("name" => "a.cabang_code", "display" => "Kode Cabang");
 
         $settings["def_filter"] = 0;
