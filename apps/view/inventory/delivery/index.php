@@ -57,10 +57,18 @@
             <th colspan="2" class="bold">Action</th>
         </tr>
         <tr>
-            <td><label for="CabangId">Cabang :</label></td>
-            <td><select id="CabangId" name="cabId">
+            <td><label for="AreaId">Area :</label></td>
+            <td><select id="AreaId" name="areaId">
+                    <option value="0">Semua</option>
                     <?php
-                    printf('<option value="%d" selected="selected">%s</option>',$cabangs->Id,$cabangs->Cabang);
+                    /** @var $areas SalesArea[] */
+                    foreach ($areas as $area){
+                        if ($areaId == $area->Id){
+                            printf('<option value="%d" selected="selected">%s - %s</option>',$area->Id,$area->AreaCode,$area->AreaName);
+                        }else{
+                            printf('<option value="%d">%s - %s</option>',$area->Id,$area->AreaCode,$area->AreaName);
+                        }
+                    }
                     ?>
                 </select>
             </td>
@@ -181,9 +189,9 @@ if ($invoices != null) {
             print('<td>&nbsp;</td>');
         }
         if ($data["delivery_status"] == 1){
-            print('<td>Terkirim</td>');
+            print('<td align="center">OK</td>');
         }else{
-            print('<td>Belum</td>');
+            print('<td align="center">-</td>');
         }
         if ($ivn <> $data["invoice_no"]) {
             printf('<td class="center"><input type="checkbox" class="cbIds" name="ids[]" value="%d" checked="checked"/></td>', $data["master_id"]);

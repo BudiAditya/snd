@@ -17,34 +17,34 @@ class DeliveryController extends AppController {
 	}
 
     public function index(){
-	    require_once (MODEL . "master/cabang.php");
+	    require_once (MODEL . "master/salesarea.php");
         require_once (MODEL . "master/warehouse.php");
         //proses rekap dll
         if (count($this->postData) > 0) {
-            $cabid = $this->GetPostValue("cabId");
+            $areid = $this->GetPostValue("areaId");
             $whsid = $this->GetPostValue("whsId");
             $sdate = strtotime($this->GetPostValue("stDate"));
             $edate = strtotime($this->GetPostValue("enDate"));
             $dstts = $this->GetPostValue("dStatus");
         }else{
-            $cabid = $this->userCabangId;
+            $areid = 0;
             $whsid = 0;
             $dstts = 0;
             $sdate = time();
             $edate = $sdate;
         }
         $loader = new Invoice();
-        $invoice= $loader->LoadInvoiceDelivery($cabid,$whsid,$sdate,$edate,$dstts);
-        $this->Set("cabId", $cabid);
+        $invoice= $loader->LoadInvoiceDelivery($areid,$whsid,$sdate,$edate,$dstts);
+        $this->Set("areaId", $areid);
         $this->Set("whsId", $whsid);
         $this->Set("dStatus", $dstts);
         $this->Set("stDate", $sdate);
         $this->Set("enDate", $edate);
         $this->Set("invoices", $invoice);
         //load cabang
-        $loader = new Cabang();
-        $cabangs = $loader->LoadById($this->userCabangId);
-        $this->Set("cabangs", $cabangs);
+        $loader = new SalesArea();
+        $areas = $loader->LoadByCabangId($this->userCabangId);
+        $this->Set("areas", $areas);
         //load cabang
         $loader = new Warehouse();
         $warehouses = $loader->LoadByCabangId($this->userCabangId,1);

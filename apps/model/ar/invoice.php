@@ -1188,10 +1188,10 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function LoadInvoiceDelivery ($cabId = 0, $whId = 0, $stDate, $enDate, $dStatus = 0){
+    public function LoadInvoiceDelivery ($areaId = 0, $whId = 0, $stDate, $enDate, $dStatus = 0){
         $sql = "Select a.* From vw_ar_invoice_delivery_detail a Where a.invoice_date BETWEEN ?stDate and ?enDate";
-        if ($cabId > 0){
-            $sql.= " And a.cabang_id = ".$cabId;
+        if ($areaId > 0){
+            $sql.= " And a.area_id = ".$areaId;
         }
         if ($whId > 0){
             $sql.= " And a.gudang_id = ".$whId;
