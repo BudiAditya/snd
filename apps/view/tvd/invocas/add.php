@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title>SND System - Adde Invoice Castrol</title>
+	<title>SND System - Add Invoice Castrol</title>
 	<meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
 	<link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/common.css")); ?>"/>
 	<link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/jquery-ui.css")); ?>"/>

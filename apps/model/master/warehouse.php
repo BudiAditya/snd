@@ -112,8 +112,8 @@ class Warehouse extends EntityBase {
         return $result;
     }
 
-    public function LoadByEntityId($entityId = 0, $isTrxOnly = 0, $orderBy = "a.wh_code") {
-	    $sql = "SELECT a.*,b.kode as cabang_code FROM m_warehouse AS a Join m_cabang b On a.cabang_id = b.id Where b.company_id = $entityId ";
+    public function LoadByCompanyId($companyId = 0, $isTrxOnly = 0, $orderBy = "a.wh_code") {
+	    $sql = "SELECT a.*,b.kode as cabang_code FROM m_warehouse AS a Join m_cabang b On a.cabang_id = b.id Where b.company_id = $companyId ";
         if ($isTrxOnly == 1){
             $sql.= " And a.is_trx = 1";
         }

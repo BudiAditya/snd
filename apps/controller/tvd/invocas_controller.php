@@ -92,7 +92,6 @@ class InvocasController extends AppController {
     }
 
     public function add(){
-        require_once (MODEL . "tvd/invocas.php");
         //proses rekap dll
         if (count($this->postData) > 0) {
             $tahun = $this->GetPostValue("Tahun");
@@ -118,6 +117,131 @@ class InvocasController extends AppController {
             $result  = $invocas->CreateDetail($detailId);
         }
         redirect_url("tvd.invocas");
+    }
+
+    public function edit($invoiceId = 0) {
+        require_once (MODEL . "master/cabang.php");
+        require_once (MODEL . "master/warehouse.php");
+        require_once (MODEL . "master/salesman.php");
+        require_once (MODEL . "inventory/expedition.php");
+        require_once (MODEL . "master/kasbank.php");
+        require_once (MODEL . "master/user_privileges.php");
+        $acl = AclManager::GetInstance();
+        $loader = null;
+        $log = new UserAdmin();
+        $invoice = new Invoice();
+        if ($invoiceId > 0){
+            $invoice = $invoice->LoadById($invoiceId);
+            if($invoice == null){
+                $this->persistence->SaveState("error", "Maaf Data Invoice dimaksud tidak ada pada database. Mungkin sudah dihapus!");
+                redirect_url("ar.invoice");
+            }
+            if($invoice->InvoiceStatus == 2){
+                $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
+                redirect_url("ar.invoice");
+            }
+            if($invoice->InvoiceStatus == 3){
+                $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -VOID-",$invoice->InvoiceNo));
+                redirect_url("ar.invoice/view/".$invoiceId);
+            }
+            if ($invoice->CreatebyId <> AclManager::GetInstance()->GetCurrentUser()->Id && $this->userLevel == 1){
+                $this->persistence->SaveState("error", sprintf("Maaf Anda tidak boleh mengubah data ini!",$invoice->InvoiceNo));
+                redirect_url("ar.invoice");
+            }
+        }
+        // load details
+        $invoice->LoadDetails();
+        //load data cabang
+        $loader = new Cabang();
+        $cabCode = null;
+        $cabName = null;
+        $cabang = $loader->LoadById($this->userCabangId);
+        if ($cabang->CabType == 2){
+            $this->persistence->SaveState("error", "Maaf Cabang %s dalam mode Gudang, tidak boleh digunakan untuk transaksi!",$cabang->Kode);
+            redirect_url("ar.invoice");
+        }
+        $cabCode = $cabang->Kode;
+        $cabName = $cabang->Cabang;
+        $loader = new Warehouse();
+        $gudangs = $loader->LoadByCabangId($this->userCabangId,1);
+        //kirim ke view
+        $this->Set("gudangs", $gudangs);
+        $this->Set("userLevel", $this->userLevel);
+        $this->Set("userCabId", $this->userCabangId);
+        $this->Set("userCompId", $this->userCompanyId);
+        $this->Set("userCabCode", $cabCode);
+        $this->Set("userCabName", $cabName);
+        $this->Set("cabangs", $cabang);
+        $this->Set("invoice", $invoice);
+        $this->Set("acl", $acl);
+        $this->Set("itemsCount", $this->InvoiceItemsCount($invoiceId));
+        //load expedisi
+        $loader = new Expedition();
+        $expedisi = $loader->LoadAll();
+        $this->Set("expedition", $expedisi);
+        //load salesman
+        $loader = new Salesman();
+        $sales = $loader->LoadByStatus(1);
+        $this->Set("sales", $sales);
+        $loader = new KasBank();
+        $coakas = $loader->LoadByCompanyId($this->userCompanyId);
+        $this->Set("coakas", $coakas);
+        //load user discount priviledges
+        $loader = new UserPrivileges();
+        $discprev = $loader->LoadDiscPrivileges($this->userUid,8);
+        $this->Set("discPrev", $discprev);
+    }
+
+    public function view($invoiceId = null) {
+        require_once(MODEL . "master/cabang.php");
+        require_once(MODEL . "master/warehouse.php");
+        require_once(MODEL . "master/salesman.php");
+        require_once(MODEL . "inventory/expedition.php");
+        require_once(MODEL . "master/kasbank.php");
+        require_once(MODEL . "ar/customer.php");
+        $acl = AclManager::GetInstance();
+        $loader = null;
+        $invoice = new Invoice();
+        $invoice = $invoice->LoadById($invoiceId);
+        if($invoice == null){
+            $this->persistence->SaveState("error", "Maaf Data Invoice dimaksud tidak ada pada database. Mungkin sudah dihapus!");
+            redirect_url("ar.invoice");
+        }
+        // load details
+        $invoice->LoadDetails();
+        //load data cabang
+        $loader = new Cabang();
+        $cabCode = null;
+        $cabName = null;
+        $cabang = $loader->LoadById($this->userCabangId);
+        $cabCode = $cabang->Kode;
+        $cabName = $cabang->Cabang;
+        $loader = new Warehouse();
+        $gudangs = $loader->LoadByCabangId($this->userCabangId);
+        //kirim ke view
+        $this->Set("gudangs", $gudangs);
+        $this->Set("userLevel", $this->userLevel);
+        $this->Set("userCabId", $this->userCabangId);
+        $this->Set("userCabCode", $cabCode);
+        $this->Set("userCabName", $cabName);
+        $this->Set("cabangs", $cabang);
+        $this->Set("invoice", $invoice);
+        $this->Set("acl", $acl);
+        //load expedisi
+        $loader = new Expedition();
+        $expedisi = $loader->LoadAll();
+        $this->Set("expedition", $expedisi);
+        //load salesman
+        $loader = new Salesman();
+        $karyawan = $loader->LoadAll();
+        $this->Set("sales", $karyawan);
+        //load coa kas/bank
+        $loader = new KasBank();
+        $coakas = $loader->LoadByCompanyId($this->userCompanyId);
+        $this->Set("coakas", $coakas);
+        //load customer
+        $loader = new Customer($invoice->CustomerId);
+        $this->Set("custdata", $loader);
     }
 }
 

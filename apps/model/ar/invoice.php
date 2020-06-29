@@ -1187,6 +1187,28 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         }
         return $result;
     }
+
+    public function LoadInvoiceDelivery ($cabId = 0, $whId = 0, $stDate, $enDate, $dStatus = 0){
+        $sql = "Select a.* From vw_ar_invoice_delivery_detail a Where a.invoice_date BETWEEN ?stDate and ?enDate";
+        if ($cabId > 0){
+            $sql.= " And a.cabang_id = ".$cabId;
+        }
+        if ($whId > 0){
+            $sql.= " And a.gudang_id = ".$whId;
+        }
+        $sql.= " And a.delivery_status = ".$dStatus;
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function ProcessDelivery($id){
+        $sql = "Update t_ar_invoice_master a Set a.delivery_status = 1,a.delivery_date = now() Where a.id = $id";
+        $this->connector->CommandText = $sql;
+        return $this->connector->ExecuteNonQuery();
+    }
 }
 
 
