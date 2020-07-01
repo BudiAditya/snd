@@ -45,7 +45,7 @@ class DeliveryController extends AppController {
         $loader = new SalesArea();
         $areas = $loader->LoadByCabangId($this->userCabangId);
         $this->Set("areas", $areas);
-        //load cabang
+        //load warehouse
         $loader = new Warehouse();
         $warehouses = $loader->LoadByCabangId($this->userCabangId,1);
         $this->Set("warehouses", $warehouses);
@@ -61,4 +61,4 @@ class DeliveryController extends AppController {
     }
 }
 
-// End of file: awal_controller.php
+// End of file: delivery_controller.php

@@ -1189,14 +1189,74 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function LoadInvoiceDelivery ($areaId = 0, $whId = 0, $stDate, $enDate, $dStatus = 0){
-        $sql = "Select a.* From vw_ar_invoice_delivery_detail a Where a.invoice_date BETWEEN ?stDate and ?enDate";
+        //$sql = "Select a.* From vw_ar_invoice_delivery_detail a Where (a.invoice_date BETWEEN ?stDate and ?enDate)";
+        $sql = "SELECT
+	`b`.`id` AS `id`,
+	`a`.`id` AS `master_id`,
+	`a`.`cabang_id` AS `cabang_id`,
+	`a`.`gudang_id` AS `gudang_id`,
+	`a`.`invoice_no` AS `invoice_no`,
+	`a`.`invoice_date` AS `invoice_date`,
+	`a`.`customer_id` AS `customer_id`,
+	`a`.`sales_id` AS `sales_id`,
+	`b`.`item_id` AS `item_id`,
+	`c`.`item_code` AS `item_code`,
+	`c`.`item_name` AS `item_name`,
+	`c`.`s_uom_code` AS `s_uom_code`,
+	`c`.`qty_convert` AS `qty_convert`,
+	`c`.`c_uom_code` AS `c_uom_code`,
+	`b`.`sales_qty` AS `qty`,
+	`c`.`s_uom_qty` AS `s_uom_qty`,
+	`a`.`delivery_status` AS `delivery_status`,
+	`a`.`delivery_by` AS `delivery_by`,
+	`a`.`delivery_date` AS `delivery_date`,
+	`a`.`expedition_id` AS `expedition_id`,
+	`d`.`cus_code` AS `cus_code`,
+	`d`.`cus_name` AS `cus_name`,
+	`d`.`addr1` AS `addr1`,
+	`d`.`addr2` AS `addr2`,
+	`d`.`area_id` AS `area_id`,
+	`e`.`sales_code` AS `sales_code`,
+	`e`.`sales_name` AS `sales_name`,
+	`d1`.`area_code` AS `area_code`,
+	`d1`.`area_name` AS `area_name`,
+	`f`.`wh_code` AS `wh_code`,
+	`f`.`wh_name` AS `wh_name`,
+	`g`.`kode` AS `cab_code`,
+	`g`.`cabang` AS `cab_name`
+FROM
+	(
+		(
+			(
+				(
+					(
+						(
+							(
+								`t_ar_invoice_master` `a`
+								JOIN `t_ar_invoice_detail` `b` ON (`b`.`invoice_id` = `a`.`id`)
+							)
+							JOIN `m_items` `c` ON (`b`.`item_id` = `c`.`id`)
+						)
+						JOIN `m_customer` `d` ON (`a`.`customer_id` = `d`.`id`)
+					)
+					JOIN `m_salesman` `e` ON (`a`.`sales_id` = `e`.`id`)
+				)
+				JOIN `m_sales_area` `d1` ON (`d`.`area_id` = `d1`.`id`)
+			)
+			JOIN `m_warehouse` `f` ON (`a`.`gudang_id` = `f`.`id`)
+		)
+		JOIN `m_cabang` `g` ON (`a`.`cabang_id` = `g`.`id`)
+	)
+WHERE
+	`a`.`is_deleted` = 0 AND `a`.`invoice_status` <> 3 And (a.invoice_date BETWEEN ?stDate And ?enDate)";
         if ($areaId > 0){
-            $sql.= " And a.area_id = ".$areaId;
+            $sql.= " And d.area_id = ".$areaId;
         }
         if ($whId > 0){
             $sql.= " And a.gudang_id = ".$whId;
         }
         $sql.= " And a.delivery_status = ".$dStatus;
+        $sql.= " ORDER BY `d`.`cus_code`,`a`.`invoice_date`,`a`.`invoice_no`,`c`.`item_code`,`b`.`sales_qty`";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
         $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));

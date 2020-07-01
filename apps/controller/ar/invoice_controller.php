@@ -1220,7 +1220,7 @@ class InvoiceController extends AppController {
         $cabName = null;
         $cabang = $loader->LoadAllowedCabId($this->userCabIds);
         $loader = new Warehouse();
-        $gudang = $loader->LoadByEntityId($this->userCompanyId);
+        $gudang = $loader->LoadByCompanyId($this->userCompanyId);
         $loader = new ItemEntity();
         $entities = $loader->LoadByCompanyId($this->userCompanyId);
         // kirim ke view
