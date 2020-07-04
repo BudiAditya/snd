@@ -74,7 +74,7 @@
 
             $("#bCetakInvoice").click(function(){
                 if (confirm('Cetak Invoice ini?')){
-                    window.open("<?php print($helper->site_url("ar.invoice/printout/invoice/?&id[]=").$invoice->Id); ?>");
+                    window.open("<?php print($helper->site_url("ar.invoice/ivcprint")); ?>");
                 }
             });
 

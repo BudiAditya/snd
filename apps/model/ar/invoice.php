@@ -57,6 +57,7 @@ class Invoice extends EntityBase {
     public $ExpName;
     public $DbAccId = 0;
     public $Npwp;
+    public $Jbaris = 0;
 
     //helper
     public $ErrorMsg;
@@ -116,6 +117,7 @@ class Invoice extends EntityBase {
         $this->NsfPajak = $row["nsf_pajak"];
         $this->AreaId = $row["area_id"];
         $this->DbAccId = $row["db_acc_id"];
+        $this->Jbaris = $row["baris"];
 	}
 
 	public function FormatInvoiceDate($format = HUMAN_DATE) {
@@ -1268,6 +1270,67 @@ WHERE
         $sql = "Update t_ar_invoice_master a Set a.delivery_status = 1,a.delivery_date = now() Where a.id = $id";
         $this->connector->CommandText = $sql;
         return $this->connector->ExecuteNonQuery();
+    }
+
+    public function LoadInvoicePrint ($areaId = 0, $whId = 0, $stDate, $enDate){
+        $sql = "SELECT
+	a.id AS id,
+	a.cabang_id AS cabang_id,
+	a.gudang_id AS gudang_id,
+	a.invoice_no AS invoice_no,
+	a.invoice_date AS invoice_date,
+	a.customer_id AS customer_id,
+	a.sales_id AS sales_id,
+	d.cus_code AS cus_code,
+	d.cus_name AS cus_name,
+	d.area_id AS area_id,
+	d1.area_code AS area_code,
+	f.wh_code AS wh_code,
+	g.kode AS cab_code,
+	b.sub_total,
+	b.discount,
+	b.ppn,
+	(c.brs1 +(c.brs2 * 2)) AS baris
+FROM
+	t_ar_invoice_master AS a
+JOIN vw_ar_invoice_sum_by_id b ON a.id = b.invoice_id
+JOIN (
+	SELECT
+		x.invoice_id,
+		sum(
+
+			IF (length(z.item_name) < 40, 1, 0)
+		) AS brs1,
+		sum(
+
+			IF (length(z.item_name) > 40, 1, 0)
+		) AS brs2
+	FROM
+		t_ar_invoice_detail x
+	JOIN m_items z ON x.item_id = z.id
+	GROUP BY
+		x.invoice_id
+) c ON a.id = c.invoice_id
+JOIN m_customer AS d ON (a.customer_id = d.id)
+JOIN m_salesman AS e ON (a.sales_id = e.id)
+JOIN m_sales_area AS d1 ON (d.area_id = d1.id)
+JOIN m_warehouse AS f ON (a.gudang_id = f.id)
+JOIN m_cabang AS g ON (a.cabang_id = g.id)
+WHERE
+	`a`.`is_deleted` = 0
+AND `a`.`invoice_status` = 2 And (a.invoice_date BETWEEN ?stDate And ?enDate)";
+        if ($areaId > 0){
+            $sql.= " And d.area_id = ".$areaId;
+        }
+        if ($whId > 0){
+            $sql.= " And a.gudang_id = ".$whId;
+        }
+        $sql.= " ORDER BY `a`.`invoice_date`,`a`.`invoice_no`";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
     }
 }
 

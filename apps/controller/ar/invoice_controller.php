@@ -76,7 +76,7 @@ class InvoiceController extends AppController {
             }
             $settings["actions"][] = array("Text" => "separator", "Url" => null);
             if ($acl->CheckUserAccess("ar.invoice", "print")) {
-                $settings["actions"][] = array("Text" => "Print Invoice", "Url" => "ar.invoice/printout/invoice","Class" => "bt_print", "Target" => "_blank", "ReqId" => 2, "Confirm" => "Pastikan Data sudah di-approve\nCetak Invoice yang dipilih?");
+                $settings["actions"][] = array("Text" => "Print Invoice", "Url" => "ar.invoice/ivcprint","Class" => "bt_print", "Target" => "_blank", "ReqId" => 0, "Confirm" => "");
                 //$settings["actions"][] = array("Text" => "Print Surat Jalan", "Url" => "ar.invoice/printout/suratjalan","Class" => "bt_print", "Target" => "_blank", "ReqId" => 2, "Confirm" => "Pastikan Data sudah di-approve\nCetak Surat Jalan yang dipilih?");
             }
 
@@ -1000,11 +1000,42 @@ class InvoiceController extends AppController {
         }
     }
 
+    public function ivcprint(){
+        require_once (MODEL . "master/salesarea.php");
+        require_once (MODEL . "master/warehouse.php");
+        if (count($this->postData) > 0) {
+            $areid = $this->GetPostValue("areaId");
+            $whsid = $this->GetPostValue("whsId");
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+        }else{
+            $areid = 0;
+            $whsid = 0;
+            $sdate = time();
+            $edate = $sdate;
+        }
+        $loader = new Invoice();
+        $invoice= $loader->LoadInvoicePrint($areid,$whsid,$sdate,$edate);
+        $this->Set("areaId", $areid);
+        $this->Set("whsId", $whsid);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("invoices", $invoice);
+        //load cabang
+        $loader = new SalesArea();
+        $areas = $loader->LoadByCabangId($this->userCabangId);
+        $this->Set("areas", $areas);
+        //load warehouse
+        $loader = new Warehouse();
+        $warehouses = $loader->LoadByCabangId($this->userCabangId,1);
+        $this->Set("warehouses", $warehouses);
+    }
+
     //proses cetak form invoice
     public function printout($doctype = 'invoice') {
         require_once (MODEL . "master/cabang.php");
         require_once (MODEL . "ar/customer.php");
-        $ids = $this->GetGetValue("id", array());
+        $ids = $this->GetPostValue("ids", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Harap pilih data yang akan dicetak !");
             redirect_url("ar.invoice");
