@@ -82,7 +82,7 @@
             <td><label for="EndDate">S/D Tgl :</label></td>
             <td><input type="text" class="text2" maxlength="10" size="8" id="EndDate" name="enDate" value="<?php printf(date('d-m-Y',$enDate));?>"/></td>
             <td>
-                <button type="submit" formaction="<?php print($helper->site_url("ar.ivcprint")); ?>"><b>Tampilkan</b></button>
+                <button type="submit" formaction="<?php print($helper->site_url("ar.invoice/ivcprint")); ?>"><b>Tampilkan</b></button>
             </td>
             <td>
                 <b><input type="button" id="btnGenerate" class="button" value="Print"/></b>
