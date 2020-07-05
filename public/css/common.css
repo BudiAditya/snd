@@ -170,7 +170,6 @@ select {
     width: 40px;
 }
 
-
 .button {
     appearance: button;
     -moz-appearance: button;
@@ -181,6 +180,27 @@ select {
     padding: 1px 12px;
     cursor: default;
 }
+
+.ftitle{
+    font-size:14px;
+    font-weight:bold;
+    padding:5px 0;
+    margin-bottom:10px;
+    border-bottom:1px solid #ccc;
+}
+.fitem{
+    margin-bottom:5px;
+}
+.fitem label{
+    display:inline-block;
+    width:100px;
+}
+.numberbox .textbox-text{
+    text-align: right;
+    color: blue;
+}
+
+.pagebreak { page-break-before: always; } /* page-break-after works, as well */
 
 /*
  tabel

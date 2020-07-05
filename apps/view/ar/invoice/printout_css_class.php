@@ -11,7 +11,51 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
     <title>SND System | Print Nota Penjualan (Invoicing)</title>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
     <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/common.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/jquery-ui.css")); ?>"/>
+
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-themes/default/easyui.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-themes/icon.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-themes/color.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-demo/demo.css")); ?>"/>
+
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.min.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery-ui.custom.min.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/auto-numeric.js")); ?>"></script>
+
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.easyui.min.js")); ?>"></script>
+
+    <script type="text/javascript" src="<?php print($helper->path("public/js/sweetalert.min.js")); ?>"></script>
+
+    <style scoped>
+        .f1{
+            width:200px;
+        }
+    </style>
+
     <style type="text/css">
+        #fd{
+            margin:0;
+            padding:5px 10px;
+        }
+        .ftitle{
+            font-size:14px;
+            font-weight:bold;
+            padding:5px 0;
+            margin-bottom:10px;
+            border-bottom:1px solid #ccc;
+        }
+        .fitem{
+            margin-bottom:5px;
+        }
+        .fitem label{
+            display:inline-block;
+            width:100px;
+        }
+        .numberbox .textbox-text{
+            text-align: right;
+            color: blue;
+        }
         .pagebreak { page-break-before: always; } /* page-break-after works, as well */
     </style>
 </head>
@@ -100,23 +144,23 @@ foreach ($report as $idx => $invoice) {
             </td>
         </tr>
     </table>
-    <table cellpadding="2" cellspacing="0" style="width:850px;" bgcolor="white" class="tableBorderSlim">
+    <table cellpadding="2" cellspacing="0" style="width:850px;" bgcolor="white">
         <tr align="center">
-            <td rowspan="2" width="3%">No.</td>
-            <td rowspan="2" width="5%">BRAND</td>
-            <td rowspan="2" width="30%">NAMA PRODUK</td>
-            <td colspan="2" width="18%">QTY</td>
-            <td rowspan="2" width="10%">HARGA SATUAN</td>
-            <td colspan="2" width="10%">DISKON</td>
-            <td rowspan="2" width="10%">DPP</td>
-            <td rowspan="2" width="8%">PPN</td>
-            <td rowspan="2" width="10%">JUMLAH</td>
+            <td class="bT bB bL" rowspan="2" width="3%">No.</td>
+            <td class="bT bB bL" rowspan="2" width="5%">BRAND</td>
+            <td class="bT bB bL bR" rowspan="2" width="30%">NAMA PRODUK</td>
+            <td class="bT" colspan="2" width="18%">QTY</td>
+            <td class="bT bB bL" rowspan="2" width="10%">HARGA SATUAN</td>
+            <td class="bT bL" colspan="2" width="10%">DISKON</td>
+            <td class="bT bB bL" rowspan="2" width="10%">DPP</td>
+            <td class="bT bB bL" rowspan="2" width="8%">PPN</td>
+            <td class="bT bB bL bR" rowspan="2" width="10%">JUMLAH</td>
         </tr>
         <tr align="center">
-            <td width="5%" style="border-left: 0px; border-bottom: 1px solid !important;">L</td>
-            <td width="5%" style="border-bottom: 1px solid !important;">S</td>
-            <td width="4%" style="border-bottom: 1px solid !important;">%</td>
-            <td width="6%" style="border-bottom: 1px solid !important;">Rp</td>
+            <td class="bT bB bL" width="5%" style="border-left: 0px;">L</td>
+            <td class="bT bB bL" width="5%">S</td>
+            <td class="bT bB bL" width="4%">%</td>
+            <td class="bT bB bL" width="6%">Rp</td>
         </tr>
         <?php
         $qjns = 0;
@@ -124,32 +168,32 @@ foreach ($report as $idx => $invoice) {
         $nmr = 1;
         $lqty = 0;
         $sqty = 0;
-        if ($invoice->Jbaris <= 13){
-            $brs = 13;
+        if ($invoice->Jbaris < 15){
+            $brs = 15;
         }else{
             $brs = 35;
         }
         foreach($invoice->Details as $idx => $detail) {
             print('<tr valign="top">');
-            printf('<td align="center">%s. </td>',$nmr++);
-            printf('<td> %s</td>',$detail->EntityCode);
-            printf('<td> %s</td>',$detail->ItemDescs);
+            printf('<td class="bL" align="center">%s. </td>',$nmr++);
+            printf('<td class="bL"> %s</td>',$detail->EntityCode);
+            printf('<td class="bL bR"> %s</td>',$detail->ItemDescs);
             printf('<td align="center">%s</td>',$detail->Lqty > 0 ? number_format($detail->Lqty) : '');
-            printf('<td align="center">%s</td>', $detail->Sqty > 0 ? number_format($detail->Sqty) : '');
+            printf('<td class="bL" align="center">%s</td>', $detail->Sqty > 0 ? number_format($detail->Sqty) : '');
             if ($detail->IsFree == 0) {
-                printf('<td align="right">%s</td>', number_format($detail->Price, 2));
+                printf('<td class="bL" align="right">%s</td>', number_format($detail->Price, 2));
                 if ($detail->DiscAmount > 0) {
-                    printf('<td align="right">%s</td>', $detail->DiscFormula);
-                    printf('<td align="right">%s</td>', number_format($detail->DiscAmount));
+                    printf('<td class="bL" align="right">%s</td>', $detail->DiscFormula);
+                    printf('<td class="bL" align="right">%s</td>', number_format($detail->DiscAmount));
                 } else {
-                    print('<td>&nbsp;</td>');
-                    print('<td>&nbsp;</td>');
+                    print('<td class="bL">&nbsp;</td>');
+                    print('<td class="bL">&nbsp;</td>');
                 }
-                printf('<td align="right">%s</td>', number_format($detail->SubTotal-$detail->DiscAmount));
-                printf('<td align="right">%s</td>', number_format($detail->PpnAmount));
-                printf('<td align="right">%s</td>', number_format($detail->SubTotal + $detail->PpnAmount - $detail->DiscAmount));
+                printf('<td class="bL" align="right">%s</td>', number_format($detail->SubTotal-$detail->DiscAmount));
+                printf('<td class="bL" align="right">%s</td>', number_format($detail->PpnAmount));
+                printf('<td class="bL bR" align="right">%s</td>', number_format($detail->SubTotal + $detail->PpnAmount - $detail->DiscAmount));
             } else {
-                print('<td align="center">*Bonus*</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
+                print('<td class="bL" align="center">*Bonus*</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL bR">&nbsp;</td>');
             }
             print('</tr>');
             $lqty+= $detail->Lqty;
@@ -160,16 +204,13 @@ foreach ($report as $idx => $invoice) {
         if ($nmr < $brs){
             for ($x = $nmr; $x <= $brs; $x++) {
                 print('<tr>');
-                print('<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
+                print('<td class="bL">&nbsp;</td><td class="bL">&nbsp;</td class="bL"><td class="bL bR">&nbsp;</td><td>&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL">&nbsp;</td><td class="bL bR">&nbsp;</td>');
                 print('</tr>');
             }
         }
-        print('<tr style="outline: thin solid">');
-        printf('<td style="border-left: 0px !important;">&nbsp;</td><td class="center" colspan="2">T O T A L</td><td class="center">%s</td><td class="center">%s</td><td colspan="3"></td><td class="right">%s</td><td class="right">%s</td><td class="right" style="border-right: 0px !important;"><b>%s</b></td>', $lqty, $sqty, number_format($invoice->BaseAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
+        print('<tr>');
+        printf('<td class="bL bT bB">&nbsp;</td><td  class="bL bR bT bB center" colspan="2">T O T A L</td><td class="center bT bB">%s</td><td class="bL bT bB center">%s</td><td class="bL bT bB" colspan="3"></td><td class="bL bT bB right">%s</td><td class="bL bT bB right">%s</td><td class="bL bR bT bB right">%s</td>', $lqty, $sqty, number_format($invoice->BaseAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
         print('</tr>');
-        print('</table>');
-        print('<br>');
-        print('<table cellpadding="0" cellspacing="0" style="width:850px;" bgcolor="white">');
         print('<tr>');
         print('<td colspan="6"><sub><u>CATATAN:</u></sub></td>');
         print('<td colspan="3">PENERIMA,</td>');
