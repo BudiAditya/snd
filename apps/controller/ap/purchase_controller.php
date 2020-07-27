@@ -176,9 +176,9 @@ class PurchaseController extends AppController {
             $purchase->SalesName = $this->GetPostValue("SalesName");
             $purchase->ExPoId = $this->GetPostValue("ExPoId");
             $purchase->ExpeditionId = $this->GetPostValue("ExpeditionId");
-            $purchase->SupInvDate = $this->GetPostValue("SupInvDate");
+            $purchase->SupInvDate = strtotime($this->GetPostValue("SupInvDate"));
             $purchase->SupInvNo = $this->GetPostValue("SupInvNo");
-            $purchase->JtpDate = $this->GetPostValue("JtpDate");
+            $purchase->JtpDate = strtotime($this->GetPostValue("JtpDate"));
             $purchase->NsfPajak = $this->GetPostValue("NsfPajak");
             if ($this->GetPostValue("GrnStatus") == null || $this->GetPostValue("GrnStatus") == 0){
                 $purchase->GrnStatus = 1;

@@ -12,6 +12,9 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
     <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/common.css")); ?>"/>
     <style type="text/css">
+        @page {
+            margin: 2cm;
+        }
         .pagebreak { page-break-before: always; } /* page-break-after works, as well */
     </style>
 </head>

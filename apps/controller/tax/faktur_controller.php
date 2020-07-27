@@ -43,23 +43,18 @@ class FakturController extends AppController {
 			$settings["title"] = "Daftar Faktur Pajak (Keluaran)";
 
 			if ($acl->CheckUserAccess("tax.faktur", "add")) {
-				$settings["actions"][] = array("Text" => "Create Faktur", "Url" => "tax.faktur/add", "Class" => "bt_add", "ReqId" => 0);
+				$settings["actions"][] = array("Text" => "<b>Create/Edit Faktur Pajak</b>", "Url" => "tax.faktur/add", "Class" => "bt_edit", "ReqId" => 0);
 			}
 
 			if ($acl->CheckUserAccess("tax.faktur", "view")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
 				$settings["actions"][] = array("Text" => "View", "Url" => "tax.faktur/view/%s", "Class" => "bt_view", "ReqId" => 1,
 					"Error" => "Mohon memilih faktur terlebih dahulu sebelum proses view.\nPERHATIAN: Mohon memilih tepat satu faktur.",
 					"Confirm" => "");
 			}
 
-			if ($acl->CheckUserAccess("tax.faktur", "delete")) {
-				$settings["actions"][] = array("Text" => "Delete", "Url" => "tax.faktur/delete/%s", "Class" => "bt_delete", "ReqId" => 1,
-					"Error" => "Mohon memilih faktur terlebih dahulu sebelum proses penghapusan.\nPERHATIAN: Mohon memilih tepat satu faktur.",
-					"Confirm" => "Apakah anda mau menghapus data faktur yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-			}
-
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
             if ($acl->CheckUserAccess("tax.faktur", "view")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "Laporan", "Url" => "tax.faktur/report", "Class" => "bt_report", "ReqId" => 0);
             }
 
@@ -96,29 +91,6 @@ class FakturController extends AppController {
         $dfaktur = $loader->LoadDetailByFakturId($id);
         $this->Set("mfaktur", $faktur);
         $this->Set("dfaktur", $dfaktur);
-	}
-
-	public function delete($id = null) {
-        if ($id == null) {
-            $this->persistence->SaveState("error", "Harap memilih data terlebih dahulu sebelum melakukan proses penghapusan data.");
-            redirect_url("tax.faktur");
-        }
-        $log = new UserAdmin();
-        $faktur = new Faktur();
-        $faktur = $faktur->LoadById($id);
-        if ($faktur == null) {
-            $this->persistence->SaveState("error", "Maaf data yang diminta tidak dapat ditemukan atau sudah dihapus.");
-            redirect_url("tax.faktur");
-        }
-        $rs = $faktur->Delete($id);
-        if ($rs == 1) {
-            $log = $log->UserActivityWriter($this->userCabangId,'tax.faktur','Delete Faktur Pajak: '.$faktur->UomCode.' - '.$faktur->UomName,'-','Success');
-            $this->persistence->SaveState("info", sprintf("Faktur Pajak: %s (%s) sudah dihapus", $faktur->UomName, $faktur->UomCode));
-        } else {
-            $log = $log->UserActivityWriter($this->userCabangId,'tax.faktur','Delete Faktur Pajak: '.$faktur->UomCode.' - '.$faktur->UomName,'-','Failed');
-            $this->persistence->SaveState("error", sprintf("Gagal menghapus jenis kontak: %s (%s). Error: %s", $faktur->UomName, $faktur->UomCode, $this->connector->GetErrorMessage()));
-        }
-		redirect_url("tax.faktur");
 	}
 
 	public function add(){
