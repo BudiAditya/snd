@@ -63,8 +63,13 @@ class ItemEntity extends EntityBase {
 		return $result;
 	}
 
-    public function LoadByCompanyId($companyId = 0,$orderBy = "a.entity_code") {
-        $this->connector->CommandText = "SELECT a.* FROM m_item_entity AS a Where a.company_id = $companyId And a.is_deleted = 0 ORDER BY $orderBy";
+    public function LoadByCompanyId($companyId = 0,$orderBy = "a.entity_code",$idFilter = 0) {
+	    $sql = "SELECT a.* FROM m_item_entity AS a Where a.company_id = $companyId And a.is_deleted = 0 ";
+	    if ($idFilter > 0){
+	        $sql.= " And id = $idFilter";
+        }
+	    $sql.= " ORDER BY $orderBy";
+        $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         $result = array();
         if ($rs != null) {

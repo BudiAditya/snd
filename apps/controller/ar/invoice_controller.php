@@ -128,6 +128,10 @@ class InvoiceController extends AppController {
                 redirect_url("ar.invoice");
             }
             if($invoice->InvoiceStatus == 2){
+                $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -APPROVED-",$invoice->InvoiceNo));
+                redirect_url("ar.invoice");
+            }
+            if($invoice->PaidAmount > 0 && $invoice->PaymentType = 1){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
                 redirect_url("ar.invoice");
             }
@@ -174,10 +178,6 @@ class InvoiceController extends AppController {
         $loader = new Salesman();
         $sales = $loader->LoadByStatus(1);
         $this->Set("sales", $sales);
-        //load customer
-        //$loader = new Customer();
-        //$customers = $loader->LoadAll();
-        //$this->Set("customers", $customers);
         //load coa kas/bank
         $loader = new KasBank();
         $coakas = $loader->LoadByCompanyId($this->userCompanyId);
@@ -327,12 +327,16 @@ class InvoiceController extends AppController {
                 redirect_url("ar.invoice");
             }
             if($invoice->InvoiceStatus == 2){
+                $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -APPROVED-",$invoice->InvoiceNo));
+                redirect_url("ar.invoice");
+            }
+            if($invoice->PaidAmount > 0 && $invoice->PaymentType = 1){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
                 redirect_url("ar.invoice");
             }
             if($invoice->InvoiceStatus == 3){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -VOID-",$invoice->InvoiceNo));
-                redirect_url("ar.invoice/view/".$invoiceId);
+                redirect_url("ar.invoice");
             }
             if ($invoice->CreatebyId <> AclManager::GetInstance()->GetCurrentUser()->Id && $this->userLevel == 1){
                 $this->persistence->SaveState("error", sprintf("Maaf Anda tidak boleh mengubah data ini!",$invoice->InvoiceNo));
@@ -456,7 +460,7 @@ class InvoiceController extends AppController {
                 $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s gagal dihapus", $invoice->InvoiceNo));
             }
         }else{
-            $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s sudah berstatus -TERBAYAR-", $invoice->InvoiceNo));
+            $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s sudah berstatus -APPROVED-", $invoice->InvoiceNo));
         }
         redirect_url("ar.invoice");
     }
@@ -479,15 +483,18 @@ class InvoiceController extends AppController {
             $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -APPROVED-",$invoice->InvoiceNo));
             redirect_url("ar.invoice");
         }
-        if($invoice->BaseAmount > 0){
-            $this->persistence->SaveState("error", sprintf("Maaf hapus dulu detail Invoice No. %s sebelum diproses!",$invoice->InvoiceNo));
+        if($invoice->PaidAmount > 0 && $invoice->PaymentType = 1){
+            $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
             redirect_url("ar.invoice");
         }
-
         $ExSoId = $invoice->ExSoId;
         // periksa status po
         if($invoice->InvoiceStatus < 2){
             $invoice->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
+            if($this->InvoiceItemsCount($invoiceId) > 0 && $this->void_detail($invoiceId) == 0){
+                $this->persistence->SaveState("error", sprintf("Maaf hapus dulu detail Invoice No. %s sebelum diproses!",$invoice->InvoiceNo));
+                redirect_url("ar.invoice");
+            }
             if ($invoice->Void($invoiceId,$ExSoId) == 1) {
                 $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Success');
                 $this->persistence->SaveState("info", sprintf("Data Invoice No: %s sudah berhasil batalkan", $invoice->InvoiceNo));
@@ -496,7 +503,7 @@ class InvoiceController extends AppController {
                 $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s gagal dibatalkan", $invoice->InvoiceNo));
             }
         }else{
-            $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s sudah berstatus -TERBAYAR-", $invoice->InvoiceNo));
+            $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s sudah berstatus -APPROVED-", $invoice->InvoiceNo));
         }
         redirect_url("ar.invoice");
     }
@@ -903,6 +910,60 @@ class InvoiceController extends AppController {
             $this->connector->RollbackTransaction();
             $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice detail -> Item Code: '.$invoicedetail->ItemCode.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Failed');
             printf("Maaf, Data Detail Invoice ID: %d gagal dihapus!",$id);
+        }
+    }
+
+    public function void_detail($invId = 0) {
+        // Cek datanya
+        //$log = new UserAdmin();
+        $invoicedetail = new InvoiceDetail();
+        $invoicedetail = $invoicedetail->LoadByInvoiceId($invId);
+        if ($invoicedetail == null) {
+            //print("Data tidak ditemukan..");
+            return 0;
+        }
+        require_once(MODEL . "inventory/stock.php");
+        $flagSuccess = true;
+        $this->connector->BeginTransaction();
+        /** @var $invoicedetail InvoiceDetail[] */
+        foreach ($invoicedetail as $detail) {
+           $id = $detail->Id;
+           $stock = new  Stock();
+           $stock = $stock->FindByTypeReffId($this->trxYear, 101, $id);
+           if ($stock == null) {
+               $flagSuccess = false;
+           } else {
+               /** @var $stock Stock[] */
+               foreach ($stock as $dstock) {
+                   $cstock = new Stock($dstock->UseStockId);
+                   if ($cstock == null) {
+                       $flagSuccess = false;
+                   } else {
+                       $cstock->QtyBalance += $dstock->Qty;
+                       $rs = $cstock->Update($dstock->UseStockId);
+                       if (!$rs) {
+                           $flagSuccess = false;
+                       }
+                   }
+               }
+               if ($flagSuccess) {
+                   //update stock
+                   $stock = new Stock();
+                   $stock->UpdatedById = $this->userUid;
+                   $stock->VoidByTypeReffId($this->trxYear, 101, $id);
+                   //update invoice detail post status
+                   $detail->ItemHpp = 0;
+                   $detail->IsPost = 0;
+                   $detail->UpdateHpp();
+               }
+           }
+           if ($flagSuccess) {
+               $this->connector->CommitTransaction();
+               return 1;
+           } else {
+               $this->connector->RollbackTransaction();
+               return 0;
+           }
         }
     }
 

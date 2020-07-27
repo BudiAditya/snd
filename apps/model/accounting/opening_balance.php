@@ -96,7 +96,7 @@ class OpeningBalance extends EntityBase {
 	}
 
 	/**
-	 * Digunakan untuk mencari pergerakan saldo awal (akibat transaksi) dari akun yang sudah diload dari DBase.
+	 * Digunakan untuk mencari pergerakan saldo awalcas (akibat transaksi) dari akun yang sudah diload dari DBase.
 	 * Method ini hanya bisa dipanggil jika sudah diload terlebih dahulu oleh method yang ada pada model ini.
 	 * Untuk parameter $currentDate harus berupa int jika di invoke jika tidak akan default ke tanggal hari ini.
 	 *
@@ -116,8 +116,8 @@ class OpeningBalance extends EntityBase {
 			throw new Exception("Tidak dapat mencari transaksi ! Data Account tidak ada !");
 		}
 
-		// Digunakan untuk mencari tanggal awal. Jika ada data maka gunakan tanggal pada OpeningBalan7ce
-		// Karena ada beberapa account yang tidak memiliki data OpeningBalance maka untuk tanggal awal akan di auto-detect ke 1 Januari
+		// Digunakan untuk mencari tanggal awalcas. Jika ada data maka gunakan tanggal pada OpeningBalan7ce
+		// Karena ada beberapa account yang tidak memiliki data OpeningBalance maka untuk tanggal awalcas akan di auto-detect ke 1 Januari
 		if (is_int($this->OpDate)) {
 			// Ok kalau masuk sini bearti ada data opening balance
 			$temp = $this->OpDate;
@@ -126,7 +126,7 @@ class OpeningBalance extends EntityBase {
 			$temp = is_int($currentDate) ? $currentDate : mktime(0, 0, 0);
 		}
 
-		// Cari tanggal awal dan akhir periode transaksi yang akan dicari
+		// Cari tanggal awalcas dan akhir periode transaksi yang akan dicari
 		$start = mktime(0, 0, 0, 1, 1, date("Y", $temp));
 		if (is_int($currentDate)) {
 			// Force ke jam 23:59:59 berdasarkan tanggal yang dikirim
@@ -139,7 +139,7 @@ class OpeningBalance extends EntityBase {
 		// Sedikit validasi...
 		if ($end < $start) {
 			// Tanggal yang diminta kurang dari tanggal Opening Balance...
-			// Ini akan kejadian pada report awal bulan yang mana start dimulai dari 1 Januari maka parameter $currentDate akan dikirim 31 Des Bulan sebelumnya
+			// Ini akan kejadian pada report awalcas bulan yang mana start dimulai dari 1 Januari maka parameter $currentDate akan dikirim 31 Des Bulan sebelumnya
 			// Dapat dipastikan tidak ada transaksi dll
 			return array(
 				"db_amount" => 0,

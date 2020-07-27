@@ -347,15 +347,13 @@ WHERE id = ?id";
 	public function Delete($id,$exSoNo = null) {
         //unpost stock dulu
         $rsx = null;
-
-        $this->connector->CommandText = "SELECT fc_ar_invoicemaster_unpost($id) As valresult;";
+        $this->connector->CommandText = "SELECT fc_ar_invoicemaster_unpost($id,1) As valresult;";
         $rsx = $this->connector->ExecuteQuery();
         if ($exSoNo != null){
             #Update PO Status
             $this->connector->CommandText = "Update t_ar_so_master AS a Set a.po_status = 1 Where a.so_no = '".$exSoNo."'";
             $this->connector->ExecuteNonQuery();
         }
-
         //hapus data invoice_
         $this->connector->CommandText = "Delete From t_ar_invoice_master WHERE id = ?id";
 		$this->connector->AddParameter("?id", $id);
@@ -365,7 +363,7 @@ WHERE id = ?id";
     public function Void($id,$exSoNo) {
         //unpost stock dulu
         $rsx = null;
-        $this->connector->CommandText = "SELECT fc_ar_invoicemaster_unpost($id) As valresult;";
+        $this->connector->CommandText = "SELECT fc_ar_invoicemaster_unpost($id,0) As valresult;";
         $rsx = $this->connector->ExecuteQuery();
         if ($exSoNo != null){
             #Update PO Status
@@ -760,6 +758,26 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         $data.= ",".$row["November"];
         $data.= ",".$row["December"];
         return $data;
+    }
+
+    public function GetDataInvoiceSumByMonth($year)
+    {
+        $query = "SELECT COALESCE(SUM(CASE WHEN month(a.invoice_date) = 1 THEN a.total_amount ELSE 0 END), 0) January
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 2 THEN a.total_amount ELSE 0 END), 0) February
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 3 THEN a.total_amount ELSE 0 END), 0) March
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 4 THEN a.total_amount ELSE 0 END), 0) April
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 5 THEN a.total_amount ELSE 0 END), 0) May
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 6 THEN a.total_amount ELSE 0 END), 0) June
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 7 THEN a.total_amount ELSE 0 END), 0) July
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 8 THEN a.total_amount ELSE 0 END), 0) August
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 9 THEN a.total_amount ELSE 0 END), 0) September
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 10 THEN a.total_amount ELSE 0 END), 0) October
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 11 THEN a.total_amount ELSE 0 END), 0) November
+				,COALESCE(SUM(CASE WHEN month(a.invoice_date) = 12 THEN a.total_amount ELSE 0 END), 0) December
+			    FROM vw_ar_invoice_master a Where year(a.invoice_date) = $year And a.invoice_status <> 3 And a.is_deleted = 0";
+        $this->connector->CommandText = $query;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs->FetchAssoc();
     }
 
     public function GetReceiptSumByYear($year){

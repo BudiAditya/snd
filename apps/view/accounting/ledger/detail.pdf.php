@@ -53,7 +53,7 @@ $pdf->SetFont("Arial", "", 9);
 $prevDate = null;
 $prevVoucherNo = null;
 
-// Saldo awal
+// Saldo awalcas
 $data = array();
 $data[] = "01";
 $data[] = "";

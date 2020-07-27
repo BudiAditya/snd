@@ -32,6 +32,8 @@ class StatisticController extends AppController {
         $invoice = new Invoice();
         $dataInvoices = $invoice->GetInvoiceSumByYear($year);
         $this->Set("dataInvoices",$dataInvoices);
+        $dataInvMonthly = $invoice->GetDataInvoiceSumByMonth($year);
+        $this->Set("dataInvMonthly",$dataInvMonthly);
         $dataReceipts = $invoice->GetReceiptSumByYear($year);
         $this->Set("dataReceipts",$dataReceipts);
         $this->Set("dataTahun",$year);

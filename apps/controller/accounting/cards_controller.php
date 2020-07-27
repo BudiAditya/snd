@@ -47,7 +47,7 @@ class CardsController extends AppController {
                 } else {
                     // Status dokumen bukan POSTED jadi kita FORCE menghitung semua transaksi
                     $transaction = $openingBalance->CalculateTransaction($temp, -1);
-                    $this->Set("info", "Saldo awal akan menggunakan semua voucher karena anda tidak memilih status POSTED");
+                    $this->Set("info", "Saldo awalcas akan menggunakan semua voucher karena anda tidak memilih status POSTED");
                 }
 
                 $query =
@@ -192,7 +192,7 @@ class CardsController extends AppController {
                 $this->connector->AddParameter("?obStatus", 4);
             } else {
                 $this->connector->AddParameter("?obStatus", "a.status", "int");	// Gw mau paksa agar querynya menjadi a.status = a.status (selalu true) bukan a.status = 'a.status'
-                $this->Set("info", "Saldo awal akan menggunakan semua voucher karena anda tidak memilih status POSTED");
+                $this->Set("info", "Saldo awalcas akan menggunakan semua voucher karena anda tidak memilih status POSTED");
             }
 
             // OK dafuq ini... mari kita query multi step
@@ -384,7 +384,7 @@ class CardsController extends AppController {
 				$this->connector->AddParameter("?obStatus", 4);
 			} else {
 				$this->connector->AddParameter("?obStatus", "a.status", "int");	// Gw mau paksa agar querynya menjadi a.status = a.status (selalu true) bukan a.status = 'a.status'
-				$this->Set("info", "Saldo awal akan menggunakan semua voucher karena anda tidak memilih status POSTED");
+				$this->Set("info", "Saldo awalcas akan menggunakan semua voucher karena anda tidak memilih status POSTED");
 			}
 
 			// OK dafuq ini... mari kita query multi step

@@ -80,8 +80,81 @@
     <br>
     <table border="1" cellspacing="1" style="width: 100%">
         <tr>
-            <td colspan="2" style="width: 100%;height: 250px">
+            <td style="width: 70%;height: 250px">
                 <canvas id="myLineChart"></canvas>
+            </td>
+            <td align="center" style="width: 30%;height: 250px">
+                <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
+                    <tr>
+                        <th>No.</th>
+                        <th>Bulan</th>
+                        <th>OMSET (Rp)</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>January</td>
+                        <td align="right"><?=number_format($dataInvMonthly["January"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>February</td>
+                        <td align="right"><?=number_format($dataInvMonthly["February"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Maret</td>
+                        <td align="right"><?=number_format($dataInvMonthly["March"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>April</td>
+                        <td align="right"><?=number_format($dataInvMonthly["April"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Mei</td>
+                        <td align="right"><?=number_format($dataInvMonthly["May"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Juni</td>
+                        <td align="right"><?=number_format($dataInvMonthly["June"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Juli</td>
+                        <td align="right"><?=number_format($dataInvMonthly["July"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Agustus</td>
+                        <td align="right"><?=number_format($dataInvMonthly["August"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>September</td>
+                        <td align="right"><?=number_format($dataInvMonthly["September"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Oktober</td>
+                        <td align="right"><?=number_format($dataInvMonthly["October"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>Nopember</td>
+                        <td align="right"><?=number_format($dataInvMonthly["November"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>Desember</td>
+                        <td align="right"><?=number_format($dataInvMonthly["December"],0);?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Total</td>
+                        <td align="right"><?=number_format($dataInvMonthly["January"]+$dataInvMonthly["February"]+$dataInvMonthly["March"]+$dataInvMonthly["April"]+$dataInvMonthly["May"]+$dataInvMonthly["June"]+$dataInvMonthly["July"]+$dataInvMonthly["August"]+$dataInvMonthly["September"]+$dataInvMonthly["October"]+$dataInvMonthly["November"]+$dataInvMonthly["December"],0);?></td>
+                    </tr>
+                </table>
             </td>
         </tr>
         <tr>

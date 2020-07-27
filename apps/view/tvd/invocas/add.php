@@ -10,7 +10,6 @@
 	<script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
     <script type="text/javascript">
         var urc = "<?php print($helper->site_url("tvd.invocas/create")); ?>";
-        var urv = "<?php print($helper->site_url("tvd.invocas/void")); ?>";
         $(document).ready(function() {
             $("#cbAll").change(function(e) { cbAll_Change(this, e);	});
 
@@ -22,16 +21,6 @@
                     $("#frd").attr('action', urc).submit();
                 }
             });
-
-            $("#btnVoid").click(function() {
-                var test = $(".cbIds:checked");
-                if (test.length == 0) {
-                    alert("Belum ada data yang dipilih!");
-                }else {
-                    $("#frd").attr('action', urv).submit();
-                }
-            });
-
         });
 
         function cbAll_Change(sender, e) {
@@ -91,7 +80,6 @@
             </td>
             <td>
                 <input type="button" id="btnGenerate" class="button" value="Create Invoice"/>
-                <input type="button" id="btnVoid" class="button" value="Batalkan Invoice"/>
             </td>
         </tr>
     </table>

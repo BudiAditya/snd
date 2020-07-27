@@ -58,7 +58,7 @@ class LedgerController extends AppController {
 				$this->connector->AddParameter("?obStatus", 2);
 			} else {
 				$this->connector->AddParameter("?obStatus", "a.journal_status", "int");	// Gw mau paksa agar querynya menjadi a.journal_status = a.journal_status (selalu true) bukan a.journal_status = 'a.journal_status'
-				//$this->Set("info", "Saldo awal akan menggunakan semua voucher karena anda tidak memilih status POSTED");
+				//$this->Set("info", "Saldo awalcas akan menggunakan semua voucher karena anda tidak memilih status POSTED");
 			}
 
 			// OK dafuq ini... mari kita query multi step
@@ -234,7 +234,7 @@ class LedgerController extends AppController {
 				} else {
 					// Status dokumen bukan POSTED jadi kita FORCE menghitung semua transaksi
 					$transaction = $openingBalance->CalculateTransaction($temp, -1,$cabangId);
-					//$this->Set("info", "Saldo awal akan menggunakan semua voucher karena anda tidak memilih status POSTED");
+					//$this->Set("info", "Saldo awalcas akan menggunakan semua voucher karena anda tidak memilih status POSTED");
 				}
 */
 				$query =
@@ -366,7 +366,7 @@ class LedgerController extends AppController {
                 $this->connector->AddParameter("?obStatus", 4);
             } else {
                 $this->connector->AddParameter("?obStatus", "a.journal_status", "int");	// Gw mau paksa agar querynya menjadi a.journal_status = a.journal_status (selalu true) bukan a.journal_status = 'a.journal_status'
-                //$this->Set("info", "Saldo awal akan menggunakan semua voucher karena anda tidak memilih status POSTED");
+                //$this->Set("info", "Saldo awalcas akan menggunakan semua voucher karena anda tidak memilih status POSTED");
             }
 
             // OK dafuq ini... mari kita query multi step

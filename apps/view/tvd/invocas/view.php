@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <?php
-/** @var $invoice Invoice */
+/** @var $invoice Invocas */
 ?>
 <head>
     <title>SND System - View Invoice Penjualan</title>
@@ -62,24 +62,24 @@
 
             $("#bTambah").click(function(){
                 if (confirm('Buat Invoice baru?')){
-                    location.href="<?php print($helper->site_url("ar.invoice/add/0")); ?>";
+                    location.href="<?php print($helper->site_url("tvd.invocas/add")); ?>";
                 }
             });
 
             $("#bHapus").click(function(){
-                if (confirm('Anda yakin akam membatalkan Invoice ini?')){
-                    location.href="<?php print($helper->site_url("ar.invoice/void/").$invoice->Id); ?>";
+                if (confirm('Anda yakin akam menghapus Invoice ini?')){
+                    location.href="<?php print($helper->site_url("tvd.invocas/delete/").$invoice->Id); ?>";
                 }
             });
 
             $("#bCetakInvoice").click(function(){
                 if (confirm('Cetak Invoice ini?')){
-                    window.open("<?php print($helper->site_url("ar.invoice/ivcprint")); ?>");
+                    window.open("<?php print($helper->site_url("tvd.invocas/ivcprint")); ?>");
                 }
             });
 
             $("#bKembali").click(function(){
-                location.href="<?php print($helper->site_url("ar.invoice")); ?>";
+                location.href="<?php print($helper->site_url("tvd.invocas")); ?>";
             });
         });
 
@@ -280,13 +280,13 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                     </tr>
                     <tr>
                         <td colspan="13" class="right"><?php
-                            if ($acl->CheckUserAccess("ar.invoice", "add")) {
+                            if ($acl->CheckUserAccess("tvd.invocas", "add")) {
                                 printf('<img src="%s" alt="Invoice Baru" title="Buat invoice baru" id="bTambah" style="cursor: pointer;"/>', $baddnew);
                             }
                             ?>
                             &nbsp;
                             <?php
-                            if ($acl->CheckUserAccess("ar.invoice", "print") && $invoice->InvoiceStatus == 2) {
+                            if ($acl->CheckUserAccess("tvd.invocas", "print")) {
                                 printf('<img src="%s" id="bCetakInvoice" alt="Cetak Bukti Invoice" title="Proses cetak bukti Invoice" style="cursor: pointer;"/>',$bcetak);
                             }
                             ?>

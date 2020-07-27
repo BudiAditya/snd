@@ -7,7 +7,7 @@
  * NOTE:
  *  - Berhubung query yang dipake disini aneh-aneh maka saya prefer tidak pakai model tetapi langsung query.
  */
-class StockController extends AppController {
+class StockCasController extends AppController {
     private $userCompanyId;
     private $userCabangId;
     private $trxYear;
@@ -17,7 +17,7 @@ class StockController extends AppController {
     private $userCabIds;
 
 	protected function Initialize() {
-		require_once(MODEL . "inventory/stock.php");
+		require_once(MODEL . "tvd/stockcas.php");
         $this->userCompanyId = $this->persistence->LoadState("company_id");
         $this->userUid = AclManager::GetInstance()->GetCurrentUser()->Id;
         $this->userLevel = $this->persistence->LoadState("user_lvl");
@@ -35,11 +35,12 @@ class StockController extends AppController {
         $settings["columns"][] = array("name" => "a.wh_code", "display" => "Gudang", "width" => 50);
         $settings["columns"][] = array("name" => "a.item_code", "display" => "Kode", "width" => 80);
         $settings["columns"][] = array("name" => "a.item_name", "display" => "Nama Produk", "width" =>250);
-        $settings["columns"][] = array("name" => "a.uom_code", "display" => "Satuan", "width" =>50);
-        $settings["columns"][] = array("name" => "format(a.qty_op,0)", "display" => "+Awal", "width" => 50, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.qty_in,0)", "display" => "+Masuk", "width" => 50, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.qty_ot,0)", "display" => "-Keluar", "width" => 50, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.qty_stock,0)", "display" => "Stock", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "a.s_uom_code", "display" => "Satuan", "width" =>50);
+        $settings["columns"][] = array("name" => "format(a.op_qty,0)", "display" => "Awal", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.in_qty,0)", "display" => "Masuk", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.ot_qty,0)", "display" => "Keluar", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.aj_qty,0)", "display" => "Koreksi", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.cl_qty,0)", "display" => "Stock", "width" => 50, "align" => "right");
 
         $settings["filters"][] = array("name" => "a.item_code", "display" => "Item Code");
         $settings["filters"][] = array("name" => "a.item_name", "display" => "Item Name");
@@ -48,33 +49,34 @@ class StockController extends AppController {
         if (!$router->IsAjaxRequest) {
             // UI Settings
             $acl = AclManager::GetInstance();
-            $settings["title"] = "Daftar Stock Produk";
-            if ($acl->CheckUserAccess("inventory.stock", "view")) {
-                $settings["actions"][] = array("Text" => "Kartu Stock", "Url" => "inventory.stock/card/%s", "Class" => "bt_view", "ReqId" => 1,"Confirm" => "");
+            $settings["title"] = "Stock Produk Castrol";
+            if ($acl->CheckUserAccess("tvd.stockcas", "add")) {
+                $settings["actions"][] = array("Text" => "Hitung Ulang Stock", "Url" => "tvd.stockcas/recreate", "Class" => "bt_edit", "ReqId" => 0, "Confirm" => "Hitung ulang Stock Castrol?");
                 $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "Laporan Stock Per Periode", "Url" => "inventory.stock/stkdetail", "Class" => "bt_report", "ReqId" => 0);
-                $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "Laporan Stock Terakhir", "Url" => "inventory.stock/report", "Class" => "bt_report", "ReqId" => 0);
             }
-
+            if ($acl->CheckUserAccess("tvd.stockcas", "view")) {
+                $settings["actions"][] = array("Text" => "Kartu Stock", "Url" => "tvd.stockcas/card/%s", "Class" => "bt_view", "ReqId" => 1,"Confirm" => "");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Laporan Stock Per Periode", "Url" => "tvd.stockcas/stkdetail", "Class" => "bt_report", "ReqId" => 0);
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Laporan Stock Terakhir", "Url" => "tvd.stockcas/report", "Class" => "bt_report", "ReqId" => 0);
+            }
             $settings["def_filter"] = 1;
             $settings["def_order"] = 2;
             $settings["singleSelect"] = true;
         } else {
-            $settings["from"] = "vw_ic_stock_list AS a";
-            $settings["where"] = "a.trx_year = $this->trxYear And a.cabang_id IN (" . $this->userCabIds . ")";
+            $settings["from"] = "vw_cas_item_stock AS a";
+            $settings["where"] = "a.trx_year = ".$this->trxYear;
         }
 
         $dispatcher = Dispatcher::CreateInstance();
         $dispatcher->Dispatch("utilities", "flexigrid", array(), $settings, null, true);
     }
 
-
-    public function getStockQty($whId = 0,$itemId = 0){
-        $sqty = 0;
-        $stock = new Stock();
-        $sqty = $stock->CheckStock($this->userAccYear,$whId,$itemId);
-        print(number_format($sqty,0));
+    public function recreate(){
+        $stock = new StockCas();
+        $stock = $stock->RecreateStock($this->trxYear);
+        redirect_url("tvd.stockcas");
     }
 
     public function card($data = '0|0'){
@@ -98,7 +100,7 @@ class StockController extends AppController {
             $endDate = time();
             $outPut = 0;
         }
-        $stock = new Stock();
+        $stock = new StockCas();
         $stock->WarehouseId = $whId;
         $stock->ItemId = $itemId;
         $stkcard = $stock->GetStockHistory($this->trxYear,$startDate,$endDate);
@@ -143,7 +145,7 @@ class StockController extends AppController {
             $outPut = 0;
         }
         //load data
-        $mstock = new Stock();
+        $mstock = new StockCas();
         $mstock = $mstock->GetMutasiStock($this->trxYear,$whId,$startDate,$endDate,$entityId);
         //load data cabang
         $company = new Company($this->userCompanyId);
@@ -163,10 +165,10 @@ class StockController extends AppController {
         }
         //load data gudang
         $loader = new Warehouse();
-        $gudangs = $loader->LoadByAllowedCabangId($this->userCabIds);
+        $gudangs = $loader->LoadByAllowedCabangId($this->userCabIds,1);
         //load data entity barang
         $loader = new ItemEntity();
-        $entities = $loader->LoadByCompanyId($this->userCompanyId,"a.id");
+        $entities = $loader->LoadByCompanyId($this->userCompanyId,"a.id",1);
         $this->Set("whId",$whId);
         $this->Set("entityId",$entityId);
         $this->Set("cabangId",$cabangId);
@@ -183,54 +185,17 @@ class StockController extends AppController {
         $this->Set("mstock",$mstock);
         $this->Set("company_name", $company->CompanyName);
     }
-    
-    public function getitemstock_plain($whId,$itemCode){
-        $ret = 'ER|0';
-        if($itemCode != null || $itemCode != ''){
-            /** @var $stock Stock */
-            $stock = new Stock();
-            $stock = $stock->FindByKodeGudang($this->userAccYear,$whId,$itemCode);
-            if ($stock != null){
-                $ret = "OK|".$stock->ItemId.'|'.$stock->ItemName.'|'.$stock->SuomCode.'|'.$stock->QtyStock;
-            }
-        }
-        print $ret;
-    }
-
-    public function getitemstock_json($whId = 0,$order="a.item_code"){
-        $filter = isset($_POST['q']) ? strval($_POST['q']) : '';
-        $stock = new Stock();
-        $itemlists = $stock->GetJSonItemStock($this->trxYear,$whId,$filter,$order);
-        echo json_encode($itemlists);
-    }
-
-    public function stock_list($output){
-        require_once(MODEL . "master/company.php");
-        $company = new Company();
-        $company = $company->LoadById($this->userCompanyId);
-        $compname = $company->CompanyName;
-        $items = new Stock();
-        $items = $items->Load4Excel($this->userAccYear,$this->userCabangId);
-        $this->Set("items", $items);
-        $this->Set("output", $output);
-        $this->Set("company_name", $compname);
-    }
 
     public function report(){
         // report rekonsil process
         require_once(MODEL . "master/company.php");
         require_once(MODEL . "master/warehouse.php");
-        require_once(MODEL . "inventory/itementity.php");
-        require_once(MODEL . "ap/supplier.php");
         $loader = null;
         $sCabangId = $this->userCabangId;
         $sReportType = 0;
         if (count($this->postData) > 0) {
             // proses rekap disini
             $sGudangId = $this->GetPostValue("GudangId");
-            $sEntityId = $this->GetPostValue("EntityId");
-            $sTypeHarga = $this->GetPostValue("TypeHarga");
-            $sReportType = $this->GetPostValue("ReportType");
             $sOutput = $this->GetPostValue("Output");
             if ($sCabangId <> $this->userCabangId){
                 $this->persistence->SaveState("error", "Maaf Anda tidak boleh mengakses Laporan Stock cabang ini!");
@@ -238,43 +203,26 @@ class StockController extends AppController {
             }
         }else{
             $sGudangId = 0;
-            $sEntityId = 0;
-            $sSupplierId = null;
-            $sTypeHarga = 0;
             $sOutput = 0;
-            $sReportType = 0;
         }
         // ambil data yang diperlukan
-        $stock = new Stock();
-        $reports = $stock->Load4Reports($sCabangId,$sGudangId,$sEntityId);
+        $stock = new StockCas();
+        $reports = $stock->Load4Reports($this->trxYear,$sGudangId);
         //get data header
         $company = new Company($this->userCompanyId);
         $cabCode = null;
         $cabName = null;
         $scabCode = null;
         $gudang = new Warehouse();
-        $gudangs = $gudang->LoadByCabangId($sCabangId);
-
-        $jenis = new ItemEntity();
-        $jenis = $jenis->LoadByCompanyId($this->userCompanyId);
+        $gudangs = $gudang->LoadByCompanyId($this->userCompanyId,1);
         // kirim ke view
         $this->Set("company_name", $company->CompanyName);
         $this->Set("gudangs", $gudangs);
-        $this->Set("jenis", $jenis);
         $this->Set("output",$sOutput);
         $this->Set("reports",$reports);
-        $this->Set("userEntityId",$sEntityId);
-        $this->Set("userTypeHarga",$sTypeHarga);
         $this->Set("userReportType",$sReportType);
         $this->Set("userLevel",$this->userLevel);
         $this->Set("gudangId",$sGudangId);
-    }
-
-
-    public function checkStock($whId,$itemId){
-        $stock = new Stock();
-        $stock = $stock->CheckStock($this->userAccYear,$whId,$itemId);
-        print $stock;
     }
 }
 

@@ -28,7 +28,7 @@ class SerialNoController extends AppController {
         $settings["columns"][] = array("name" => "a.sn_start", "display" => "Mulai Nomor", "width" => 100);
         $settings["columns"][] = array("name" => "a.sn_end", "display" => "S/D Nomor", "width" => 100);
         $settings["columns"][] = array("name" => "a.sn_next_counter", "display" => "Berikutnya", "width" => 100);
-        $settings["columns"][] = array("name" => "a.sn_end - a.sn_next_counter", "display" => "Sisa", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "a.sn_end - a.sn_next_counter +1", "display" => "Sisa", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "if (a.is_aktif = 1,'Aktif','Non-Aktif')", "display" => "Status", "width" => 50);
 
 		$settings["filters"][] = array("name" => "a.tax_year", "display" => "Tahun");

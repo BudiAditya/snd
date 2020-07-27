@@ -131,13 +131,13 @@ class Invocas extends EntityBase {
     }
 
 	/**
-	 * @return InvoiceDetail[]
+	 * @return InvocasDetail[]
 	 */
 	public function LoadDetails() {
 		if ($this->Id == null) {
 			return $this->Details;
 		}
-		$detail = new InvoiceDetail();
+		$detail = new InvocasDetail();
 		$this->Details = $detail->LoadByInvoiceId($this->Id);
 		return $this->Details;
 	}
@@ -328,6 +328,30 @@ WHERE id = ?id";
         $rs = $this->connector->ExecuteQuery();
         $row = $rs->FetchAssoc();
         return strval($row["valresult"]);
+    }
+
+    public function GetInvoiceItemRow($invoiceId){
+        $this->connector->CommandText = "Select count(*) As valresult From t_cas_ar_invoice_detail as a Where a.invoice_id = ?invoiceId;";
+        $this->connector->AddParameter("?invoiceId", $invoiceId);
+        $rs = $this->connector->ExecuteQuery();
+        $row = $rs->FetchAssoc();
+        return strval($row["valresult"]);
+    }
+
+    public function Delete($id,$exSoNo = null) {
+        //hapus data invoice_
+        $this->connector->CommandText = "Delete From t_cas_ar_invoice_master WHERE id = ?id";
+        $this->connector->AddParameter("?id", $id);
+        return $this->connector->ExecuteNonQuery();
+    }
+
+    public function Void($id,$exSoNo) {
+        //unpost stock dulu
+        //mark as void data invoice_
+        $this->connector->CommandText = "Update t_cas_ar_invoice_master a Set a.invoice_status = 3 WHERE a.id = ?id";
+        $this->connector->AddParameter("?id", $id);
+        $rsz =  $this->connector->ExecuteNonQuery();
+        return $rsz;
     }
 }
 

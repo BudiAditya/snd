@@ -63,7 +63,7 @@ for ($i = 0; $i < 7; $i++) {
 	$sheet->getColumnDimensionByColumn($i)->setAutoSize(true);
 }
 
-// Saldo awal
+// Saldo awalcas
 $sheet->setCellValue("C7", "Saldo Awal " . date(HUMAN_DATE, $start));
 $sheet->setCellValue("F7", ($haveData && $openingBalance->GetCoa()->PosisiSaldo == "DK") ? $transaction["saldo"] : 0);
 $sheet->setCellValue("G7", ($haveData && $openingBalance->GetCoa()->PosisiSaldo == "KD") ? $transaction["saldo"] : 0);

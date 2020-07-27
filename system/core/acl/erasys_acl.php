@@ -123,7 +123,7 @@ class ErasysAcl extends AclBase {
 	 * Harus kita override karena akan ada sedikit validasi tambahan sebelum checking acl
 	 *  - Berhubung nama method-nya ada yang common (add_master, add_detail, add_xxx) itu akan digabung menjadi add
 	 *  - Untuk report semuanya akan digabung pada ACL 'view'
-	 *  - Khusus untuk generate memerlukan ACL 'add' yang di handle pada saat pembuatan ACL oleh Authenticate(). Rencana awal akan dimaskin disini tetapi tidak jadi agar tidak ada beban terus menerus tiap request
+	 *  - Khusus untuk generate memerlukan ACL 'add' yang di handle pada saat pembuatan ACL oleh Authenticate(). Rencana awalcas akan dimaskin disini tetapi tidak jadi agar tidak ada beban terus menerus tiap request
 	 *
 	 * @param string $controller
 	 * @param string $method

@@ -61,7 +61,7 @@ class InvocasDetail extends EntityBase {
         $this->ExpDate = strtotime($row["exp_date"]);
         $this->ByAngkut = $row["by_angkut"];
         $this->IsiSatKecil = $row["bisisatkecil"];
-        if ($this->SalesQty >= $this->IsiSatKecil){
+        if ($this->SalesQty >= $this->IsiSatKecil && $this->IsiSatKecil > 0){
             $aqty = array();
             $sqty = round($this->SalesQty/$this->IsiSatKecil,2);
             $aqty = explode('.',$sqty);
@@ -80,7 +80,7 @@ class InvocasDetail extends EntityBase {
     }
 
 	public function LoadById($id) {
-		$this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.id = ?id";
+		$this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_cas_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.id = ?id";
 		$this->connector->AddParameter("?id", $id);
 		$rs = $this->connector->ExecuteQuery();
 		if ($rs == null || $rs->GetNumRows() == 0) {
@@ -91,7 +91,7 @@ class InvocasDetail extends EntityBase {
 	}
 
     public function FindById($id) {
-        $this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.id = ?id";
+        $this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_cas_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.id = ?id";
         $this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteQuery();
         if ($rs == null || $rs->GetNumRows() == 0) {
@@ -102,13 +102,13 @@ class InvocasDetail extends EntityBase {
     }
 
 	public function LoadByInvoiceId($invoiceId, $orderBy = "a.id") {
-		$this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.invoice_id = ?invoiceId ORDER BY $orderBy";
+		$this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_cas_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.invoice_id = ?invoiceId ORDER BY $orderBy";
 		$this->connector->AddParameter("?invoiceId", $invoiceId);
 		$result = array();
 		$rs = $this->connector->ExecuteQuery();
 		if ($rs) {
 			while ($row = $rs->FetchAssoc()) {
-				$temp = new InvoiceDetail();
+				$temp = new InvocasDetail();
 				$temp->FillProperties($row);
 				$result[] = $temp;
 			}
@@ -117,13 +117,13 @@ class InvocasDetail extends EntityBase {
 	}
 
     public function LoadByInvoiceNo($invoiceNo, $orderBy = "a.id") {
-        $this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.invoice_no = ?invoiceNo ORDER BY $orderBy";
+        $this->connector->CommandText = "SELECT a.*,b.item_code,b.item_name,b.l_uom_code AS bsatbesar,b.s_uom_code AS bsatkecil,b.entity_code,b.s_uom_qty as bisisatkecil FROM t_cas_ar_invoice_detail AS a Join vw_ic_items AS b On a.item_id = b.id WHERE a.invoice_no = ?invoiceNo ORDER BY $orderBy";
         $this->connector->AddParameter("?invoiceNo", $invoiceNo);
         $result = array();
         $rs = $this->connector->ExecuteQuery();
         if ($rs) {
             while ($row = $rs->FetchAssoc()) {
-                $temp = new InvoiceDetail();
+                $temp = new InvocasDetail();
                 $temp->FillProperties($row);
                 $result[] = $temp;
             }
@@ -133,7 +133,7 @@ class InvocasDetail extends EntityBase {
 
 	public function Insert() {
 		$this->connector->CommandText =
-"INSERT INTO t_ar_invoice_detail(is_post,ex_so_id,by_angkut,is_free,invoice_id, item_id, item_descs, sales_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, exp_date, item_hpp)
+"INSERT INTO t_cas_ar_invoice_detail(is_post,ex_so_id,by_angkut,is_free,invoice_id, item_id, item_descs, sales_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, exp_date, item_hpp)
 VALUES(?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, ?item_id, ?item_descs, ?sales_qty, ?return_qty, ?price, ?disc_formula, ?disc_amount, ?sub_total, ?pph_pct, ?pph_amount, ?ppn_pct, ?ppn_amount, ?exp_date, ?item_hpp)";
 		$this->connector->AddParameter("?invoice_id", $this->InvoiceId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
@@ -179,7 +179,7 @@ VALUES(?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, ?item_id, ?item_descs
         $this->connector->CommandText = "SELECT fc_ar_invoicedetail_unpost($id) As valresult;";
         $rsx = $this->connector->ExecuteQuery();
         $this->connector->CommandText =
-"UPDATE t_ar_invoice_detail SET
+"UPDATE t_cas_ar_invoice_detail SET
 	  invoice_id = ?invoice_id
 	, item_descs = ?item_descs
 	, sales_qty = ?sales_qty
@@ -235,7 +235,7 @@ WHERE id = ?id";
 	}
 
 	public function UpdateHpp(){
-        $this->connector->CommandText = "Update t_ar_invoice_detail a Set a.item_hpp = ?hpp, a.is_post = ?isp Where a.id = ?id";
+        $this->connector->CommandText = "Update t_cas_ar_invoice_detail a Set a.item_hpp = ?hpp, a.is_post = ?isp Where a.id = ?id";
         $this->connector->AddParameter("?hpp", $this->ItemHpp);
         $this->connector->AddParameter("?isp", $this->IsPost);
         $this->connector->AddParameter("?id", $this->Id);
@@ -249,7 +249,7 @@ WHERE id = ?id";
         $this->connector->CommandText = "SELECT fc_ar_invoicedetail_unpost($id) As valresult;";
         $rsx = $this->connector->ExecuteQuery();
         //hapus detail
-		$this->connector->CommandText = "DELETE FROM t_ar_invoice_detail WHERE id = ?id";
+		$this->connector->CommandText = "DELETE FROM t_cas_ar_invoice_detail WHERE id = ?id";
 		$this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteNonQuery();
         if ($rs == 1) {
@@ -269,7 +269,7 @@ WHERE id = ?id";
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteNonQuery();
         $sql = 'Update t_ar_invoice_master a
-Join (Select c.invoice_id, coalesce(sum(c.sub_total),0) As subTotal, coalesce(sum(c.disc_amount),0) as sumDiscount, coalesce(sum(c.ppn_amount),0) as sumPpn, coalesce(sum(c.pph_amount),0) as sumPph, coalesce(sum(c.by_angkut),0) as sumByAngkut From t_ar_invoice_detail c Group By c.invoice_id) b
+Join (Select c.invoice_id, coalesce(sum(c.sub_total),0) As subTotal, coalesce(sum(c.disc_amount),0) as sumDiscount, coalesce(sum(c.ppn_amount),0) as sumPpn, coalesce(sum(c.pph_amount),0) as sumPph, coalesce(sum(c.by_angkut),0) as sumByAngkut From t_cas_ar_invoice_detail c Group By c.invoice_id) b
 On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDiscount, a.ppn_amount = b.sumPpn, a.pph_amount = b.sumPph, a.other_costs_amount = b.sumByAngkut Where a.id = ?invoiceId;';
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?invoiceId", $invoiceId);

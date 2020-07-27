@@ -57,7 +57,7 @@ class Mutasi extends EntityBase {
         }
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
-        //jadikan saldo awal
+        //jadikan saldo awalcas
         $sqx = "Insert Into tmp_mutasi (idx,trx_date,supplier,saldo)";
         $sqx.= " Select 0,'" . $stDate ."','Saldo sebelumnya..',coalesce(sum(a.grn - (a.retur + a.payment)),0) as sum_saldo From tmp_prev a Group By a.trx_date";
         $this->connector->CommandText = $sqx;
