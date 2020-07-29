@@ -5,7 +5,7 @@ class CusType extends EntityBase {
 	public $CompanyId = 1;
 	public $TypeCode;
 	public $TypeName;
-	public $ArAccId = 0;
+	public $TrxId = 0;
     public $CreatebyId;
     public $UpdatebyId;
 
@@ -22,7 +22,7 @@ class CusType extends EntityBase {
         $this->CompanyId = $row["company_id"];
 		$this->TypeCode = $row["type_code"];
 		$this->TypeName = $row["type_name"];
-		$this->ArAccId = $row["ar_acc_id"];
+		$this->TrxId = $row["trx_id"];
         $this->CreatebyId = $row["createby_id"];
         $this->UpdatebyId = $row["updateby_id"];
 	}
@@ -97,21 +97,21 @@ class CusType extends EntityBase {
 	}
 
 	public function Insert() {
-		$this->connector->CommandText = 'INSERT INTO m_customer_type(company_id, type_code, type_name, ar_acc_id, createby_id, create_time) VALUES(?company_id, ?type_code, ?type_name, ?ar_acc_id, ?createby_id, now())';
+		$this->connector->CommandText = 'INSERT INTO m_customer_type(company_id, type_code, type_name, trx_id, createby_id, create_time) VALUES(?company_id, ?type_code, ?type_name, ?trx_id, ?createby_id, now())';
 		$this->connector->AddParameter("?company_id", $this->CompanyId);
         $this->connector->AddParameter("?type_code", $this->TypeCode, "varchar");
         $this->connector->AddParameter("?type_name", $this->TypeName);
-		$this->connector->AddParameter("?ar_acc_id", $this->ArAccId);
+		$this->connector->AddParameter("?trx_id", $this->TrxId);
         $this->connector->AddParameter("?createby_id", $this->CreatebyId);
 		return $this->connector->ExecuteNonQuery();
 	}
 
 	public function Update($id) {
-		$this->connector->CommandText = 'UPDATE m_customer_type SET company_id = ?company_id,type_code = ?type_code,type_name = ?type_name,ar_acc_id = ?ar_acc_id,updateby_id = ?updateby_id,update_time = now() WHERE id = ?id';
+		$this->connector->CommandText = 'UPDATE m_customer_type SET company_id = ?company_id,type_code = ?type_code,type_name = ?type_name,trx_id = ?trx_id,updateby_id = ?updateby_id,update_time = now() WHERE id = ?id';
         $this->connector->AddParameter("?company_id", $this->CompanyId);
         $this->connector->AddParameter("?type_code", $this->TypeCode,"varchar");
         $this->connector->AddParameter("?type_name", $this->TypeName);
-        $this->connector->AddParameter("?ar_acc_id", $this->ArAccId);
+        $this->connector->AddParameter("?trx_id", $this->TrxId);
         $this->connector->AddParameter("?updateby_id", $this->UpdatebyId);
 		$this->connector->AddParameter("?id", $id);
 		return $this->connector->ExecuteNonQuery();

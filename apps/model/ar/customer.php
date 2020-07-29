@@ -6,8 +6,8 @@ class Customer extends EntityBase {
 	public $CusTypeId = 0;
 	public $CusCode;
 	public $CusName;
-	public $Addr1;
-	public $Addr2;
+	public $Address;
+	public $City;
 	public $AreaId = 0;
 	public $Phone;
 	public $Fax;
@@ -22,6 +22,8 @@ class Customer extends EntityBase {
 	public $CreditLimit = 0;
     public $CreatebyId;
     public $UpdatebyId;
+    //tambahan
+    public $StartDate;
 
 	public function __construct($id = null) {
 		parent::__construct();
@@ -37,8 +39,8 @@ class Customer extends EntityBase {
 		$this->CusTypeId = $row["custype_id"];
         $this->CusCode = $row["cus_code"];
 		$this->CusName = $row["cus_name"];
-        $this->Addr1 = $row["addr1"];
-        $this->Addr2 = $row["addr2"];
+        $this->Address = $row["address"];
+        $this->City = $row["city"];
         $this->AreaId = $row["area_id"];
         $this->Phone = $row["phone"];
         $this->Fax = $row["fax"];
@@ -47,19 +49,19 @@ class Customer extends EntityBase {
         $this->Term = $row["term"];
         $this->IsPkp = $row["is_pkp"];
         $this->IsExternal = $row["is_external"];
-        $this->DateOfBirth = $row["dateofbirth"];
+        $this->DateOfBirth = strtotime($row["dateofbirth"]);
         $this->CreditLimit = $row["credit_limit"];
         $this->IsAktif = $row["is_aktif"];
         $this->TaxCustId = $row["taxcust_id"];
         $this->CreatebyId = $row["createby_id"];
         $this->UpdatebyId = $row["updateby_id"];
+        $this->StartDate = strtotime($row["start_date"]);
 	}
 
-	/**
-	 * @param string $orderBy
-	 * @param bool $includeDeleted
-	 * @return Location[]
-	 */
+    public function FormatStartDate($format = HUMAN_DATE) {
+        return is_int($this->StartDate) ? date($format, $this->StartDate) : date($format, strtotime(date('Y-m-d')));
+    }
+
 	public function LoadAll($orderBy = "a.cus_name") {
 		$this->connector->CommandText = "SELECT a.* FROM m_customer AS a Where  a.is_deleted = 0 ORDER BY $orderBy";
 		$rs = $this->connector->ExecuteQuery();
@@ -125,13 +127,13 @@ class Customer extends EntityBase {
 	}
 
 	public function Insert() {
-		$this->connector->CommandText = 'INSERT INTO m_customer(cabang_id,custype_id,cus_code,cus_name,addr1,addr2,area_id,phone,fax,contact,npwp,term,is_aktif,taxcust_id,is_pkp,is_external,dateofbirth,credit_limit,createby_id,create_time) VALUES(?cabang_id,?custype_id,?cus_code,?cus_name,?addr1,?addr2,?area_id,?phone,?fax,?contact,?npwp,?term,?is_aktif,?taxcust_id,?is_pkp,?is_external,?dateofbirth,?credit_limit,?createby_id, now())';
+		$this->connector->CommandText = 'INSERT INTO m_customer(start_date,cabang_id,custype_id,cus_code,cus_name,address,city,area_id,phone,fax,contact,npwp,term,is_aktif,taxcust_id,is_pkp,is_external,dateofbirth,credit_limit,createby_id,create_time) VALUES(?start_date,?cabang_id,?custype_id,?cus_code,?cus_name,?address,?city,?area_id,?phone,?fax,?contact,?npwp,?term,?is_aktif,?taxcust_id,?is_pkp,?is_external,?dateofbirth,?credit_limit,?createby_id, now())';
 		$this->connector->AddParameter("?cabang_id", $this->CabangId);
         $this->connector->AddParameter("?custype_id", $this->CusTypeId);
         $this->connector->AddParameter("?cus_code", $this->CusCode, "varchar");
         $this->connector->AddParameter("?cus_name", $this->CusName);
-		$this->connector->AddParameter("?addr1", $this->Addr1);
-        $this->connector->AddParameter("?addr2", $this->Addr2);
+		$this->connector->AddParameter("?address", $this->Address);
+        $this->connector->AddParameter("?city", $this->City);
         $this->connector->AddParameter("?area_id", $this->AreaId);
         $this->connector->AddParameter("?phone", $this->Phone);
         $this->connector->AddParameter("?fax", $this->Fax);
@@ -145,6 +147,7 @@ class Customer extends EntityBase {
         $this->connector->AddParameter("?dateofbirth", $this->DateOfBirth);
         $this->connector->AddParameter("?credit_limit", $this->CreditLimit);
         $this->connector->AddParameter("?createby_id", $this->CreatebyId);
+        $this->connector->AddParameter("?start_date", date("Y-m-d",$this->StartDate));
 		return $this->connector->ExecuteNonQuery();
 	}
 
@@ -154,8 +157,8 @@ SET cabang_id = ?cabang_id
 ,custype_id = ?custype_id
 ,cus_code = ?cus_code
 ,cus_name = ?cus_name
-,addr1 = ?addr1
-,addr2 = ?addr2
+,address = ?address
+,city = ?city
 ,area_id = ?area_id
 ,phone = ?phone
 ,fax = ?fax
@@ -170,13 +173,14 @@ SET cabang_id = ?cabang_id
 ,credit_limit = ?credit_limit
 ,updateby_id = ?updateby_id
 ,update_time = now() 
+,start_date = ?start_date
 WHERE id = ?id';
         $this->connector->AddParameter("?cabang_id", $this->CabangId);
         $this->connector->AddParameter("?custype_id", $this->CusTypeId);
         $this->connector->AddParameter("?cus_code", $this->CusCode, "varchar");
         $this->connector->AddParameter("?cus_name", $this->CusName);
-        $this->connector->AddParameter("?addr1", $this->Addr1);
-        $this->connector->AddParameter("?addr2", $this->Addr2);
+        $this->connector->AddParameter("?address", $this->Address);
+        $this->connector->AddParameter("?city", $this->City);
         $this->connector->AddParameter("?area_id", $this->AreaId);
         $this->connector->AddParameter("?phone", $this->Phone);
         $this->connector->AddParameter("?fax", $this->Fax);
@@ -190,6 +194,7 @@ WHERE id = ?id';
         $this->connector->AddParameter("?dateofbirth", $this->DateOfBirth);
         $this->connector->AddParameter("?credit_limit", $this->CreditLimit);
         $this->connector->AddParameter("?updateby_id", $this->UpdatebyId);
+        $this->connector->AddParameter("?start_date", date("Y-m-d",$this->StartDate));
 		$this->connector->AddParameter("?id", $id);
 		return $this->connector->ExecuteNonQuery();
 	}
@@ -226,7 +231,7 @@ WHERE id = ?id';
     }
 
     public function GetJSonCustomer($cabangId = 0, $filter = null,$sort = 'a.cus_name',$order = 'ASC') {
-        $sql = "SELECT a.id,a.cus_name,a.cus_code,a.addr1,b.area_name,a.term,a.credit_limit,a.is_pkp,b.zone_id FROM m_customer as a Left Join m_sales_area b ON a.area_id = b.id Where a.is_deleted = 0 And a.is_aktif = 1";
+        $sql = "SELECT a.id,a.cus_name,a.cus_code,a.address,b.area_name,a.term,a.credit_limit,a.is_pkp,b.zone_id FROM m_customer as a Left Join m_sales_area b ON a.area_id = b.id Where a.is_deleted = 0 And a.is_aktif = 1";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = $cabangId";
         }

@@ -138,7 +138,7 @@ $menu = $root->AddNode("TVD CASTROL", null, "menu");
         $menu->AddNode("Pembelian Castrol", "tvd.purcas");
         $menu->AddNode("Product Stock", "tvd.stockcas");
     $menu->AddNode("Report", null, "title");
-        $menu->AddNode("Export Report", "tvd.report");
+        $menu->AddNode("Export Report", "tvd.reporting");
 $menu = $root->AddNode("PENGATURAN", null, "menu");
     $menu->AddNode("Data Perusahaan", null, "title");
         $menu->AddNode("Data Perusahaan", "master.company");

@@ -17,17 +17,15 @@ class CusTypeController extends AppController {
 		$settings = array();
 
 		$settings["columns"][] = array("name" => "a.id", "display" => "ID", "width" => 0);
-		$settings["columns"][] = array("name" => "a.type_code", "display" => "Kode", "width" => 50);
-		$settings["columns"][] = array("name" => "a.type_name", "display" => "Jenis", "width" => 150);
-        $settings["columns"][] = array("name" => "b.kode", "display" => "Akun Piutang", "width" => 100);
-        $settings["columns"][] = array("name" => "b.perkiraan", "display" => "Nama Perkiraan", "width" => 200);
+		$settings["columns"][] = array("name" => "a.type_code", "display" => "Kode", "width" => 100);
+		$settings["columns"][] = array("name" => "a.type_name", "display" => "TYpe", "width" => 250);
 
 		$settings["filters"][] = array("name" => "a.type_code", "display" => "Jenis Barang");
 		$settings["filters"][] = array("name" => "a.type_name", "display" => "Jenis");
 
 		if (!$router->IsAjaxRequest) {
 			$acl = AclManager::GetInstance();
-			$settings["title"] = "Type Customer";
+			$settings["title"] = "Kategori Customer/Outlet";
 
 			if ($acl->CheckUserAccess("ar.custype", "add")) {
 				$settings["actions"][] = array("Text" => "Add", "Url" => "ar.custype/add", "Class" => "bt_add", "ReqId" => 0);
@@ -48,7 +46,7 @@ class CusTypeController extends AppController {
 			$settings["singleSelect"] = true;
 
 		} else {
-		    $sql = "m_customer_type AS a Left Join m_account b On a.ar_acc_id = b.id";
+		    $sql = "m_customer_type AS a";
 			$settings["from"] = $sql;
             $settings["where"] = " a.company_id = ".$this->userCompanyId." And a.is_deleted = 0";
 		}
@@ -63,14 +61,13 @@ class CusTypeController extends AppController {
 	}
 
 	public function add() {
-        require_once(MODEL . "master/coadetail.php");
         $custype = new CusType();
         $log = new UserAdmin();
         if (count($this->postData) > 0) {
             $custype->CompanyId = $this->userCompanyId;
             $custype->TypeCode = $this->GetPostValue("TypeCode");
             $custype->TypeName = $this->GetPostValue("TypeName");
-            $custype->ArAccId = $this->GetPostValue("ArAccId");
+            $custype->TrxId = $this->GetPostValue("TrxId");
             if ($this->ValidateData($custype)) {
                 $custype->CreatebyId = $this->userUid;
                 $rs = $custype->Insert();
@@ -84,14 +81,10 @@ class CusTypeController extends AppController {
                 }
             }
         }
-        $loader = new CoaDetail();
-        $ivtCoa = $loader->LoadAll($this->userCompanyId);
-        $this->Set("ivtcoa", $ivtCoa);
         $this->Set("custype", $custype);
 	}
 
 	public function edit($id = null) {
-        require_once(MODEL . "master/coadetail.php");
         if ($id == null) {
             $this->persistence->SaveState("error", "Harap memilih data terlebih dahulu sebelum melakukan proses edit.");
             redirect_url("ar.custype");
@@ -103,7 +96,7 @@ class CusTypeController extends AppController {
             $custype->CompanyId = $this->userCompanyId;
             $custype->TypeCode = $this->GetPostValue("TypeCode");
             $custype->TypeName = $this->GetPostValue("TypeName");
-            $custype->ArAccId = $this->GetPostValue("ArAccId");
+            $custype->TrxId = $this->GetPostValue("TrxId");
             if ($this->ValidateData($custype)) {
                 $custype->UpdatebyId = $this->userUid;
                 $rs = $custype->Update($id);
@@ -123,9 +116,6 @@ class CusTypeController extends AppController {
                 redirect_url("ar.custype");
             }
         }
-        $loader = new CoaDetail();
-        $ivtCoa = $loader->LoadAll($this->userCompanyId);
-        $this->Set("ivtcoa", $ivtCoa);
         $this->Set("custype", $custype);
 	}
 

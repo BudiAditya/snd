@@ -66,6 +66,11 @@ class SalesmanController extends AppController {
         if (count($this->postData) > 0) {
             $salesman->SalesCode = $this->GetPostValue("SalesCode");
             $salesman->SalesName = $this->GetPostValue("SalesName");
+            $salesman->FirstName = $this->GetPostValue("FirstName");
+            $salesman->LastName = $this->GetPostValue("LastName");
+            $salesman->JobTitle = $this->GetPostValue("JobTitle");
+            $salesman->IsCastrol = $this->GetPostValue("IsCastrol");
+            $salesman->TrxId = $this->GetPostValue("TrxId");
             $salesman->IsAktif = $this->GetPostValue("IsAktif");
             if ($this->ValidateData($salesman)) {
                 $salesman->CreatebyId = $this->userUid;
@@ -94,6 +99,11 @@ class SalesmanController extends AppController {
             $salesman->Id = $id;
             $salesman->SalesCode = $this->GetPostValue("SalesCode");
             $salesman->SalesName = $this->GetPostValue("SalesName");
+            $salesman->FirstName = $this->GetPostValue("FirstName");
+            $salesman->LastName = $this->GetPostValue("LastName");
+            $salesman->JobTitle = $this->GetPostValue("JobTitle");
+            $salesman->IsCastrol = $this->GetPostValue("IsCastrol");
+            $salesman->TrxId = $this->GetPostValue("TrxId");
             $salesman->IsAktif = $this->GetPostValue("IsAktif");
             if ($this->ValidateData($salesman)) {
                 $salesman->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;

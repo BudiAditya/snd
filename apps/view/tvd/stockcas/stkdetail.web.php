@@ -29,8 +29,8 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
 <?php if (isset($info)) { ?>
     <div class="ui-state-highlight subTitle center"><?php print($info); ?></div><?php } ?>
 <br />
+<div id="printArea">
 <fieldset>
-    <div id="printArea">
     <legend><b>POSISI STOCK BARANG</b></legend>
     <form id="frm" action="<?php print($helper->site_url("tvd.stockcas/stkdetail")); ?>" method="post">
         <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
@@ -204,8 +204,8 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             ?>
         </table>
     </form>
-    </div>
 </fieldset>
+</div>
 <br>
 <?php
 print('<i>* Printed by: ' . $userName . '  - Time: ' . date('d-m-Y h:i:s') . ' *</i>');

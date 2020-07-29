@@ -22,8 +22,8 @@ class CustomerController extends AppController {
         $settings["columns"][] = array("name" => "a.cus_code", "display" => "Kode", "width" => 50);
 		$settings["columns"][] = array("name" => "b.type_name", "display" => "Kategori", "width" => 70);
 		$settings["columns"][] = array("name" => "a.cus_name", "display" => "Nama Customer", "width" => 250);
-		$settings["columns"][] = array("name" => "a.addr1", "display" => "Alamat 1", "width" => 250);
-        $settings["columns"][] = array("name" => "a.addr2", "display" => "Alamat 2", "width" => 150);
+		$settings["columns"][] = array("name" => "a.address", "display" => "Alamat", "width" => 250);
+        $settings["columns"][] = array("name" => "a.city", "display" => "Kota", "width" => 150);
         $settings["columns"][] = array("name" => "c.area_name", "display" => "Area", "width" => 100);
         $settings["columns"][] = array("name" => "a.contact", "display" => "P I C", "width" => 100);
         $settings["columns"][] = array("name" => "a.phone", "display" => "No. Telepon/HP", "width" => 100);
@@ -82,8 +82,8 @@ class CustomerController extends AppController {
             $customer->CusTypeId = $this->GetPostValue("CusTypeId");
             $customer->CusCode = $this->GetPostValue("CusCode");
             $customer->CusName = $this->GetPostValue("CusName");
-            $customer->Addr1 = $this->GetPostValue("Addr1");
-            $customer->Addr2 = $this->GetPostValue("Addr2");
+            $customer->Address = $this->GetPostValue("Address");
+            $customer->City = $this->GetPostValue("City");
             $customer->AreaId  = $this->GetPostValue("AreaId");
             $customer->Phone = $this->GetPostValue("Phone");
             $customer->Fax = $this->GetPostValue("Fax");
@@ -95,6 +95,7 @@ class CustomerController extends AppController {
             $customer->TaxCustId = $this->GetPostValue("TaxCustId");
             $customer->IsPkp = $this->GetPostValue("IsPkp");
             $customer->IsAktif = $this->GetPostValue("IsAktif");
+            $customer->StartDate = strtotime($this->GetPostValue("StartDate"));
             if ($this->ValidateData($customer)) {
                 $customer->CreatebyId = $this->userUid;
                 $rs = $customer->Insert();
@@ -132,8 +133,8 @@ class CustomerController extends AppController {
             $customer->CusTypeId = $this->GetPostValue("CusTypeId");
             $customer->CusCode = $this->GetPostValue("CusCode");
             $customer->CusName = $this->GetPostValue("CusName");
-            $customer->Addr1 = $this->GetPostValue("Addr1");
-            $customer->Addr2 = $this->GetPostValue("Addr2");
+            $customer->Address = $this->GetPostValue("Address");
+            $customer->City = $this->GetPostValue("City");
             $customer->AreaId  = $this->GetPostValue("AreaId");
             $customer->Phone = $this->GetPostValue("Phone");
             $customer->Fax = $this->GetPostValue("Fax");
@@ -145,6 +146,7 @@ class CustomerController extends AppController {
             $customer->TaxCustId = $this->GetPostValue("TaxCustId");
             $customer->IsPkp = $this->GetPostValue("IsPkp");
             $customer->IsAktif = $this->GetPostValue("IsAktif");
+            $customer->StartDate = strtotime($this->GetPostValue("StartDate"));
             if ($this->ValidateData($customer)) {
                 $customer->UpdatebyId = $this->userUid;
                 $rs = $customer->Update($id);

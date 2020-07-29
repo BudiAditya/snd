@@ -21,7 +21,7 @@
 			//var elements = ["CusName", "ContactTypeId", "Address", "City", "PostCd", "MailAddr", "MailCity", "MailPostCd","TelNo", "FaxNo", "ContactPerson", "Position", "HandPhone", "IdCard", "Nationality", "DateOfBirth", "MaritalStatus", "Npwp", "EmailAdd", "WebSite", "Gender","Remark","Status","ContactLevel","CreditTerms", "Reminder", "Interest","CreditLimit","CreditToDate","MaxInvOutstanding","PointSum","PointRedem","Submit"];
 			//BatchFocusRegister(elements);
 
-			//$("#DateOfBirth").datepicker({dateFormat:'yy-mm-dd', altFormat:'dd-mm-yy'});
+            $("#StartDate").datepicker({dateFormat:'dd-mm-yy', altFormat:'yy-mm-dd'});
 		});
 	</script>
 </head>
@@ -76,12 +76,12 @@
                 <td><input type="text" id="CusCode" name="CusCode" value="<?php print($customer->CusCode); ?>" size="15" readonly/></td>
             </tr>
             <tr>
-                <td class="bold right"><label for="Addr1">Alamat :</label></td>
-                <td colspan="3"><input type="text" id="Addr1" name="Addr1" value="<?php print($customer->Addr1); ?>" size="63" required/></td>
+                <td class="bold right"><label for="Address">Alamat :</label></td>
+                <td colspan="3"><input type="text" id="Address" name="Address" value="<?php print($customer->Address); ?>" size="63" required/></td>
             </tr>
             <tr>
-                <td>&nbsp;</td>
-                <td colspan="3"><input type="text" id="Addr2" name="Addr2" value="<?php print($customer->Addr2); ?>" size="63"/></td>
+                <td class="bold right"><label for="City">Kota :</label></td>
+                <td colspan="3"><input type="text" id="City" name="City" value="<?php print($customer->City); ?>" size="63"/></td>
             </tr>
             <tr>
                 <td class="bold right"><label for="Phone">Telephone :</label></td>
@@ -114,6 +114,10 @@
                         <option value="0" <?php print($customer->IsAktif == 0 ? 'selected="selected"' : '');?>>0 - Non-Aktif</option>
                     </select>
                 </td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="StartDate">Mulai Tgl :</label></td>
+                <td><input type="text" id="StartDate" name="StartDate" value="<?php print($customer->FormatStartDate(JS_DATE)); ?>" size="10"/></td>
             </tr>
             <tr>
                 <td>&nbsp;</td>

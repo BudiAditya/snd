@@ -4,8 +4,13 @@ class Salesman extends EntityBase {
 	public $IsDeleted = 0;
 	public $SalesCode;
 	public $SalesName;
+	public $FirstName;
+	public $LastName;
 	public $KaryawanId = 0;
 	public $IsAktif = 1;
+	public $JobTitle;
+	public $TrxId = 0;
+	public $IsCastrol = 0;
     public $CreatebyId;
     public $UpdatebyId;
 
@@ -25,6 +30,11 @@ class Salesman extends EntityBase {
         $this->IsAktif = $row["is_aktif"];
         $this->CreatebyId = $row["createby_id"];
         $this->UpdatebyId = $row["updateby_id"];
+        $this->FirstName = $row["first_name"];
+        $this->LastName = $row["last_name"];
+        $this->JobTitle = $row["job_title"];
+        $this->TrxId = $row["trx_id"];
+        $this->IsCastrol = $row["is_castrol"];
 	}
     
 	public function LoadAll($orderBy = "a.sales_code", $includeDeleted = false) {
@@ -81,11 +91,16 @@ class Salesman extends EntityBase {
 	}
 
 	public function Insert() {
-		$this->connector->CommandText = 'INSERT INTO m_salesman(is_aktif,karyawan_id,sales_code,sales_name,createby_id,create_time) VALUES(?is_aktif,?karyawan_id,?sales_code,?sales_name,?createby_id,now())';
+		$this->connector->CommandText = 'INSERT INTO m_salesman(first_name,last_name,job_title,trx_id,is_castrol,is_aktif,karyawan_id,sales_code,sales_name,createby_id,create_time) VALUES(?first_name,?last_name,?job_title,?trx_id,?is_castrol,?is_aktif,?karyawan_id,?sales_code,?sales_name,?createby_id,now())';
 		$this->connector->AddParameter("?sales_code", $this->SalesCode,"varchar");
         $this->connector->AddParameter("?sales_name", $this->SalesName);
         $this->connector->AddParameter("?karyawan_id", $this->KaryawanId);
         $this->connector->AddParameter("?is_aktif", $this->IsAktif);
+        $this->connector->AddParameter("?first_name", $this->FirstName);
+        $this->connector->AddParameter("?last_name", $this->LastName);
+        $this->connector->AddParameter("?job_title", $this->JobTitle);
+        $this->connector->AddParameter("?trx_id", $this->TrxId);
+        $this->connector->AddParameter("?is_castrol", $this->IsCastrol);
         $this->connector->AddParameter("?createby_id", $this->CreatebyId);
         $rs = $this->connector->ExecuteNonQuery();
         if ($rs == 1) {
@@ -97,11 +112,16 @@ class Salesman extends EntityBase {
 	}
 
 	public function Update($id) {
-		$this->connector->CommandText = 'UPDATE m_salesman SET is_aktif = ?is_aktif, karyawan_id = ?karyawan_id, sales_code = ?sales_code, sales_name = ?sales_name, updateby_id = ?updateby_id, update_time = now() WHERE id = ?id';
+		$this->connector->CommandText = 'UPDATE m_salesman SET first_name = ?first_name, last_name = ?last_name, job_title = ?job_title, trx_id = ?trx_id, is_castrol = ?is_castrol, is_aktif = ?is_aktif, karyawan_id = ?karyawan_id, sales_code = ?sales_code, sales_name = ?sales_name, updateby_id = ?updateby_id, update_time = now() WHERE id = ?id';
 		$this->connector->AddParameter("?sales_code", $this->SalesCode,"varchar");
         $this->connector->AddParameter("?sales_name", $this->SalesName);
         $this->connector->AddParameter("?karyawan_id", $this->KaryawanId);
         $this->connector->AddParameter("?is_aktif", $this->IsAktif);
+        $this->connector->AddParameter("?first_name", $this->FirstName);
+        $this->connector->AddParameter("?last_name", $this->LastName);
+        $this->connector->AddParameter("?job_title", $this->JobTitle);
+        $this->connector->AddParameter("?trx_id", $this->TrxId);
+        $this->connector->AddParameter("?is_castrol", $this->IsCastrol);
         $this->connector->AddParameter("?updateby_id", $this->UpdatebyId);
 		$this->connector->AddParameter("?id", $id);
 		return $this->connector->ExecuteNonQuery();

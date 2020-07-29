@@ -27,13 +27,34 @@
 				<td class="bold right"><label for="SalesCode">Kode :</label></td>
 				<td><input type="text" id="SalesCode" name="SalesCode" value="<?php print($salesman->SalesCode); ?>" size="5" required/></td>
 			</tr>
-			<tr>
-				<td class="bold right"><label for="SalesName">Nama :</label></td>
-				<td><input type="text" id="SalesName" name="SalesName" value="<?php print($salesman->SalesName); ?>" size="20" required/></td>
-			</tr>
+            <tr>
+                <td class="bold right"><label for="SalesName">Nama Lengkap :</label></td>
+                <td><input type="text" id="SalesName" name="SalesName" value="<?php print($salesman->SalesName); ?>" size="20" required/></td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="FirstName">Nama Depan :</label></td>
+                <td><input type="text" id="FirstName" name="FirstName" value="<?php print($salesman->FirstName); ?>" size="20" required/></td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="LastName">Nama Belakang :</label></td>
+                <td><input type="text" id="LastName" name="LastName" value="<?php print($salesman->LastName); ?>" size="20" required/></td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="JobTitle">Jabatan :</label></td>
+                <td><input type="text" id="JobTitle" name="JobTitle" value="<?php print($salesman->JobTitle); ?>" size="20" required/></td>
+            </tr>
+            <tr>
+                <td class="bold right"><label for="IsCastrol">Sales Castrol :</label></td>
+                <td><select id="IsCastrol" name="IsCastrol" required style="width: 100px">
+                        <option value="1" <?php print($salesman->IsCastrol == 1 ? 'selected="selected"' : '');?>>1 - Ya</option>
+                        <option value="0" <?php print($salesman->IsCastrol == 0 ? 'selected="selected"' : '');?>>0 - Tidak</option>
+                    </select>
+                    <input type="hidden" id="TrxId" name="TrxId" value="<?=$salesman->TrxId;?>"/>
+                </td>
+            </tr>
             <tr>
                 <td class="bold right"><label for="IsAktif">Status :</label></td>
-                <td><select id="IsAktif" name="IsAktif" required>
+                <td><select id="IsAktif" name="IsAktif" required style="width: 100px">
                         <option value="1" <?php print($salesman->IsAktif == 1 ? 'selected="selected"' : '');?>>1 - Aktif</option>
                         <option value="0" <?php print($salesman->IsAktif == 0 ? 'selected="selected"' : '');?>>0 - Non-Aktif</option>
                     </select>
