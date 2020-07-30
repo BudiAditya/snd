@@ -87,7 +87,9 @@
 				<td class="bold right"><label for="ItemCode">Kode Barang :</label></td>
 				<td><input type="text" id="ItemCode" name="ItemCode" value="<?php print($items->ItemCode); ?>" size="20" maxlength="30" readonly/></td>
                 <td class="bold right"><label for="ItemName">Nama Barang :</label></td>
-				<td colspan="5"><input type="text" id="ItemName" name="ItemName" value="<?php print(htmlspecialchars($items->ItemName)); ?>" size="42" maxlength="100" required/></td>
+				<td colspan="2"><input type="text" id="ItemName" name="ItemName" value="<?php print(htmlspecialchars($items->ItemName)); ?>" size="42" maxlength="100" required/></td>
+                <td class="bold right"><label for="OldCode">Principal Item Code :</label></td>
+                <td><input type="text" id="OldCode" name="OldCode" value="<?php print($items->OldCode); ?>" size="15" maxlength="30"/></td>
             </tr>
             <tr>
                 <td class="bold right"><label for="LuomCode">Satuan Besar :</label></td>

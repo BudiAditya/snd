@@ -23,6 +23,7 @@ class ItemsController extends AppController {
         //$settings["columns"][] = array("name" => "a.brand_name", "display" => "Brand", "width" => 80);
         $settings["columns"][] = array("name" => "a.item_code", "display" => "Kode Barang", "width" => 80);
         $settings["columns"][] = array("name" => "a.item_name", "display" => "Nama Barang", "width" => 250);
+        $settings["columns"][] = array("name" => "a.old_code", "display" => "P I C", "width" => 80);
         //$settings["columns"][] = array("name" => "format(a.l_uom_qty,0)", "display" => "Isi", "width" => 20,"align" => "right");
         $settings["columns"][] = array("name" => "a.l_uom_code", "display" => "Sat Besar", "width" => 50);
         //$settings["columns"][] = array("name" => "format(a.m_uom_qty,0)", "display" => "Isi", "width" => 20,"align" => "right");
@@ -57,7 +58,7 @@ class ItemsController extends AppController {
 					"Confirm" => "Apakah anda mau menghapus data items yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
 			}
             */
-			$settings["def_order"] = 3;
+			$settings["def_order"] = 2;
 			$settings["def_filter"] = 0;
 			$settings["singleSelect"] = true;
 

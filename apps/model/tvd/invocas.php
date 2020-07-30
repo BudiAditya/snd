@@ -353,6 +353,14 @@ WHERE id = ?id";
         $rsz =  $this->connector->ExecuteNonQuery();
         return $rsz;
     }
+
+    public function GetCasInvReport($startDate,$endDate){
+	    $sql = "Select a.* From vw_cas_invoice_rekap4tvd a WHERE a.invoice_date BETWEEN ?startdate and ?enddate Order By a.invoice_date,a.cas_code,a.item_code";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
+        $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
+        return $this->connector->ExecuteQuery();
+    }
 }
 
 

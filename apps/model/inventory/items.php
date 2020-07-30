@@ -165,13 +165,14 @@ class Items extends EntityBase {
     }
 
 	public function Insert() {
-        $sql = 'INSERT INTO m_items(principal_id,brand_id,subcategory_id,item_code,item_name,bar_code,l_uom_code,l_uom_qty,s_uom_code,s_uom_qty,is_convert,qty_convert,c_uom_code,max_stock,min_stock,is_purchase,is_sale,is_stock,is_allow_minus,is_aktif,item_level,cabang_id,createby_id,create_time)';
-        $sql.= ' VALUES(?principal_id,?brand_id,?subcategory_id,?item_code,?item_name,?bar_code,?l_uom_code,?l_uom_qty,?s_uom_code,?s_uom_qty,?is_convert,?qty_convert,?c_uom_code,?max_stock,?min_stock,?is_purchase,?is_sale,?is_stock,?is_allow_minus,?is_aktif,?item_level,?cabang_id,?createby_id,now())';
+        $sql = 'INSERT INTO m_items(old_code,principal_id,brand_id,subcategory_id,item_code,item_name,bar_code,l_uom_code,l_uom_qty,s_uom_code,s_uom_qty,is_convert,qty_convert,c_uom_code,max_stock,min_stock,is_purchase,is_sale,is_stock,is_allow_minus,is_aktif,item_level,cabang_id,createby_id,create_time)';
+        $sql.= ' VALUES(?old_code,?principal_id,?brand_id,?subcategory_id,?item_code,?item_name,?bar_code,?l_uom_code,?l_uom_qty,?s_uom_code,?s_uom_qty,?is_convert,?qty_convert,?c_uom_code,?max_stock,?min_stock,?is_purchase,?is_sale,?is_stock,?is_allow_minus,?is_aktif,?item_level,?cabang_id,?createby_id,now())';
 		$this->connector->CommandText = $sql;
 		$this->connector->AddParameter("?principal_id", $this->PrincipalId);
         $this->connector->AddParameter("?brand_id", $this->BrandId);
         $this->connector->AddParameter("?subcategory_id", $this->SubCategoryId);
         $this->connector->AddParameter("?item_code", $this->ItemCode, "varchar");
+        $this->connector->AddParameter("?old_code", $this->OldCode, "varchar");
         $this->connector->AddParameter("?item_name", $this->ItemName);
         $this->connector->AddParameter("?bar_code", $this->BarCode, "varchar");
         $this->connector->AddParameter("?l_uom_code", $this->LuomCode);
@@ -196,18 +197,6 @@ class Items extends EntityBase {
         if ($rs == 1) {
             $this->connector->CommandText = "SELECT LAST_INSERT_ID();";
             $this->Id = (int)$this->connector->ExecuteScalar();
-            /*
-            // check apakan data stocknya ada? jika belum isi stock di cabang input = 0 dulu
-            $sql = "Select * From t_ic_stockcenter a Where a.item_code = '".$this->BrandId."' And a.cabang_id = ".$this->IsAktif;
-            $this->connector->CommandText = $sql;
-            $rcn = $this->connector->ExecuteQuery()->GetNumRows();
-            if ($rcn == 0){
-                $sql = "Insert Into t_ic_stockcenter (cabang_id,item_id,item_code,qty_stock)";
-                $sql.= " Values(".$this->IsAktif.",".$this->Id.",'".$this->BrandId."',0)";
-                $this->connector->CommandText = $sql;
-                $rs = $this->connector->ExecuteNonQuery();
-            }
-            */
         }
         return $rs;
 	}
@@ -218,6 +207,7 @@ SET principal_id = ?principal_id,
 brand_id = ?brand_id, 
 subcategory_id = ?subcategory_id,
 item_code = ?item_code,
+old_code = ?old_code,
 item_name = ?item_name,
 bar_code = ?bar_code,
 l_uom_code = ?l_uom_code,
@@ -243,6 +233,7 @@ WHERE id = ?bid';
         $this->connector->AddParameter("?brand_id", $this->BrandId);
         $this->connector->AddParameter("?subcategory_id", $this->SubCategoryId);
         $this->connector->AddParameter("?item_code", $this->ItemCode, "varchar");
+        $this->connector->AddParameter("?old_code", $this->OldCode, "varchar");
         $this->connector->AddParameter("?item_name", $this->ItemName);
         $this->connector->AddParameter("?bar_code", $this->BarCode, "varchar");
         $this->connector->AddParameter("?l_uom_code", $this->LuomCode);

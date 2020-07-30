@@ -35,6 +35,7 @@ class StockCasController extends AppController {
         $settings["columns"][] = array("name" => "a.wh_code", "display" => "Gudang", "width" => 50);
         $settings["columns"][] = array("name" => "a.item_code", "display" => "Kode", "width" => 80);
         $settings["columns"][] = array("name" => "a.item_name", "display" => "Nama Produk", "width" =>250);
+        $settings["columns"][] = array("name" => "a.old_code", "display" => "P I C", "width" => 80);
         $settings["columns"][] = array("name" => "a.s_uom_code", "display" => "Satuan", "width" =>50);
         $settings["columns"][] = array("name" => "format(a.op_qty,0)", "display" => "Awal", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.in_qty,0)", "display" => "Masuk", "width" => 50, "align" => "right");
@@ -62,7 +63,7 @@ class StockCasController extends AppController {
                 $settings["actions"][] = array("Text" => "Laporan Stock Terakhir", "Url" => "tvd.stockcas/report", "Class" => "bt_report", "ReqId" => 0);
             }
             $settings["def_filter"] = 1;
-            $settings["def_order"] = 2;
+            $settings["def_order"] = 3;
             $settings["singleSelect"] = true;
         } else {
             $settings["from"] = "vw_cas_item_stock AS a";

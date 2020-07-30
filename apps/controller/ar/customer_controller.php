@@ -19,18 +19,21 @@ class CustomerController extends AppController {
 		$settings = array();
 
 		$settings["columns"][] = array("name" => "a.id", "display" => "ID", "width" => 40);
-        $settings["columns"][] = array("name" => "a.cus_code", "display" => "Kode", "width" => 50);
-		$settings["columns"][] = array("name" => "b.type_name", "display" => "Kategori", "width" => 70);
-		$settings["columns"][] = array("name" => "a.cus_name", "display" => "Nama Customer", "width" => 250);
+        $settings["columns"][] = array("name" => "a.cus_code", "display" => "Kode", "width" => 60);
+		$settings["columns"][] = array("name" => "b.type_code", "display" => "Kategori", "width" => 100);
+		$settings["columns"][] = array("name" => "a.cus_name", "display" => "Nama Customer", "width" => 200);
 		$settings["columns"][] = array("name" => "a.address", "display" => "Alamat", "width" => 250);
         $settings["columns"][] = array("name" => "a.city", "display" => "Kota", "width" => 150);
-        $settings["columns"][] = array("name" => "c.area_name", "display" => "Area", "width" => 100);
-        $settings["columns"][] = array("name" => "a.contact", "display" => "P I C", "width" => 100);
+        $settings["columns"][] = array("name" => "c.area_name", "display" => "Sales Area", "width" => 100);
+        $settings["columns"][] = array("name" => "a.contact", "display" => "Contact", "width" => 100);
         $settings["columns"][] = array("name" => "a.phone", "display" => "No. Telepon/HP", "width" => 100);
         $settings["columns"][] = array("name" => "if(a.is_pkp = 0,'Non-PKP','PKP')", "display" => "Pajak", "width" => 50);
 
 		$settings["filters"][] = array("name" => "a.cus_code", "display" => "Kode");
+        $settings["filters"][] = array("name" => "b.type_code", "display" => "Kategori");
 		$settings["filters"][] = array("name" => "a.cus_name", "display" => "Nama Customer");
+        $settings["filters"][] = array("name" => "a.address", "display" => "Alamat");
+        $settings["filters"][] = array("name" => "a.city", "display" => "Kota");
         $settings["filters"][] = array("name" => "c.area_name", "display" => "Sales Area");
 
 		if (!$router->IsAjaxRequest) {

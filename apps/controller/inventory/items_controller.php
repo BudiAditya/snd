@@ -32,10 +32,15 @@ class ItemsController extends AppController {
         $settings["columns"][] = array("name" => "format(a.qty_convert,1)", "display" => "Isi", "width" => 30,"align" => "right");
         $settings["columns"][] = array("name" => "a.c_uom_code", "display" => "Volume", "width" => 50);
         $settings["columns"][] = array("name" => "if(a.is_aktif = 1,'Aktif','Tidak')", "display" => "Is Aktif", "width" => 50);
-        $settings["columns"][] = array("name" => "a.subcategory_name", "display" => "Category Produk", "width" => 150);
+        $settings["columns"][] = array("name" => "a.subcategory_name", "display" => "Category", "width" => 150);
         $settings["columns"][] = array("name" => "a.principal_name", "display" => "Principal", "width" => 200);
+        $settings["columns"][] = array("name" => "a.old_code", "display" => "P I C", "width" => 100);
+
 		$settings["filters"][] = array("name" => "a.item_name", "display" => "Nama Barang");
         $settings["filters"][] = array("name" => "a.item_code", "display" => "Kode Barang");
+        $settings["filters"][] = array("name" => "a.old_code", "display" => "Item Code");
+        $settings["filters"][] = array("name" => "a.subcategory_name", "display" => "Category");
+        $settings["filters"][] = array("name" => "a.brand_name", "display" => "Brand");
         $settings["filters"][] = array("name" => "if(a.is_aktif = 1,'Aktif','Tidak')", "display" => "Status Aktif");
 
 		if (!$router->IsAjaxRequest) {
@@ -104,6 +109,7 @@ class ItemsController extends AppController {
         $loader = null;
         if (count($this->postData) > 0) {
             $items->ItemCode = $this->GetPostValue("ItemCode");
+            $items->OldCode = $this->GetPostValue("OldCode");
             $items->ItemName = $this->GetPostValue("ItemName");
             $items->SubCategoryId = $this->GetPostValue("SubCategoryId");
             //$items->BarCode = $this->GetPostValue("BarCode");
@@ -180,6 +186,7 @@ class ItemsController extends AppController {
         $loader = null;
         if (count($this->postData) > 0) {
             $items->ItemCode = $this->GetPostValue("ItemCode");
+            $items->OldCode = $this->GetPostValue("OldCode");
             $items->ItemName = $this->GetPostValue("ItemName");
             //$items->SubCategoryId = $this->GetPostValue("SubCategoryId");
             //$items->BarCode = $this->GetPostValue("BarCode");
