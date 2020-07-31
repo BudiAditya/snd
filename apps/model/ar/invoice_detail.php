@@ -61,7 +61,7 @@ class InvoiceDetail extends EntityBase {
         $this->ExpDate = strtotime($row["exp_date"]);
         $this->ByAngkut = $row["by_angkut"];
         $this->IsiSatKecil = $row["bisisatkecil"];
-        if ($this->SalesQty >= $this->IsiSatKecil && $this->IsiSatKecil > 0){
+        if (($this->SalesQty >= $this->IsiSatKecil && $this->IsiSatKecil > 0) && ($this->SatBesar != $this->SatKecil)){
             $aqty = array();
             $sqty = round($this->SalesQty/$this->IsiSatKecil,2);
             $aqty = explode('.',$sqty);

@@ -246,11 +246,11 @@ class TransferController extends AppController {
         $this->Set("transfer", $transfer);
         //load data gudang asal
         $loader = new Warehouse();
-        $whfrom = $loader->LoadByEntityId($this->userCompanyId);
+        $whfrom = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("whfrom", $whfrom);
         //load data gudang tujuan
         $loader = new Warehouse();
-        $whdest = $loader->LoadByEntityId($this->userCompanyId);
+        $whdest = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("whdest", $whdest);
 	}
 

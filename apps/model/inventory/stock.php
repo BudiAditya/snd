@@ -82,7 +82,7 @@ class Stock extends EntityBase {
 		// Disini kita akan mengambil data dokumen referensi.
 		switch ($this->StockTypeCode) {
 			case 1:
-			    //saldo awalcas stock
+			    //saldo awal stock
 				$this->DocumentType = "OB";
 				$this->connector->CommandText = "SELECT a.id, trx_no AS doc_no, a.op_date AS doc_date FROM t_ic_saldoawal AS a WHERE a.id = ?refId";
 				break;
@@ -121,6 +121,11 @@ class Stock extends EntityBase {
 				$this->DocumentType = "CR";
 				$this->connector->CommandText = "SELECT a.id, a.corr_no as doc_no, a.corr_date AS doc_date FROM t_ic_stock_correction AS a WHERE a.id = ?refId";
 				break;
+            case 105:
+                //Pemakaian sendiri (Issue)
+                $this->DocumentType = "IS";
+                $this->connector->CommandText = "SELECT a.id, a.issue_no as doc_no, a.issue_date AS doc_date FROM t_ic_issue AS a WHERE a.id = ?refId";
+                break;
 			default:
 				throw new Exception("NotImplemented Exception ! StockTypeCode: " . $this->StockTypeCode . " is not yet implemented for acquiring referenced document ! Please contact system admin !");
 		}
@@ -158,6 +163,8 @@ class Stock extends EntityBase {
                 return "ap.return/view/" . $this->DocumentId;
 			case 104:
 				return "inventory.correction/view/" . $this->DocumentId;
+            case 105:
+                return "inventory.issue/view/" . $this->DocumentId;
 			default:
 				throw new Exception("NotImplemented Exception ! StockTypeCode: " . $this->StockTypeCode . " is not yet implemented for generate reference link ! Please contact system admin !");
 		}
@@ -370,9 +377,10 @@ WHERE id = ?id";
                 `trx_url`  varchar(50),
                 `relasi`  varchar(50),
                 `price`  int(11) DEFAULT 0,
-                `awalcas`  decimal(11,2) NOT NULL DEFAULT 0,
+                `awal`  decimal(11,2) NOT NULL DEFAULT 0,
                 `masuk`  decimal(11,2) NOT NULL DEFAULT 0,
                 `keluar`  decimal(11,2) NOT NULL DEFAULT 0,
+                `issue`  decimal(11,2) NOT NULL DEFAULT 0,
                 `koreksi`  decimal(11,2) NOT NULL DEFAULT 0,
                 `saldo`  decimal(11,2) NOT NULL DEFAULT 0,
                 `notes` varchar(250))';
@@ -386,16 +394,17 @@ WHERE id = ?id";
                 `trx_url`  varchar(50),
                 `relasi`  varchar(50),
                 `price`  int(11) DEFAULT 0,
-                `awalcas`  decimal(11,2) NOT NULL DEFAULT 0,
+                `awal`  decimal(11,2) NOT NULL DEFAULT 0,
                 `masuk`  decimal(11,2) NOT NULL DEFAULT 0,
                 `keluar`  decimal(11,2) NOT NULL DEFAULT 0,
+                `issue`  decimal(11,2) NOT NULL DEFAULT 0,
                 `koreksi`  decimal(11,2) NOT NULL DEFAULT 0,
                 `saldo`  decimal(11,2) NOT NULL DEFAULT 0,
                 `notes` varchar(250))';
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
-        // get saldo awalcas
-        $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,awalcas,relasi,price) Select a.op_date,'Saldo Awal','inventory.awalcas',a.op_qty,'-',0 From t_ic_saldoawal as a";
+        // get saldo awal
+        $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,awal,relasi,price) Select a.op_date,'Saldo Awal','inventory.awal',a.op_qty,'-',0 From t_ic_saldoawal as a";
         $sqx.= " Where a.item_id = ?item_id And Year(a.op_date) = ?year And a.warehouse_id = ?gudang_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?item_id", $this->ItemId);
@@ -469,6 +478,17 @@ WHERE id = ?id";
         $this->connector->AddParameter("?gudang_id", $this->WarehouseId);
         $rs = $this->connector->ExecuteNonQuery();
 
+        // get issue
+        $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,issue,relasi)";
+        $sqx.= " Select a.issue_date,concat('Issue - ',a.corr_no),'inventory.issue',a.qty,a.keterangan";
+        $sqx.= " From t_ic_issue as a";
+        $sqx.= " Where a.item_id = ?item_id and Year(a.issue_date) = ?year and a.warehouse_id = ?gudang_id and a.is_status = 1";
+        $this->connector->CommandText = $sqx;
+        $this->connector->AddParameter("?item_id", $this->ItemId);
+        $this->connector->AddParameter("?year", $trxYear);
+        $this->connector->AddParameter("?gudang_id", $this->WarehouseId);
+        $rs = $this->connector->ExecuteNonQuery();
+        
         // get koreksi
         $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,koreksi,relasi)";
         $sqx.= " Select a.corr_date,concat('Koreksi - ',a.corr_no),'inventory.correction',a.corr_qty,a.corr_reason";
@@ -482,11 +502,11 @@ WHERE id = ?id";
 
         //filter data
         $sqx = "Insert Into tmp_card1 (seq_no,trx_date,trx_type,saldo)";
-        $sqx.= " Select 0,'".date('Y-m-d',$startDate)."','Saldo lalu...',coalesce(sum((a.awalcas+a.masuk+a.koreksi)-a.keluar),0) From tmp_card a Where a.trx_date < '".date('Y-m-d',$startDate)."'";
+        $sqx.= " Select 0,'".date('Y-m-d',$startDate)."','Saldo lalu...',coalesce(sum((a.awal+a.masuk+a.koreksi)-a.keluar),0) From tmp_card a Where a.trx_date < '".date('Y-m-d',$startDate)."'";
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
-        $sqx = "Insert Into tmp_card1 (seq_no,trx_date,trx_type,trx_url,relasi,price,awalcas,masuk,keluar,koreksi,saldo,notes)";
-        $sqx.= " Select 1,trx_date,trx_type,trx_url,relasi,price,awalcas,masuk,keluar,koreksi,saldo,notes From tmp_card a Where a.trx_date >= '".date('Y-m-d',$startDate)."' And a.trx_date <= '".date('Y-m-d',$endDate)."'";
+        $sqx = "Insert Into tmp_card1 (seq_no,trx_date,trx_type,trx_url,relasi,price,awal,masuk,keluar,issue,koreksi,saldo,notes)";
+        $sqx.= " Select 1,trx_date,trx_type,trx_url,relasi,price,awal,masuk,keluar,issue,koreksi,saldo,notes From tmp_card a Where a.trx_date >= '".date('Y-m-d',$startDate)."' And a.trx_date <= '".date('Y-m-d',$endDate)."'";
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         // try get all tmp card data
@@ -519,7 +539,7 @@ WHERE id = ?id";
         // create previous mutasi temp table
         $sqx = 'CREATE TEMPORARY TABLE `tmp_prev` (
                 `item_id`  int(5) NOT NULL DEFAULT 0,
-                `awalcas`  decimal(11,2) NOT NULL DEFAULT 0,
+                `awal`  decimal(11,2) NOT NULL DEFAULT 0,
                 `beli`  decimal(11,2) NOT NULL DEFAULT 0,
                 `xin`  decimal(11,2) NOT NULL DEFAULT 0,
                 `rjual`  decimal(11,2) NOT NULL DEFAULT 0,
@@ -528,13 +548,14 @@ WHERE id = ?id";
                 `xout`  decimal(11,2) NOT NULL DEFAULT 0,
                 `rbeli`  decimal(11,2) NOT NULL DEFAULT 0,
                 `asyout`  decimal(11,2) NOT NULL DEFAULT 0,
+                `issue`  decimal(11,2) NOT NULL DEFAULT 0,
                 `koreksi`  decimal(11,2) NOT NULL DEFAULT 0)';
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         // create request mutasi temp table
         $sqx = 'CREATE TEMPORARY TABLE `tmp_mutasi` (
                 `item_id`  int(5) NOT NULL DEFAULT 0,
-                `awalcas`  decimal(11,2) NOT NULL DEFAULT 0,
+                `awal`  decimal(11,2) NOT NULL DEFAULT 0,
                 `beli`  decimal(11,2) NOT NULL DEFAULT 0,
                 `xin`  decimal(11,2) NOT NULL DEFAULT 0,
                 `rjual`  decimal(11,2) NOT NULL DEFAULT 0,
@@ -543,11 +564,12 @@ WHERE id = ?id";
                 `xout`  decimal(11,2) NOT NULL DEFAULT 0,
                 `rbeli`  decimal(11,2) NOT NULL DEFAULT 0,
                 `asyout`  decimal(11,2) NOT NULL DEFAULT 0,
+                `issue`  decimal(11,2) NOT NULL DEFAULT 0,
                 `koreksi`  decimal(11,2) NOT NULL DEFAULT 0)';
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
-        // get saldo awalcas
-        $sqx = "Insert Into `tmp_prev` (item_id,awalcas) Select a.item_id,sum(a.op_qty) From t_ic_saldoawal as a";
+        // get saldo awal
+        $sqx = "Insert Into `tmp_prev` (item_id,awal) Select a.item_id,sum(a.op_qty) From t_ic_saldoawal as a";
         $sqx.= " Where year(a.op_date) = ?year And a.op_date <= ?startDate and a.warehouse_id = ?whId Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
@@ -615,6 +637,16 @@ WHERE id = ?id";
         $this->connector->AddParameter("?whId", $whId);
         $rs = $this->connector->ExecuteNonQuery();
 
+        // get issue lalu
+        $sqx = "Insert Into `tmp_prev` (item_id,issue)";
+        $sqx.= " Select a.item_id,sum(a.qty) From t_ic_issue as a";
+        $sqx.= " Where Year(a.issue_date) = ?year And a.issue_date < ?startDate and a.warehouse_id = ?whId and a.is_status = 1 Group By a.item_id";
+        $this->connector->CommandText = $sqx;
+        $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
+        $this->connector->AddParameter("?year", $trxYear);
+        $this->connector->AddParameter("?whId", $whId);
+        $rs = $this->connector->ExecuteNonQuery();
+
         // get koreksi lalu
         $sqx = "Insert Into `tmp_prev` (item_id,koreksi)";
         $sqx.= " Select a.item_id,sum(a.corr_qty) From t_ic_stock_correction as a";
@@ -625,8 +657,8 @@ WHERE id = ?id";
         $this->connector->AddParameter("?whId", $whId);
         $rs = $this->connector->ExecuteNonQuery();
 
-        // get saldo awalcas dari transaksi sebelumnya
-        $sqx = "Insert Into `tmp_mutasi` (item_id,awalcas) Select a.item_id,sum((a.awalcas+a.beli+a.xin+a.rjual+a.asyin)-(a.jual+a.xout+a.rbeli+a.asyout)+a.koreksi) From tmp_prev as a Group By a.item_id";
+        // get saldo awal dari transaksi sebelumnya
+        $sqx = "Insert Into `tmp_mutasi` (item_id,awal) Select a.item_id,sum((a.awal+a.beli+a.xin+a.rjual+a.asyin)-(a.jual+a.xout+a.rbeli+a.asyout)+a.koreksi) From tmp_prev as a Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
 
@@ -696,6 +728,17 @@ WHERE id = ?id";
         $this->connector->AddParameter("?whId", $whId);
         $rs = $this->connector->ExecuteNonQuery();
 
+        // get issue
+        $sqx = "Insert Into `tmp_mutasi` (item_id,issue)";
+        $sqx.= " Select a.item_id,sum(a.qty) From t_ic_issue as a";
+        $sqx.= " Where Year(a.issue_date) = ?year And a.issue_date BETWEEN ?startDate and ?endDate and a.warehouse_id = ?whId and a.is_status = 1 Group By a.item_id";
+        $this->connector->CommandText = $sqx;
+        $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
+        $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
+        $this->connector->AddParameter("?year", $trxYear);
+        $this->connector->AddParameter("?whId", $whId);
+        $rs = $this->connector->ExecuteNonQuery();
+
         // get koreksi
         $sqx = "Insert Into `tmp_mutasi` (item_id,koreksi)";
         $sqx.= " Select a.item_id,sum(a.corr_qty) From t_ic_stock_correction as a";
@@ -708,7 +751,7 @@ WHERE id = ?id";
         $rs = $this->connector->ExecuteNonQuery();
 
         // try get all tmp card data
-        $sqx = "Select c.entity_id,a.item_id, b.item_code, b.item_name, b.s_uom_code as satuan, b.s_uom_qty, b.c_uom_code, b.qty_convert, sum(a.awalcas) as sAwal, sum(a.beli) as sBeli, sum(a.asyin) as sAsyin, sum(a.xin) as sXin, sum(a.rjual) as sRjual, sum(a.asyout) as sAsyout, sum(a.jual) as sJual, sum(a.xout) as sXout, sum(a.rbeli) as sRbeli, sum(a.koreksi) as sKoreksi ";
+        $sqx = "Select c.entity_id,a.item_id, b.item_code, b.item_name, b.s_uom_code as satuan, b.s_uom_qty, b.c_uom_code, b.qty_convert, sum(a.awal) as sAwal, sum(a.beli) as sBeli, sum(a.asyin) as sAsyin, sum(a.xin) as sXin, sum(a.rjual) as sRjual, sum(a.asyout) as sAsyout, sum(a.jual) as sJual, sum(a.xout) as sXout, sum(a.rbeli) as sRbeli, sum(a.koreksi) as sKoreksi ";
         $sqx.= " From tmp_mutasi as a Join m_items as b On a.item_id = b.id Join m_item_brand c ON b.brand_id = c.id";
         if ($entityId > 0){
             $sqx.= " Where c.entity_id = ".$entityId;
