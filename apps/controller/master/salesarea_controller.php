@@ -18,7 +18,7 @@ class SalesAreaController extends AppController {
 
 		$settings["columns"][] = array("name" => "a.id", "display" => "ID", "width" => 0);
 		$settings["columns"][] = array("name" => "a.area_code", "display" => "Kode", "width" => 50);
-		$settings["columns"][] = array("name" => "a.area_name", "display" => "Sales Area", "width" => 150);
+		$settings["columns"][] = array("name" => "a.area_name", "display" => "Sales Area", "width" => 200);
         $settings["columns"][] = array("name" => "b.name", "display" => "Propinsi", "width" => 150);
         $settings["columns"][] = array("name" => "c.name", "display" => "Zone Harga", "width" => 100);
 
@@ -50,7 +50,7 @@ class SalesAreaController extends AppController {
 			$settings["singleSelect"] = true;
 
 		} else {
-		    $sql = "m_sales_area AS a Join m_province b ON a.prop_id = b.id Join m_zone c On a.zone_id = c.id Join m_cabang d ON a.cabang_id = d.id";
+		    $sql = "m_sales_area AS a Join m_zone c On a.zone_id = c.id Join m_cabang d ON a.cabang_id = d.id Left Join m_province b ON a.prop_id = b.id ";
 			$settings["from"] = $sql;
             $settings["where"] = " d.company_id = ".$this->userCompanyId." And a.is_deleted = 0";
 		}

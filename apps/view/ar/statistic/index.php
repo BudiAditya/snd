@@ -80,10 +80,10 @@
     <br>
     <table border="1" cellspacing="1" style="width: 100%">
         <tr>
-            <td style="width: 70%;height: 250px">
+            <td colspan="2" style="width: 80%;height: 250px">
                 <canvas id="myLineChart"></canvas>
             </td>
-            <td align="center" style="width: 30%;height: 250px">
+            <td align="center" style="width: 20%;height: 250px">
                 <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
                     <tr>
                         <th>No.</th>
@@ -158,7 +158,7 @@
             </td>
         </tr>
         <tr>
-            <td style="width: 60%;height: 250px">
+            <td style="width: 70%;height: 250px">
                 <canvas id="myBarChart"></canvas>
             </td>
             <!--
@@ -166,7 +166,7 @@
                 <canvas id="myPieChart"></canvas>
             </td>
             -->
-            <td align="center">
+            <td colspan="2" align="center" style="width: 30%;height: 250px">
                 <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
                     <tr>
                         <th>No.</th>
@@ -195,7 +195,7 @@
             </td>
         </tr>
         <tr>
-            <td style="width: 60%;height: 350px">
+            <td style="width: 70%;height: 250px">
                 <canvas id="myPrincipalBarChart"></canvas>
             </td>
             <!--
@@ -203,7 +203,7 @@
                 <canvas id="myPrincipalPieChart"></canvas>
             </td>
             -->
-            <td align="center">
+            <td colspan="2" align="center" style="width: 30%;height: 250px">
                 <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
                     <tr>
                         <th>No.</th>
@@ -232,10 +232,10 @@
             </td>
         </tr>
         <tr>
-            <td style="width: 60%;height: 250px">
+            <td style="width: 70%;height: 250px">
                 <canvas id="mySalesChart"></canvas>
             </td>
-            <td align="center">
+            <td colspan="2" align="center" style="width: 30%;height: 250px">
                 <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
                     <tr>
                         <th>No.</th>
@@ -262,7 +262,7 @@
             </td>
         </tr>
         <tr>
-            <td style="width: 60%;height: 350px">
+            <td style="width: 70%;height: 250px">
                 <canvas id="myCityBarChart"></canvas>
             </td>
             <!--
@@ -270,7 +270,7 @@
                 <canvas id="myCityPieChart"></canvas>
             </td>
             -->
-            <td align="center">
+            <td colspan="2" align="center" style="width: 30%;height: 250px">
                 <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
                     <tr>
                         <th>No.</th>
@@ -299,10 +299,10 @@
             </td>
         </tr>
         <tr>
-            <td style="width: 70%;height: 300px">
+            <td style="width: 70%;height: 250px">
                 <canvas id="myCustomerChart"></canvas>
             </td>
-            <td align="center">
+            <td colspan="2" align="center" style="width: 30%;height: 250px">
                 <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
                     <tr>
                         <th>No.</th>
@@ -323,10 +323,10 @@
             </td>
         </tr>
         <tr>
-            <td style="width: 70%;height: 300px">
+            <td style="width: 70%;height: 250px">
                 <canvas id="myItemChart"></canvas>
             </td>
-            <td align="center">
+            <td colspan="2" align="center" style="width: 30%;height: 250px">
                 <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
                     <tr>
                         <th>No.</th>

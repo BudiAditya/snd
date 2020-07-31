@@ -85,7 +85,7 @@ $(document).ready(function() {
 	}
 
 	$(document).idleTimer({
-		timeout: 600 * 3000 // 30 Menit...
+		timeout: 600 * 6000 // 60 Menit...
 		, onSleep: function(sender) {
 			$(sender).idleTimer("stop"); // Matiin timer
 			$("#autoLogOutDialog").dialog("open"); // Buka dialog

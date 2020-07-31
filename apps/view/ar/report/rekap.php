@@ -106,16 +106,24 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 $invoice = 0;
                 $retur = 0;
                 $receipt = 0;
+                $url = null;
                 while ($row = $Reports->FetchAssoc()) {
                     if ($nmr == 1){
                         $saldo = $row["saldo"];
                     }else{
                         $saldo = $saldo + ($row["invoice"] - ($row["retur"] + $row["receipt"]));
                     }
+                    if ($row["idx"] == 1){
+                        $url = $helper->site_url("ar.invoice/view/" . $row["id"]);
+                    }elseif ($row["idx"] == 2){
+                        $url = $helper->site_url("ar.arreturn/view/" . $row["id"]);
+                    }elseif ($row["idx"] == 3){
+                        $url = $helper->site_url("ar.receipt/view/" . $row["id"]);
+                    }
                     print("<tr valign='Midle'>");
                     printf("<td>%s</td>", $nmr++);
                     printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["trx_date"])));
-                    printf("<td nowrap='nowrap'>%s</td>", $row["no_bukti"]);
+                    printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["no_bukti"]);
                     printf("<td nowrap='nowrap'>%s</td>", $row["customer"]);
                     printf("<td align='right'>%s</td>", number_format($row["invoice"], 0));
                     printf("<td align='right'>%s</td>", number_format($row["retur"], 0));

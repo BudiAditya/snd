@@ -25,10 +25,10 @@ class ReceiptController extends AppController {
         $settings["columns"][] = array("name" => "a.cabang_code", "display" => "Cabang", "width" => 80);
         $settings["columns"][] = array("name" => "a.receipt_date", "display" => "Tanggal", "width" => 60);
         $settings["columns"][] = array("name" => "a.receipt_no", "display" => "No. Receipt", "width" => 100);
-        $settings["columns"][] = array("name" => "a.debtor_name", "display" => "Nama Customer", "width" => 150);
-        $settings["columns"][] = array("name" => "a.receipt_descs", "display" => "Keterangan", "width" => 160);
+        $settings["columns"][] = array("name" => "a.debtor_name", "display" => "Nama Customer", "width" => 200);
+        //$settings["columns"][] = array("name" => "a.receipt_descs", "display" => "Keterangan", "width" => 160);
         $settings["columns"][] = array("name" => "a.cara_bayar", "display" => "Cara Bayar", "width" => 80);
-        $settings["columns"][] = array("name" => "a.bank_name", "display" => "Kas/Bank", "width" => 80);
+        $settings["columns"][] = array("name" => "a.bank_name", "display" => "Kas/Bank", "width" => 100);
         $settings["columns"][] = array("name" => "format(a.receipt_amount,0)", "display" => "Penerimaan", "width" => 80, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.allocate_amount,0)", "display" => "Alokasi", "width" => 80, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.receipt_amount - a.allocate_amount,0)", "display" => "Sisa", "width" => 80, "align" => "right");

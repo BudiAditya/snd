@@ -23,6 +23,7 @@ class Report extends EntityBase {
         // create request mutasi temp table
         $sqx = 'CREATE TEMPORARY TABLE `tmp_mutasi` (
                 `idx`  tinyint(1) NULL DEFAULT 0 ,
+                `id`  bigint(20) NULL DEFAULT 0,
                 `trx_date`  date NULL ,
                 `no_bukti`  varchar(50) NULL ,
                 `customer`  varchar(100) NULL ,
@@ -78,8 +79,8 @@ class Report extends EntityBase {
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         //get invoice bulan diminta
-        $sqx = "Insert Into tmp_mutasi (idx,trx_date,no_bukti,customer,invoice)";
-        $sqx.= " Select 1,a.invoice_date,a.invoice_no,a.customer_name,a.total_amount From vw_ar_invoice_master a Where (a.invoice_date >= '". $stDate . "' And a.invoice_date <= '". $enDate ."') And a.invoice_status < 3";
+        $sqx = "Insert Into tmp_mutasi (idx,id,trx_date,no_bukti,customer,invoice)";
+        $sqx.= " Select 1,a.id,a.invoice_date,a.invoice_no,a.customer_name,a.total_amount From vw_ar_invoice_master a Where (a.invoice_date >= '". $stDate . "' And a.invoice_date <= '". $enDate ."') And a.invoice_status < 3";
         if ($customerId > 0){
             $sqx.= " And a.customer_id = ".$customerId;
         }
@@ -91,8 +92,8 @@ class Report extends EntityBase {
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         //get return bulan diminta
-        $sqx = "Insert Into tmp_mutasi (idx,trx_date,no_bukti,customer,retur)";
-        $sqx.= " Select 2,a.rj_date,a.rj_no,a.customer_name,a.rj_amount From vw_ar_return_master a Where (a.rj_date >= '". $stDate . "' And a.rj_date <= '". $enDate ."') And a.rj_status < 3";
+        $sqx = "Insert Into tmp_mutasi (idx,id,trx_date,no_bukti,customer,retur)";
+        $sqx.= " Select 2,a.id,a.rj_date,a.rj_no,a.customer_name,a.rj_amount From vw_ar_return_master a Where (a.rj_date >= '". $stDate . "' And a.rj_date <= '". $enDate ."') And a.rj_status < 3";
         if ($customerId > 0){
             $sqx.= " And a.customer_id = ".$customerId;
         }
@@ -104,8 +105,8 @@ class Report extends EntityBase {
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         //get receipt bulan diminta
-        $sqx = "Insert Into tmp_mutasi (idx,trx_date,no_bukti,customer,receipt)";
-        $sqx.= " Select 3,a.receipt_date,a.receipt_no,a.debtor_name,a.receipt_amount From vw_ar_receipt_master a Where(a.receipt_date >= '". $stDate . "' And a.receipt_date <= '". $enDate ."') And a.receipt_status < 3";
+        $sqx = "Insert Into tmp_mutasi (idx,id,trx_date,no_bukti,customer,receipt)";
+        $sqx.= " Select 3,a.id,a.receipt_date,a.receipt_no,a.debtor_name,a.receipt_amount From vw_ar_receipt_master a Where(a.receipt_date >= '". $stDate . "' And a.receipt_date <= '". $enDate ."') And a.receipt_status < 3";
         if ($customerId > 0){
             $sqx.= " And a.debtor_id = ".$customerId;
         }

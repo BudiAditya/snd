@@ -568,7 +568,7 @@ class TransferController extends AppController {
             $cabName = $cabang->Cabang;
         }
         $loader = new Warehouse();
-        $gudang = $loader->LoadByEntityId($this->userCompanyId);
+        $gudang = $loader->LoadByCompanyId($this->userCompanyId);
         //kirim ke view
         $this->Set("userLevel", $this->userLevel);
         $this->Set("userCabId", $this->userCabangId);
