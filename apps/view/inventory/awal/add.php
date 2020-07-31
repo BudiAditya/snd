@@ -29,7 +29,7 @@
 <br />
 <fieldset>
 	<legend><span class="bold">Entry Data Stock Awal Barang</span></legend>
-	<form action="<?php print($helper->site_url("inventory.awalcas/add")); ?>" method="post">
+	<form action="<?php print($helper->site_url("inventory.awal/add")); ?>" method="post">
 		<table cellspacing="0" cellpadding="0" class="tablePadding" style="margin: 0;">
 			<tr>
 				<td class="bold right"><label for="WarehouseId">Gudang :</label></td>
@@ -79,7 +79,7 @@
 				<td>&nbsp;</td>
 				<td colspan="3"><button type="submit" class="button">SIMPAN</button>
                     &nbsp&nbsp
-                    <a href="<?php print($helper->site_url("inventory.awalcas")); ?>" class="button">Batal</a>
+                    <a href="<?php print($helper->site_url("inventory.awal")); ?>" class="button">Batal</a>
                 </td>
 			</tr>
 		</table>

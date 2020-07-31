@@ -37,13 +37,13 @@ class AwalController extends AppController {
 			$acl = AclManager::GetInstance();
 			$settings["title"] = "Stock Awal Barang ".$this->userAccYear;
 
-			if ($acl->CheckUserAccess("inventory.awalcas", "add")) {
-				$settings["actions"][] = array("Text" => "Add", "Url" => "inventory.awalcas/add", "Class" => "bt_add", "ReqId" => 0);
+			if ($acl->CheckUserAccess("inventory.awal", "add")) {
+				$settings["actions"][] = array("Text" => "Add", "Url" => "inventory.awal/add", "Class" => "bt_add", "ReqId" => 0);
 			}
-			if ($acl->CheckUserAccess("inventory.awalcas", "delete")) {
-				$settings["actions"][] = array("Text" => "Delete", "Url" => "inventory.awalcas/delete/%s", "Class" => "bt_delete", "ReqId" => 1,
-					"Error" => "Mohon memilih awalcas terlebih dahulu sebelum proses penghapusan.\nPERHATIAN: Mohon memilih tepat satu awalcas.",
-					"Confirm" => "Apakah anda mau menghapus data awalcas yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+			if ($acl->CheckUserAccess("inventory.awal", "delete")) {
+				$settings["actions"][] = array("Text" => "Delete", "Url" => "inventory.awal/delete/%s", "Class" => "bt_delete", "ReqId" => 1,
+					"Error" => "Mohon memilih awal terlebih dahulu sebelum proses penghapusan.\nPERHATIAN: Mohon memilih tepat satu awal.",
+					"Confirm" => "Apakah anda mau menghapus data awal yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
 			}
 
 			$settings["def_order"] = 2;
@@ -103,22 +103,22 @@ class AwalController extends AppController {
                         $rs = $stock->Insert();
                         if ($rs > 0){
                             $flagSuccess = true;
-                            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awalcas','Add New Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Success');
+                            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awal','Add New Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Success');
                             $this->persistence->SaveState("info", sprintf("Data Stock Awal: %s (%s) sudah berhasil disimpan", $awal->ItemId, $awal->OpQty));
                         }else{
                             $flagSuccess = false;
-                            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awalcas','Add New Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Failed');
+                            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awal','Add New Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Failed');
                             $this->Set("error", "Gagal pada saat menyimpan data.. Message: " . $this->connector->GetErrorMessage());
                         }
                     }
                 } else {
                     $flagSuccessc= false;
-                    $log = $log->UserActivityWriter($this->userCabangId,'inventory.awalcas','Add New Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Failed');
+                    $log = $log->UserActivityWriter($this->userCabangId,'inventory.awal','Add New Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Failed');
                     $this->Set("error", "Gagal pada saat menyimpan data.. Message: " . $this->connector->GetErrorMessage());
                 }
                 if ($flagSuccess){
                     $this->connector->CommitTransaction();
-                    redirect_url("inventory.awalcas");
+                    redirect_url("inventory.awal");
                 }else{
                     $this->connector->RollbackTransaction();
                 }
@@ -130,20 +130,20 @@ class AwalController extends AppController {
         $loader = new Warehouse();
         $whs  = $loader->LoadByCabangId($this->userCabangId);
         $this->Set("whs", $whs);
-        $this->Set("awalcas", $awal);
+        $this->Set("awal", $awal);
 	}
 
 	public function delete($id = null) {
         if ($id == null) {
             $this->persistence->SaveState("error", "Harap memilih data terlebih dahulu sebelum melakukan proses penghapusan data.");
-            redirect_url("inventory.awalcas");
+            redirect_url("inventory.awal");
         }
         $log = new UserAdmin();
         $awal = new Awal();
         $awal = $awal->LoadById($id);
         if ($awal == null) {
             $this->persistence->SaveState("error", "Maaf data yang diminta tidak dapat ditemukan atau sudah dihapus.");
-            redirect_url("inventory.awalcas");
+            redirect_url("inventory.awal");
         }
         /** @var $awal Awal */
         $flagSuccess = true;
@@ -162,15 +162,15 @@ class AwalController extends AppController {
         }
         if ($flagSuccess){
             $this->connector->CommitTransaction();
-            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awalcas','Delete Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Success');
+            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awal','Delete Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Success');
             $this->persistence->SaveState("info", sprintf("Stock Awal Barang: %s (%s) sudah dihapus", $awal->ItemId, $awal->OpQty));
         } else {
             $this->connector->RollbackTransaction();
-            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awalcas','Delete Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Failed');
+            $log = $log->UserActivityWriter($this->userCabangId,'inventory.awal','Delete Item Stock Awal -> Stock Awal: '.$awal->ItemId.' - '.$awal->OpQty,'-','Failed');
             $this->persistence->SaveState("error", sprintf("Gagal menghapus jenis kontak: %s (%s). Error: %s", $awal->ItemId, $awal->OpQty, $this->connector->GetErrorMessage()));
         }
-		redirect_url("inventory.awalcas");
+		redirect_url("inventory.awal");
 	}
 }
 
-// End of file: awalcas_controller.php
+// End of file: awal_controller.php

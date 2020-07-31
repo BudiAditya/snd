@@ -71,6 +71,7 @@ $menu = $root->AddNode("INVENTORY", null, "menu");
     $menu->AddNode("Transaksi Inventory", null, "title");
         $menu->AddNode("Stock Awal Gudang", "inventory.awal");
         $menu->AddNode("Stock Transfer (NPB)", "inventory.transfer");
+        $menu->AddNode("Pemakaian Sendiri", "inventory.issue");
         $menu->AddNode("Pengiriman Barang", "inventory.delivery");
         //$menu->AddNode("Penerimaan Barang", "inventory.receive");
         $menu->AddNode("Stock Opname/Koreksi", "inventory.correction");

@@ -24,14 +24,15 @@ class CorrectionController extends AppController {
         //$settings["columns"][] = array("name" => "a.cabang_code", "display" => "Cabang", "width" => 50);
         $settings["columns"][] = array("name" => "a.wh_code", "display" => "Gudang", "width" => 80);
         $settings["columns"][] = array("name" => "a.corr_date", "display" => "Tanggal", "width" => 60);
-        $settings["columns"][] = array("name" => "a.corr_no", "display" => "Trx. No.", "width" => 80);
-        $settings["columns"][] = array("name" => "a.item_code", "display" => "Kode Barang", "width" => 100);
+        $settings["columns"][] = array("name" => "a.corr_no", "display" => "Trx. No.", "width" => 100);
+        $settings["columns"][] = array("name" => "a.item_code", "display" => "Kode Barang", "width" => 80);
         $settings["columns"][] = array("name" => "a.item_name", "display" => "Nama Barang", "width" => 250);
         $settings["columns"][] = array("name" => "a.satuan", "display" => "Satuan", "width" => 50);
         $settings["columns"][] = array("name" => "a.sys_qty", "display" => "System", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "a.whs_qty", "display" => "Gudang", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "a.corr_qty", "display" => "Koreksi", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.corr_amt,2)", "display" => "Nilai", "width" => 80, "align" => "right");
+        $settings["columns"][] = array("name" => "a.corr_reason", "display" => "Keterangan", "width" => 300);
 
         $settings["filters"][] = array("name" => "a.cabang_code", "display" => "Cabang");
         $settings["filters"][] = array("name" => "a.wh_code", "display" => "Gudang");
@@ -49,13 +50,13 @@ class CorrectionController extends AppController {
                     "Confirm" => "Apakah anda mau menghapus data correction yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
             }
 
-            $settings["def_order"] = 4;
+            $settings["def_order"] = 2;
             $settings["def_filter"] = 0;
             $settings["singleSelect"] = true;
 
         } else {
             $settings["from"] = "vw_ic_stock_correction AS a ";
-            $settings["where"] = "a.cabang_id = ".$this->userCabangId." And Year(a.corr_date) = ".$this->userAccYear;
+            $settings["where"] = "Year(a.corr_date) = ".$this->userAccYear; //"a.cabang_id = ".$this->userCabangId." And Year(a.corr_date) = ".$this->userAccYear;
             $settings["order_by"] = "a.wh_code, a.item_code";
         }
 
