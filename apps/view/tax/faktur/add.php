@@ -128,6 +128,7 @@ if ($invoices != null) {
             <th>P P N</th>
             <th>Jumlah</th>
             <th>Ex Invoice</th>
+            <th>Tgl Invoice</th>
             <th>Outlet</th>
             <th>Pilih <input type="checkbox" id="cbAll" checked="checked"></th>
         </tr>
@@ -135,30 +136,31 @@ if ($invoices != null) {
     $nmr = 1;
     $dpp = 0;
     $ppn = 0;
-    foreach ($invoices as $data){
+    While ($data = $invoices->FetchAssoc()){
         print('<tr>');
         printf('<td>%d</td>',$nmr++);
-        printf('<td nowrap="nowrap">%s</td>',$data->NsfPajak);
-        printf('<td nowrap="nowrap">%s</td>',$data->FpDate == null ? '&nbsp;' : date('d-m-Y', $data->FpDate));
-        printf('<td nowrap="nowrap">%s</td>',$data->CustomerName);
+        printf('<td nowrap="nowrap">%s</td>',$data["nsf_pajak"]);
+        printf('<td nowrap="nowrap">%s</td>',$data["fp_date"] == null ? '&nbsp;' : date('d-m-Y', strtotime($data["fp_date"])));
+        printf('<td nowrap="nowrap">%s</td>',$data["cus_name"]);
         //printf('<td>%s</td>',$row["alamat_lengkap"]);
-        printf('<td nowrap="nowrap">%s</td>',$data->Npwp);
-        printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data->BaseAmount-$data->DiscAmount,0));
-        printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data->PpnAmount,0));
-        printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data->BaseAmount-$data->DiscAmount+$data->PpnAmount,0));
-        printf('<td nowrap="nowrap">%s</td>',$data->InvoiceNo);
-        printf('<td nowrap="nowrap">%s</td>',$data->CustomerCode);
-        printf('<td class="center"><input type="checkbox" class="cbIds" name="ids[]" value="%d" checked="checked"/></td>',$data->Id);
+        printf('<td nowrap="nowrap">%s</td>',$data["npwp"]);
+        printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["dpp_amount"],0));
+        printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["ppn_amount"],0));
+        printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["dpp_amount"]+$data["ppn_amount"],0));
+        printf('<td nowrap="nowrap">%s</td>',$data["invoice_no"]);
+        printf('<td nowrap="nowrap">%s</td>',$data["invoice_date"] == null ? '&nbsp;' : date('d-m-Y', strtotime($data["invoice_date"])));
+        printf('<td nowrap="nowrap">%s</td>',$data["cus_code"]);
+        printf('<td class="center"><input type="checkbox" class="cbIds" name="ids[]" value="%d" checked="checked"/></td>',$data["id"]);
         print('</tr>');
-        $dpp+= $data->BaseAmount-$data->DiscAmount;
-        $ppn+= $data->PpnAmount;
+        $dpp+= $data["dpp_amount"];
+        $ppn+= $data["ppn_amount"];
     }
     print('<tr class="bold">');
     print('<td colspan="5">TOTAL</td>');
     printf('<td nowrap="nowrap" align="right">%s</td>',number_format($dpp,0));
     printf('<td nowrap="nowrap" align="right">%s</td>',number_format($ppn,0));
     printf('<td nowrap="nowrap" align="right">%s</td>',number_format($dpp+$ppn,0));
-    print('<td colspan="3">&nbsp;</td>');
+    print('<td colspan="4">&nbsp;</td>');
     print('</tr>');
     print('</table>');
     print('</form>');

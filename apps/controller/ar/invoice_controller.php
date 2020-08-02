@@ -1389,6 +1389,8 @@ class InvoiceController extends AppController {
         $uid = AclManager::GetInstance()->GetCurrentUser()->Id;
         $infos = array();
         $errors = array();
+        set_time_limit(600);
+        ini_set("memory_limit", "256M");
         foreach ($ids as $id) {
             $invoice = new Invoice();
             $log = new UserAdmin();

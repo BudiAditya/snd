@@ -198,7 +198,10 @@ class Invoice extends EntityBase {
     }
 
     public function LoadByMonth($companyId,$year,$bulan) {
-        $this->connector->CommandText = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.company_id = ?companyId And Year(a.invoice_date) = ?tahun And Month(a.invoice_date) = ?bulan And a.is_deleted = 0 And a.invoice_status = 2";
+	    $sql = "SELECT a.*";
+	    $sql.= " FROM vw_ar_invoice_master AS a WHERE a.company_id = ?companyId And Year(a.invoice_date) = ?tahun And Month(a.invoice_date) = ?bulan And a.is_deleted = 0 And a.invoice_status = 2";
+	    $sql.= " Order By a.invoice_date,a.invoice_no";
+        $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?companyId", $companyId);
         $this->connector->AddParameter("?tahun", $year);
         $this->connector->AddParameter("?bulan", $bulan);
@@ -662,7 +665,24 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function Approve($id = null, $uid = null){
-        $this->connector->CommandText = "SELECT fc_ar_invoice_approve($id,$uid) As valresult;";
+	    $sql = "Update t_ar_invoice_master a Set a.invoice_status = 2, a.update_time = now(), a.updateby_id = ?uid Where a.id = ?id";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?id", $id);
+        $this->connector->AddParameter("?uid", $uid);
+        return $this->connector->ExecuteQuery();
+    }
+
+    public function Unapprove($id = null, $uid = null){
+        $sql = "Update t_ar_invoice_master a Set a.invoice_status = 1, a.update_time = now(), a.updateby_id = ?uid Where a.id = ?id";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?id", $id);
+        $this->connector->AddParameter("?uid", $uid);
+        return $this->connector->ExecuteQuery();
+    }
+
+    public function Post2Accounting($id = null, $uid = null){
+        $sql = "SELECT fc_ar_invoice_approve($id,$uid) As valresult";
+        $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?id", $id);
         $this->connector->AddParameter("?uid", $uid);
         $rs = $this->connector->ExecuteQuery();
@@ -670,8 +690,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return strval($row["valresult"]);
     }
 
-    public function Unapprove($id = null, $uid = null){
-        $this->connector->CommandText = "SELECT fc_ar_invoice_unapprove($id,$uid) As valresult;";
+    public function UnpostFromAccounting($id = null, $uid = null){
+        $sql = "SELECT fc_ar_invoice_unapprove($id,$uid) As valresult";
+        $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?id", $id);
         $this->connector->AddParameter("?uid", $uid);
         $rs = $this->connector->ExecuteQuery();
@@ -1354,25 +1375,20 @@ AND `a`.`invoice_status` = 2 And (a.invoice_date BETWEEN ?stDate And ?enDate)";
 	a.invoice_date AS invoice_date,
 	a.customer_id AS customer_id,
 	a.sales_id AS sales_id,
-    e.sales_name,
-	d.cus_code AS cus_code,
-	d.cus_name AS cus_name,
-	d.area_id AS area_id,
-	d1.area_code AS area_code,
-	f.wh_code AS wh_code,
-	g.kode AS cab_code,
-	b.sub_total,
-	b.discount,
-	b.ppn,
+    c.sales_name,
+	b.cus_code AS cus_code,
+	b.cus_name AS cus_name,
+	b.area_id AS area_id,
+	d.area_code AS area_code,
+	a.base_amount as sub_total,
+	a.disc_amount as discount,
+	a.ppn_amount as ppn,
     a.invoice_status
 FROM
 	t_ar_invoice_master AS a
-JOIN vw_ar_invoice_sum_by_id b ON a.id = b.invoice_id
-JOIN m_customer AS d ON (a.customer_id = d.id)
-JOIN m_salesman AS e ON (a.sales_id = e.id)
-JOIN m_sales_area AS d1 ON (d.area_id = d1.id)
-JOIN m_warehouse AS f ON (a.gudang_id = f.id)
-JOIN m_cabang AS g ON (a.cabang_id = g.id)
+JOIN m_customer AS b ON (a.customer_id = b.id)
+JOIN m_salesman AS c ON (a.sales_id = c.id)
+JOIN m_sales_area AS d ON (b.area_id = d.id)
 WHERE
 	`a`.`is_deleted` = 0
 AND (a.invoice_date BETWEEN ?stDate And ?enDate)";
@@ -1386,6 +1402,15 @@ AND (a.invoice_date BETWEEN ?stDate And ?enDate)";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
         $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function LoadInvoice4FakturPajak ($Tahun,$Bulan){
+        $sql = "SELECT a.id,a.invoice_no,a.invoice_date,a.nsf_pajak,a.fp_date,b.cus_code,b.cus_name,b.npwp,a.base_amount-a.disc_amount as dpp_amount,a.ppn_amount";
+        $sql.= " FROM t_ar_invoice_master AS a JOIN m_customer AS b ON (a.customer_id = b.id) WHERE a.invoice_status = 2 And a.is_deleted = 0 And Year(a.invoice_date) = $Tahun And Month(a.invoice_date) = $Bulan And a.ppn_amount > 0";
+        $sql.= " ORDER BY a.invoice_date,a.invoice_no";
+        $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs;
     }

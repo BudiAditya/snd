@@ -106,7 +106,7 @@ class FakturController extends AppController {
             $output = 0;
         }
         $loader = new Invoice();
-        $invoice= $loader->LoadByMonth($this->userCompanyId,$tahun,$bulan);
+        $invoice= $loader->LoadInvoice4FakturPajak($tahun,$bulan);
         $this->Set("tahun", $tahun);
         $this->Set("bulan", $bulan);
         $this->Set("output", $output);
@@ -114,9 +114,12 @@ class FakturController extends AppController {
     }
 
     public function create(){
+        // Jika kena error no memory
+        set_time_limit(600);
+        ini_set("memory_limit", "512M");
         $ids = $this->GetPostValue("ids", array());
         //sudah divalidasi harus ada yg di post
-        $qry = "Select a.id,a.invoice_date,a.nsf_pajak From t_ar_invoice_master a Where a.id IN ?ids Order By a.id";
+        $qry = "Select a.id,a.invoice_date,a.nsf_pajak From t_ar_invoice_master a Where a.id IN ?ids Order By a.invoice_date,a.invoice_no,a.id";
         $this->connector->CommandText = $qry;
         $this->connector->AddParameter("?ids", $ids);
         $rs = $this->connector->ExecuteQuery();
