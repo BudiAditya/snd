@@ -11,6 +11,10 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
     <title>SND System | Print Nota Penjualan (Invoicing)</title>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
     <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/common.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/jquery-ui.css")); ?>"/>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.min.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery-ui.custom.min.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
     <style type="text/css">
         @page {
             margin: 2cm;
@@ -19,11 +23,13 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
     </style>
 </head>
 <body style="background-color:white;">
-<?php //include(VIEW . "main/menu.php"); ?>
-<div align="right">
-    <input type="button" class="button" onclick="printDiv('printInvoice')" value="Print Invoice" />
-    <a href="<?php print($helper->site_url("ar.invoice")); ?>">Daftar Invoice</a>
+<?php include(VIEW . "main/menu.php"); ?>
+<div align="center" style="font-weight: bold">
+    <input type="button" class="button" onclick="printDiv('printInvoice')" value="PRINT INVOICE" />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="<?php print($helper->site_url("ar.invoice/ivcprint")); ?>">KEMBALI</a>
 </div>
+<hr>
 <div id="printInvoice">
 <?php
 $kop = 'I N V O I C E';

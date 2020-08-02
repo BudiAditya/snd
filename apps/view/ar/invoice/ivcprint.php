@@ -43,12 +43,12 @@
 <form id="frm" name="frmReport" method="post">
     <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
         <tr>
-            <th class="bold" colspan="8">PROSES PENCETAKAN INVOICE</th>
+            <th class="bold" colspan="10">PROSES PENCETAKAN INVOICE (FAKTUR PENJUALAN)</th>
             <th colspan="2" class="bold">Action</th>
         </tr>
         <tr>
             <td><label for="AreaId">Area :</label></td>
-            <td><select id="AreaId" name="areaId">
+            <td><select id="AreaId" name="areaId" style="width: 150px">
                     <option value="0">Semua</option>
                     <?php
                     /** @var $areas SalesArea[] */
@@ -81,11 +81,18 @@
             <td><input type="text" class="text2" maxlength="10" size="8" id="StartDate" name="stDate" value="<?php printf(date('d-m-Y',$stDate));?>"/></td>
             <td><label for="EndDate">S/D Tgl :</label></td>
             <td><input type="text" class="text2" maxlength="10" size="8" id="EndDate" name="enDate" value="<?php printf(date('d-m-Y',$enDate));?>"/></td>
-            <td>
-                <button type="submit" formaction="<?php print($helper->site_url("ar.invoice/ivcprint")); ?>"><b>Tampilkan</b></button>
+            <td><label for="pSize">Kertas :</label></td>
+            <td><select id="pSize" name="pSize">
+                    <option value="0" <?php print($pSize == 0 ? 'selected="selected"' : '');?>>0 - Semua</option>
+                    <option value="1" <?php print($pSize == 1 ? 'selected="selected"' : '');?>>1 - Pendek</option>
+                    <option value="2" <?php print($pSize == 2 ? 'selected="selected"' : '');?>>2 - Panjang</option>
+                </select>
             </td>
             <td>
-                <b><input type="button" id="btnGenerate" class="button" value="Print"/></b>
+                <button type="submit" formaction="<?php print($helper->site_url("ar.invoice/ivcprint")); ?>"><b>GENERATE</b></button>
+            </td>
+            <td>
+                <b><input type="button" id="btnGenerate" class="button" value="PREVIEW"/></b>
             </td>
         </tr>
     </table>
@@ -103,6 +110,7 @@ if ($invoices != null) {
             <th>No. Invoice</th>
             <th>Nama Customer</th>
             <th>Area</th>
+            <th>Salesman</th>
             <th>Sub Total</th>
             <th>Diskon</th>
             <th>DPP</th>
@@ -123,13 +131,14 @@ if ($invoices != null) {
         printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $data["invoice_no"]);
         printf('<td nowrap="nowrap">%s</td>', $data["cus_code"] . ' - ' . $data["cus_name"]);
         printf('<td nowrap="nowrap">%s</td>', $data["area_code"]);
+        printf('<td nowrap="nowrap">%s</td>', $data["sales_name"]);
         printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["sub_total"],0));
         printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["discount"],0));
         printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["sub_total"]-$data["discount"],0));
         printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["ppn"],0));
         printf('<td nowrap="nowrap" align="right">%s</td>',number_format(($data["sub_total"]-$data["discount"])-$data["ppn"],0));
         printf('<td nowrap="nowrap" align="center">%s</td>', $data["baris"]);
-        if ($data["baris"] > 40) {
+        if ($data["baris"] > 13) {
             print('<td>Panjang</td>');
         }else{
             print('<td>Pendek</td>');

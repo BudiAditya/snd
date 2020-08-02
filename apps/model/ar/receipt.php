@@ -407,6 +407,21 @@ WHERE id = ?id";
         return strval($row["valresult"]);
     }
 
+    public function LoadReceipt4Approval ($cabId = 0,$stDate, $enDate, $rStatus = 0){
+        $sql = "SELECT a.* FROM vw_ar_receipt_master a WHERE a.is_deleted = 0 And (a.receipt_date BETWEEN ?stDate And ?enDate)";
+        if ($cabId > 0){
+            $sql.= " And a.cabang_id = ".$cabId;
+        }
+        if ($rStatus > -1){
+            $sql.= " And a.receipt_status = ".$rStatus;
+        }
+        $sql.= " ORDER BY a.receipt_date,a.receipt_no";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
 }
 
 

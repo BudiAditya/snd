@@ -25,28 +25,27 @@ class InvoiceController extends AppController {
         $settings = array();
         $settings["columns"][] = array("name" => "a.id", "display" => "ID", "width" => 40);
         //$settings["columns"][] = array("name" => "a.entity_cd", "display" => "Entity", "width" => 30);
-        $settings["columns"][] = array("name" => "a.cabang_code", "display" => "Cabang", "width" => 50);
+        //$settings["columns"][] = array("name" => "a.cabang_code", "display" => "Cabang", "width" => 50);
         $settings["columns"][] = array("name" => "a.invoice_date", "display" => "Tanggal", "width" => 60);
         $settings["columns"][] = array("name" => "a.invoice_no", "display" => "No. Invoice", "width" => 100);
-        $settings["columns"][] = array("name" => "a.customer_name", "display" => "Nama Customer", "width" => 200);
+        $settings["columns"][] = array("name" => "concat(b.cus_name,'(',b.cus_code,')')", "display" => "Nama Customer", "width" => 200);
         //$settings["columns"][] = array("name" => "a.invoice_descs", "display" => "Keterangan", "width" => 150);
         $settings["columns"][] = array("name" => "if(a.payment_type = 0,'Cash','Credit')", "display" => "Cara Bayar", "width" => 55);
-        $settings["columns"][] = array("name" => "a.due_date", "display" => "JTP", "width" => 60);
-        $settings["columns"][] = array("name" => "format(a.total_amount,0)", "display" => "Nilai Penjualan", "width" => 70, "align" => "right");
+        $settings["columns"][] = array("name" => "a.invoice_date + INTERVAL a.credit_terms DAY", "display" => "JTP", "width" => 60);
+        $settings["columns"][] = array("name" => "format(a.base_amount - a.disc_amount + a.ppn_amount + a.other_costs_amount,0)", "display" => "Nilai Penjualan", "width" => 70, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.return_amount,0)", "display" => "Retur", "width" => 70, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.paid_amount,0)", "display" => "Terbayar", "width" => 70, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.balance_amount,0)", "display" => "OutStanding", "width" => 70, "align" => "right");
-        $settings["columns"][] = array("name" => "a.sales_name", "display" => "Salesman", "width" => 100);
+        $settings["columns"][] = array("name" => "format(a.base_amount - a.disc_amount + a.ppn_amount + a.other_costs_amount - (a.paid_amount + a.return_amount),0)", "display" => "OutStanding", "width" => 70, "align" => "right");
+        $settings["columns"][] = array("name" => "c.sales_name", "display" => "Salesman", "width" => 100);
         $settings["columns"][] = array("name" => "if(a.invoice_status = 0,'Draft',if(a.invoice_status = 1,'Posted',if(a.invoice_status = 2,'Approved','Void')))", "display" => "Status", "width" => 50);
 
         $settings["filters"][] = array("name" => "a.invoice_no", "display" => "No. Invoice");
         $settings["filters"][] = array("name" => "a.invoice_date", "display" => "Tanggal");
-        $settings["filters"][] = array("name" => "a.customer_name", "display" => "Nama Customer");
+        $settings["filters"][] = array("name" => "b.cus_name", "display" => "Nama Customer");
         $settings["filters"][] = array("name" => "if(a.invoice_status = 0,'Draft',if(a.invoice_status = 1,'Posted',if(a.invoice_status = 2,'Approved','Void')))", "display" => "Status");
-        $settings["filters"][] = array("name" => "a.cabang_code", "display" => "Kode Cabang");
 
-        $settings["def_filter"] = 0;
-        $settings["def_invoice"] = 3;
+        $settings["def_filter"] = 1;
+        $settings["def_order"] = 2;
         $settings["def_direction"] = "asc";
         $settings["singleSelect"] = false;
 
@@ -87,16 +86,19 @@ class InvoiceController extends AppController {
 
             if ($acl->CheckUserAccess("ar.invoice", "approve")) {
                 $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "Approve Penjualan", "Url" => "ar.invoice/approve", "Class" => "bt_approve", "ReqId" => 2,
+                $settings["actions"][] = array("Text" => "<b>Approval Invoice</b>", "Url" => "ar.invoice/approve/1", "Class" => "bt_approve", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Penjualan terlebih dahulu sebelum proses approval.",
                     "Confirm" => "Apakah anda menyetujui data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-                $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "ar.invoice/unapprove", "Class" => "bt_reject", "ReqId" => 2,
+                $settings["actions"][] = array("Text" => "<b>Batal Approval</b>", "Url" => "ar.invoice/approve/0", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Penjualan terlebih dahulu sebelum proses pembatalan.",
                     "Confirm" => "Apakah anda mau membatalkan approval data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "<b>Proses Approval</b>", "Url" => "ar.invoice/approval", "Class" => "bt_approve", "ReqId" => 0);
             }
 
         } else {
-            $settings["from"] = "vw_ar_invoice_master AS a";
+            //$settings["from"] = "vw_ar_invoice_master AS a";
+            $settings["from"] = "t_ar_invoice_master AS a JOIN m_customer AS b ON a.customer_id = b.id JOIN m_salesman AS c ON a.sales_id = c.id";
             if ($_GET["query"] == "") {
                 $_GET["query"] = null;
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.invoice_date) = ".$this->trxYear." And month(a.invoice_date) = ".$this->trxMonth;
@@ -131,7 +133,7 @@ class InvoiceController extends AppController {
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -APPROVED-",$invoice->InvoiceNo));
                 redirect_url("ar.invoice");
             }
-            if($invoice->PaidAmount > 0 && $invoice->PaymentType = 1){
+            if($invoice->PaidAmount > 0 && $invoice->PaymentType == 1){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
                 redirect_url("ar.invoice");
             }
@@ -330,7 +332,7 @@ class InvoiceController extends AppController {
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -APPROVED-",$invoice->InvoiceNo));
                 redirect_url("ar.invoice");
             }
-            if($invoice->PaidAmount > 0 && $invoice->PaymentType = 1){
+            if($invoice->PaidAmount > 0 && $invoice->PaymentType == 1){
                 $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
                 redirect_url("ar.invoice");
             }
@@ -411,7 +413,7 @@ class InvoiceController extends AppController {
         $cabCode = $cabang->Kode;
         $cabName = $cabang->Cabang;
         $loader = new Warehouse();
-        $gudangs = $loader->LoadByCabangId($this->userCabangId);
+        $gudangs = $loader->LoadByCompanyId($this->userCompanyId);
         //kirim ke view
         $this->Set("gudangs", $gudangs);
         $this->Set("userLevel", $this->userLevel);
@@ -483,7 +485,7 @@ class InvoiceController extends AppController {
             $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -APPROVED-",$invoice->InvoiceNo));
             redirect_url("ar.invoice");
         }
-        if($invoice->PaidAmount > 0 && $invoice->PaymentType = 1){
+        if($invoice->PaidAmount > 0 && $invoice->PaymentType == 1){
             $this->persistence->SaveState("error", sprintf("Maaf Data Invoice No. %s sudah berstatus -TERBAYAR-",$invoice->InvoiceNo));
             redirect_url("ar.invoice");
         }
@@ -1069,18 +1071,21 @@ class InvoiceController extends AppController {
             $whsid = $this->GetPostValue("whsId");
             $sdate = strtotime($this->GetPostValue("stDate"));
             $edate = strtotime($this->GetPostValue("enDate"));
+            $psize = $this->GetPostValue("pSize");
         }else{
             $areid = 0;
             $whsid = 0;
             $sdate = time();
             $edate = $sdate;
+            $psize = 0;
         }
         $loader = new Invoice();
-        $invoice= $loader->LoadInvoicePrint($areid,$whsid,$sdate,$edate);
+        $invoice= $loader->LoadInvoicePrint($this->userCabangId,$areid,$whsid,$sdate,$edate,$psize);
         $this->Set("areaId", $areid);
         $this->Set("whsId", $whsid);
         $this->Set("stDate", $sdate);
         $this->Set("enDate", $edate);
+        $this->Set("pSize", $psize);
         $this->Set("invoices", $invoice);
         //load cabang
         $loader = new SalesArea();
@@ -1090,6 +1095,24 @@ class InvoiceController extends AppController {
         $loader = new Warehouse();
         $warehouses = $loader->LoadByCabangId($this->userCabangId,1);
         $this->Set("warehouses", $warehouses);
+    }
+
+    public function approval(){
+        if (count($this->postData) > 0) {
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+            $ivsts = $this->GetPostValue("iStatus");
+        }else{
+            $sdate = time();
+            $edate = $sdate;
+            $ivsts = 1;
+        }
+        $loader = new Invoice();
+        $invoice = $loader->LoadInvoice4Approval($this->userCabangId,$sdate,$edate,$ivsts);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("iStatus", $ivsts);
+        $this->Set("invoices", $invoice);
     }
 
     //proses cetak form invoice
@@ -1356,7 +1379,7 @@ class InvoiceController extends AppController {
         $this->Set("PropId",$sPropId);
     }
 
-    public function approve() {
+    public function approve($token) {
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di approve !");
@@ -1372,17 +1395,44 @@ class InvoiceController extends AppController {
             $invoice = $invoice->FindById($id);
             /** @var $invoice Invoice */
             // process invoice
-            if($invoice->InvoiceStatus == 1){
-                $rs = $invoice->Approve($invoice->Id,$uid);
-                if ($rs) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Approve Invoice',$invoice->InvoiceNo,'Success');
-                    $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-approve.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
+            if ($token == 1) {
+                if ($invoice->InvoiceStatus == 1) {
+                    $rs = $invoice->Approve($invoice->Id, $uid);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Approve Invoice', $invoice->InvoiceNo, 'Success');
+                        $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-approve.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Approve Invoice', $invoice->InvoiceNo, 'Failed');
+                        $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
+                    }
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Approve Invoice',$invoice->InvoiceNo,'Failed');
-                    $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
+                    $errors[] = sprintf("Data Invoice No.%s sudah berstatus -Approved- !", $invoice->InvoiceNo);
                 }
             }else{
-                $errors[] = sprintf("Data Invoice No.%s sudah berstatus -Approved- !",$invoice->InvoiceNo);
+                if($invoice->InvoiceStatus == 2){
+                    if ($invoice->PaidAmount > 0 && $invoice->PaymentType == 1) {
+                        $errors[] = sprintf("Data Invoice No.%s sudah terbayar !", $invoice->InvoiceNo);
+                        //}elseif($invoice->QtyReturn($invoice->Id) > 0){
+                        //    $errors[] = sprintf("Data Invoice No.%s ada item yg diretur !", $invoice->InvoiceNo);
+                    }else {
+                        $rs = $invoice->Unapprove($invoice->Id, $uid);
+                        if ($rs) {
+                            $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Success');
+                            $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-batalkan.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
+                        } else {
+                            $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Failed');
+                            $errors[] = sprintf("Maaf, Gagal proses pembatalan Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
+                        }
+                    }
+                }else{
+                    if ($invoice->InvoiceStatus == 1) {
+                        $errors[] = sprintf("Data Invoice No.%s masih berstatus -POSTED- !", $invoice->InvoiceNo);
+                    }elseif ($invoice->InvoiceStatus == 3){
+                        $errors[] = sprintf("Data Invoice No.%s sudah berstatus -VOID- !",$invoice->InvoiceNo);
+                    }else{
+                        $errors[] = sprintf("Data Invoice No.%s masih berstatus -DRAFT- !",$invoice->InvoiceNo);
+                    }
+                }
             }
         }
         if (count($infos) > 0) {

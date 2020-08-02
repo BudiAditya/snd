@@ -264,7 +264,7 @@ WHERE id = ?id";
 	}
 
     public function UpdateInvoiceMaster($invoiceId){
-        $sql = 'Update t_ar_invoice_master a Set a.base_amount = 0, a.ppn_amount = 0, a.pph_amount = 0, a.disc_amount = 0, a.other_costs_amount = 0 Where a.id = ?invoiceId;';
+        $sql = 'Update t_ar_invoice_master a Set a.base_amount = 0, a.ppn_amount = 0, a.pph_amount = 0, a.disc_amount = 0, a.other_costs_amount = 0, a.sum_qty = 0, a.baris = 0 Where a.id = ?invoiceId;';
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteNonQuery();
@@ -275,6 +275,12 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteNonQuery();
         $sql = 'Update t_ar_invoice_master a Set a.paid_amount = (a.base_amount - a.disc_amount) + a.ppn_amount + a.pph_amount + a.other_costs_amount Where a.id = ?invoiceId And a.payment_type = 0;';
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?invoiceId", $invoiceId);
+        $rs = $this->connector->ExecuteNonQuery();
+        $sql = "Update t_ar_invoice_master a JOIN (SELECT x.invoice_id,coalesce(sum(x.sales_qty),0) AS sum_qty, sum(IF (length(z.item_name) < 40, 1, 0)) AS brs1,sum(IF (length(z.item_name) > 40, 2, 0)) AS brs2";
+        $sql.= " FROM t_ar_invoice_detail x	JOIN m_items z ON x.item_id = z.id GROUP BY	x.invoice_id) c ON a.id = c.invoice_id";
+        $sql.= " Set a.sum_qty = c.sum_qty, a.baris = c.brs1+c.brs2 Where a.id = ?invoiceId";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?invoiceId", $invoiceId);
         $rs = $this->connector->ExecuteNonQuery();

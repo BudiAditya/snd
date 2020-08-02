@@ -60,33 +60,25 @@ class ReceiptController extends AppController {
                     "Confirm" => "");
             }
             if ($acl->CheckUserAccess("ar.receipt", "delete")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "Void", "Url" => "ar.receipt/void/%s", "Class" => "bt_delete", "ReqId" => 1);
             }
             if ($acl->CheckUserAccess("ar.receipt", "view")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "View", "Url" => "ar.receipt/view/%s", "Class" => "bt_view", "ReqId" => 1,
                     "Error" => "Maaf anda harus memilih Data Receipt terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data receipt","Confirm" => "");
-            }
-            /*
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
-            if ($acl->CheckUserAccess("ar.receipt", "print")) {
-                $settings["actions"][] = array("Text" => "Print Receipt", "Url" => "ar.receipt/print_pdf/%s", "Class" => "bt_pdf", "ReqId" => 1,
-                    "Error" => "Maaf anda harus memilih Data Receipt terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data receipt","Confirm" => "");
-            }
-            */
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
-            if ($acl->CheckUserAccess("ar.receipt", "view")) {
                 $settings["actions"][] = array("Text" => "Laporan", "Url" => "ar.receipt/report", "Class" => "bt_report", "ReqId" => 0);
             }
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
             if ($acl->CheckUserAccess("ar.receipt", "approve")) {
-                $settings["actions"][] = array("Text" => "Approve Receipt", "Url" => "ar.receipt/approve", "Class" => "bt_approve", "ReqId" => 2,
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Approve", "Url" => "ar.receipt/approve/1", "Class" => "bt_approve", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Receipt terlebih dahulu sebelum proses approval.",
                     "Confirm" => "Apakah anda menyetujui data invoice yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-            }
-            if ($acl->CheckUserAccess("ar.receipt", "approve")) {
-                $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "ar.receipt/unapprove", "Class" => "bt_reject", "ReqId" => 2,
+                $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "ar.receipt/approve/0", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Receipt terlebih dahulu sebelum proses pembatalan.",
                     "Confirm" => "Apakah anda mau membatalkan approval data invoice yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Proses Approval", "Url" => "ar.receipt/approval", "Class" => "bt_approve", "ReqId" => 0);
             }
         } else {
             $settings["from"] = "vw_ar_receipt_master AS a";
@@ -582,7 +574,7 @@ class ReceiptController extends AppController {
         echo json_encode($itemlists);
     }
 
-    public function approve() {
+    public function approve($token = 0) {
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di approve !");
@@ -598,22 +590,41 @@ class ReceiptController extends AppController {
             $receipt = $receipt->FindById($id);
             /** @var $receipt Receipt */
             // process receipt
-            if($receipt->ReceiptStatus == 1 && $receipt->ReceiptAmount > 0 && $receipt->BalanceAmount < 1000){
-                $rs = $receipt->Approve($receipt->Id,$uid);
-                if ($rs) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ar.receipt','Approve Receipt',$receipt->ReceiptNo,'Success');
-                    $infos[] = sprintf("Data Receipt No.: '%s' (%s) telah berhasil di-approve.", $receipt->ReceiptNo, $receipt->ReceiptDescs);
+            if ($token == 1) {
+                if ($receipt->ReceiptStatus == 1 && $receipt->ReceiptAmount > 0 && $receipt->BalanceAmount < 1000) {
+                    $rs = $receipt->Approve($receipt->Id, $uid);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.receipt', 'Approve Receipt', $receipt->ReceiptNo, 'Success');
+                        $infos[] = sprintf("Data Receipt No.: '%s' (%s) telah berhasil di-approve.", $receipt->ReceiptNo, $receipt->ReceiptDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.receipt', 'Approve Receipt', $receipt->ReceiptNo, 'Failed');
+                        $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $receipt->ReceiptNo, $this->connector->GetErrorMessage());
+                    }
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ar.receipt','Approve Receipt',$receipt->ReceiptNo,'Failed');
-                    $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $receipt->ReceiptNo, $this->connector->GetErrorMessage());
+                    if ($receipt->ReceiptStatus <> 1) {
+                        $errors[] = sprintf("Data Receipt No.%s tidak berstatus -Posted- !", $receipt->ReceiptNo);
+                    } elseif ($receipt->ReceiptAmount == 0) {
+                        $errors[] = sprintf("Data Receipt No.%s nilai penerimaan masih kosong !", $receipt->ReceiptNo);
+                    } elseif ($receipt->BalanceAmount >= 1000) {
+                        $errors[] = sprintf("Data Receipt No.%s nilai penerimaan masih ada yang belum dialokasikan !", $receipt->ReceiptNo);
+                    }
                 }
             }else{
-                if ($receipt->ReceiptStatus <> 1) {
-                    $errors[] = sprintf("Data Receipt No.%s tidak berstatus -Posted- !", $receipt->ReceiptNo);
-                }elseif ($receipt->ReceiptAmount == 0){
-                    $errors[] = sprintf("Data Receipt No.%s nilai penerimaan masih kosong !", $receipt->ReceiptNo);
-                }elseif ($receipt->BalanceAmount >= 1000){
-                    $errors[] = sprintf("Data Receipt No.%s nilai penerimaan masih ada yang belum dialokasikan !", $receipt->ReceiptNo);
+                if($receipt->ReceiptStatus == 2){
+                    $rs = $receipt->Unapprove($receipt->Id,$uid);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId,'ar.receipt','Un-Approve Receipt',$receipt->ReceiptNo,'Success');
+                        $infos[] = sprintf("Data Receipt No.: '%s' (%s) telah berhasil di-batalkan.", $receipt->ReceiptNo, $receipt->ReceiptDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId,'ar.receipt','Un-Approve Receipt',$receipt->ReceiptNo,'Failed');
+                        $errors[] = sprintf("Maaf, Gagal proses pembatalan Data Invoice: '%s'. Message: %s", $receipt->ReceiptNo, $this->connector->GetErrorMessage());
+                    }
+                }else{
+                    if ($receipt->ReceiptStatus == 1){
+                        $errors[] = sprintf("Data Receipt No.%s masih berstatus -POSTED- !",$receipt->ReceiptNo);
+                    }else{
+                        $errors[] = sprintf("Data Receipt No.%s masih berstatus -DRAFT- !",$receipt->ReceiptNo);
+                    }
                 }
             }
         }
@@ -666,6 +677,24 @@ class ReceiptController extends AppController {
             $this->persistence->SaveState("error", "<ul><li>" . implode("</li><li>", $errors) . "</li></ul>");
         }
         redirect_url("ar.receipt");
+    }
+
+    public function approval(){
+        if (count($this->postData) > 0) {
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+            $rsts = $this->GetPostValue("rStatus");
+        }else{
+            $sdate = time();
+            $edate = $sdate;
+            $rsts = 1;
+        }
+        $loader = new Receipt();
+        $receipt = $loader->LoadReceipt4Approval($this->userCabangId,$sdate,$edate,$rsts);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("rStatus", $rsts);
+        $this->Set("receipts", $receipt);
     }
 }
 
