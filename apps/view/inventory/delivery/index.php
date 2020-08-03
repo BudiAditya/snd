@@ -58,7 +58,7 @@
         </tr>
         <tr>
             <td><label for="AreaId">Area :</label></td>
-            <td><select id="AreaId" name="areaId">
+            <td><select id="AreaId" name="areaId" style="width: 150px">
                     <option value="0">Semua</option>
                     <?php
                     /** @var $areas SalesArea[] */

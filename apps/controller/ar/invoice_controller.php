@@ -42,6 +42,7 @@ class InvoiceController extends AppController {
         $settings["filters"][] = array("name" => "a.invoice_no", "display" => "No. Invoice");
         $settings["filters"][] = array("name" => "a.invoice_date", "display" => "Tanggal");
         $settings["filters"][] = array("name" => "b.cus_name", "display" => "Nama Customer");
+        $settings["filters"][] = array("name" => "if(a.payment_type = 0,'Cash','Credit')", "display" => "Cara Bayar");
         $settings["filters"][] = array("name" => "if(a.invoice_status = 0,'Draft',if(a.invoice_status = 1,'Posted',if(a.invoice_status = 2,'Approved','Void')))", "display" => "Status");
 
         $settings["def_filter"] = 1;
@@ -103,7 +104,7 @@ class InvoiceController extends AppController {
                 $_GET["query"] = null;
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.invoice_date) = ".$this->trxYear." And month(a.invoice_date) = ".$this->trxMonth;
             } else {
-                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId;
+                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.invoice_date) = ".$this->trxYear;
             }
         }
 
@@ -1188,6 +1189,7 @@ class InvoiceController extends AppController {
                             default:
                                 $dPrice = $iPrices->UomCode.'|'.$iPrices->pZone1;
                         }
+                        $dPrice .= "|".$iPrices->LuomCode."|".$iPrices->SuomCode."|".$iPrices->SuomQty;
                     }
                 }
             }

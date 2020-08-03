@@ -230,8 +230,8 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                         <th>Brand</th>
                         <th>Kode</th>
                         <th nowrap="nowrap">Nama Barang</th>
-                        <th>L</th>
-                        <th>S</th>
+                        <th>QTY</th>
+                        <th>UOM</th>
                         <th>Harga</th>
                         <th>Bonus</th>
                         <th>Jumlah</th>
@@ -252,8 +252,8 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                         printf('<td>%s</td>', $detail->EntityCode);
                         printf('<td>%s</td>', $detail->ItemCode);
                         printf('<td nowrap="nowrap">%s</td>', $detail->ItemDescs);
-                        printf('<td class="right">%s</td>', number_format($detail->Lqty,0));
-                        printf('<td class="right">%s</td>', number_format($detail->Sqty,0));
+                        printf('<td class="right">%s</td>', number_format($detail->SalesQty,0));
+                        printf('<td nowrap="nowrap">%s</td>', $detail->SatKecil);
                         printf('<td class="right">%s</td>', number_format($detail->Price,2));
                         if($detail->IsFree == 0){
                             print("<td class='center'><input type='checkbox' disabled></td>");

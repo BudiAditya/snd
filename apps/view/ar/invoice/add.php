@@ -63,6 +63,11 @@
         var msgText = null;
         var dMode = null;
         var detailId = 0;
+        var dPrc = 0;
+        var dShr = null;
+        var dSbs = null;
+        var dSkc = null;
+        var dIsi = 0;
         $( function() {
             //var addetail = ["aItemCode", "aQty","aPrice", "aDiscFormula", "aDiscAmount", "aIsFree", "aSubTotal"];
             //BatchFocusRegister(addetail);
@@ -137,38 +142,22 @@
                     $('#aPrice').numberbox('setValue',harga);
                     $('#aDiscFormula').textbox('setValue',0);
                     $('#aDiscAmount').numberbox('setValue',0);
-                    if (isi > 0 && qty >= isi) {
-                        dtz = round(qty/isi,2);
-                        dtz = dtz.toString();
-                        adt = dtz.split('.');
-                        $("#lQty").numberbox('setValue',adt[0]);
-                        $("#sQty").numberbox('setValue',qty - (Number(adt[0]) * isi));
-                    }else{
-                        $("#lQty").numberbox('setValue',0);
-                        $("#sQty").numberbox('setValue',qty);
-                    }
                     $('#aQty').numberbox('setValue',qty);
                     $('#aPpnPct').numberbox('setValue',10);
                     $('#aPpnAmount').numberbox('setValue',0);
                     $('#aIsiSatKecil').val(row.s_uom_qty);
-                    $('#lUom').text(row.l_uom_code+' x '+isi);
-                    $('#sUom').text(row.s_uom_code);
+                    $('#lUom').text('1 ' + row.l_uom_code + ' @ ' + isi + ' ' + row.s_uom_code);
                     $('#qUom').text(row.s_uom_code);
-                    $('#pUom').text('/'+row.l_uom_code);
+                    $('#pUom').text('/'+row.s_uom_code);
                     //check stock
-                    //gudangId = $('#GudangId').combobox('getValue');
                     $.get("<?php print($helper->site_url("ar.invoice/checkStock/"));?>"+gudangId+'/'+bid, function(data){
                         qst = Number(data);
                         $('#aQtyStock').val(qst);
                         $('#xQtyStock').numberbox('setValue',qst);
                         if (qst > 0) {
-                            $('#lQty').prop('disabled',false);
-                            $('#sQty').prop('disabled',false);
                             fillSalePrice(areaId, bid);
                             hitDetail();
                         }else{
-                            $('#lQty').prop('disabled',true);
-                            $('#sQty').prop('disabled',true);
                             $.messager.alert('Warning','Maaf Stock produk tidak cukup!');
                         }
                     });
@@ -215,24 +204,10 @@
                     $('#aPrice').numberbox('setValue',harga);
                     $('#aDiscFormula').textbox('setValue',0);
                     $('#aDiscAmount').numberbox('setValue',0);
-                    /*
-                    if (isi > 0 && qty >= isi) {
-                        dtz = round(qty/isi,2);
-                        dtz = dtz.toString();
-                        adt = dtz.split('.');
-                        $("#lQty").numberbox('setValue',adt[0]);
-                        $("#sQty").numberbox('setValue',qty - (Number(adt[0]) * isi));
-                    }else{
-                        $("#lQty").numberbox('setValue',0);
-                        $("#sQty").numberbox('setValue',qty);
-                    }
-                    $('#aQty').numberbox('setValue',qty);
-                    */
                     $('#aPpnPct').numberbox('setValue',10);
                     $('#aPpnAmount').numberbox('setValue',0);
                     $('#aIsiSatKecil').val(row.s_uom_qty);
-                    $('#lUom').text(row.l_uom_code+' x '+isi);
-                    $('#sUom').text(row.s_uom_code);
+                    $('#lUom').text('1 ' + row.l_uom_code + ' @ ' + isi + ' ' + row.s_uom_code);
                     $('#qUom').text(row.s_uom_code);
                     $('#pUom').text('/'+row.l_uom_code);
                     //check stock
@@ -244,13 +219,9 @@
                         $('#aQtyStock').val(qst);
                         $('#xQtyStock').numberbox('setValue',qst);
                         if (qst > 0) {
-                            $('#lQty').prop('disabled',false);
-                            $('#sQty').prop('disabled',false);
                             fillSalePrice(areaId, bid);
                             hitDetail();
                         }else{
-                            $('#lQty').prop('disabled',true);
-                            $('#sQty').prop('disabled',true);
                             $.messager.alert('Warning','[ER1] - Maaf Stock produk tidak cukup!');
                         }
                     });
@@ -271,22 +242,13 @@
                     $('#aSubTotal').numberbox('setValue',0);
                     $('#aPpnPct').numberbox('setValue',10);
                     $('#aPpnAmount').numberbox('setValue',0);
-                    $('#lQty').numberbox('setValue',0);
-                    $('#sQty').numberbox('setValue',0);
                     $('#aQtyStock').val(0);
                     $('#xQtyStock').numberbox('setValue', 0);
                     newItem();
                 }
             });
 
-            $('#lQty').numberbox({
-                onChange: function(rvalue){
-                    hitQty();
-                    hitDetail();
-                }
-            });
-
-            $('#sQty').numberbox({
+            $('#aQty').numberbox({
                 onChange: function(rvalue){
                     hitQty();
                     hitDetail();
@@ -369,43 +331,52 @@
 
         function hitQty() {
             var iQty = Number($("#aIsiSatKecil").val());
-            var lQTy = Number($("#lQty").numberbox('getValue'));
-            var sQTy = Number($("#sQty").numberbox('getValue'));
             var tQty = Number($("#aQtyStock").val());
-            var rQty = Number((lQTy * iQty)) + sQTy;
+            var rQty = Number($("#aQty").numberbox('getValue'));
             if (tQty >= rQty) {
                 $("#aQty").numberbox('setValue',rQty);
             }else{
-                $("#lQty").numberbox('setValue',0);
-                $("#sQty").numberbox('setValue',0);
                 $("#aQty").numberbox('setValue',0);
                 $.messager.alert('Warning','[ER2] - Maaf Stock produk tidak cukup! (Stok: '+tQty+', Dibutuhkan: '+ rQty +')');
             }
         }
 
+        function fillSalePrice(areaId,itemId) {
+            var csi = $('#CustomerId').combogrid("getValue");
+            var urs = "<?php print($helper->site_url("ar.invoice/getItemSalePriceBySalesArea/"));?>"+csi+'/'+itemId;
+            $.get(urs, function(data, status){
+                var dta = data.split('|');
+                if(dta[0] == 'ERR'){
+                    $.messager.alert('Warning','Harga Produk ini belum disetting!');
+                }else{
+                    dShr = dta[0];
+                    dPrc = Number(dta[1]);
+                    dSbs = dta[2];
+                    dSkc = dta[3];
+                    dIsi = Number(dta[4]);
+                    if (dShr == dSbs && dIsi > 0 && dPrc > 0){
+                        dPrc = Number(round(dPrc/dIsi,2));
+                    }
+                    $('#aPrice').numberbox('setValue',dPrc);
+                    $('#pUom').text('/'+dSkc);
+                    hitDetail();
+                }
+            });
+        }
+
         function hitDetail(){
             var isFree = Number($("#aIsFree").combobox('getValue'));
             var tpp = Number($('#aPpnPct').numberbox('getValue'));
+            var qty = Number($('#aQty').numberbox('getValue'));
             var txa = 0;
-            var isi = Number($("#aIsiSatKecil").val());
-            var hrg = Number($("#aPrice").numberbox('getValue'));
-            var lqt = Number($("#lQty").numberbox('getValue'));
-            var sqt = Number($("#sQty").numberbox('getValue'));
             var dfm = $("#aDiscFormula").textbox('getValue');
             var dam = Number($('#aDiscAmount').numberbox('getValue'));
             var subTotal = 0;
             var dpp = 0;
             var discAmount = 0;
             var totalDetail = 0;
-            if (isFree == 0 && hrg > 0 && isi > 0){
-                if (lqt > 0){
-                    subTotal+= round(lqt * hrg,0);
-                }
-                if (sqt > 0){
-                    hrg = Number(round(hrg/isi,2));
-                    subTotal+= round(sqt * hrg,0);
-                }
-                //alert(hrg);
+            if (isFree == 0 && dPrc > 0 && dIsi > 0){
+                subTotal+= round(qty * dPrc,0);
                 if (dfm != null && dfm != '0' && dfm != '') {
                     discAmount = hitDiscFormula(subTotal, dfm);
                 }else{
@@ -442,13 +413,11 @@
             $('#aExSoId').val(dtx[10]);
             $('#aPphPct').val(dtx[11]);
             $('#aPpnPct').numberbox('setValue',dtx[12]);
-            $('#lQty').numberbox('setValue',dtx[15]);
-            $('#sQty').numberbox('setValue',dtx[16]);
-            $('#lUom').text(dtx[18]+' x ' + dtx[17]);
-            $('#sUom').text(dtx[6]);
+            $('#lUom').text('1 ' + dtx[18]+' @ ' + dtx[17] + ' ' + dtx[6]);
             $('#qUom').text(dtx[6]);
+            $('#pUom').text('/' + dtx[6]);
             $('#aIsiSatKecil').val(dtx[17]);
-            $('#aQty').numberbox('setValue',dtx[4]);
+            $('#aQty').numberbox('setValue',Number(dtx[4]));
             //set dialog
             $('#dlg').dialog('open').dialog('setTitle','Edit Detail Barang yang dijual');
             $('#cSubmit').text('UPDATE');
@@ -463,17 +432,6 @@
                 $('#aQtyStock').val(qst);
                 $('#xQtyStock').numberbox('setValue',qst);
                 hitDetail();
-                /*
-                 if (qst > 0) {
-                 $('#lQty').prop('disabled',false);
-                 $('#sQty').prop('disabled',false);
-                 hitDetail();
-                 }else{
-                 $('#lQty').prop('disabled',true);
-                 $('#sQty').prop('disabled',true);
-                 $.messager.alert('Warning','Maaf Stock produk tidak cukup!');
-                 }
-                 */
             });
         }
 
@@ -704,21 +662,6 @@
             return retVal;
         }
 
-        function fillSalePrice(areaId,itemId) {
-            var csi = $('#CustomerId').combogrid("getValue");
-            var urs = "<?php print($helper->site_url("ar.invoice/getItemSalePriceBySalesArea/"));?>"+csi+'/'+itemId;
-            $.get(urs, function(data, status){
-                var dta = data.split('|');
-                if(dta[0] == 'ERR'){
-                    $.messager.alert('Warning','Harga Produk ini belum disetting!');
-                }else{
-                    $('#aPrice').numberbox('setValue',dta[1]);
-                    $('#pUom').text('/'+dta[0]);
-                    hitDetail();
-                }
-            });
-        }
-
         function checkStock(whId,itemId) {
             var urs = "<?php print($helper->site_url("ar.invoice/checkStock/"));?>"+whId+'/'+itemId;
             $.get(urs, function(data){
@@ -892,8 +835,8 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                             <th>Brand</th>
                             <th>Kode</th>
                             <th nowrap="nowrap">Nama Barang</th>
-                            <th>L</th>
-                            <th>S</th>
+                            <th>UOM</th>
+                            <th>QTY</th>
                             <th>Harga</th>
                             <th>Bonus</th>
                             <th>Jumlah</th>
@@ -914,8 +857,8 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                             printf('<td>%s</td>', $detail->EntityCode);
                             printf('<td>%s</td>', $detail->ItemCode);
                             printf('<td nowrap="nowrap">%s</td>', $detail->ItemDescs);
-                            printf('<td class="right">%s</td>', number_format($detail->Lqty,0));
-                            printf('<td class="right">%s</td>', number_format($detail->Sqty,0));
+                            printf('<td nowrap="nowrap">%s</td>', $detail->SatKecil);
+                            printf('<td class="right">%s</td>', number_format($detail->SalesQty,0));
                             printf('<td class="right">%s</td>', number_format($detail->Price,2));
                             if($detail->IsFree == 0){
                                 print("<td class='center'><input type='checkbox' disabled></td>");
@@ -931,9 +874,11 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                             print("<td class='center' nowrap='nowrap'>");
                             $dta = addslashes($detail->Id.'|'.$detail->ItemCode.'|'.str_replace('"',' in',$detail->ItemDescs));
                             $dtx = $detail->Id.'|'.$detail->ItemCode.'|'.str_replace('"',' in',$detail->ItemDescs).'|'.$detail->ItemId.'|'.$detail->SalesQty.'|'.$detail->ReturnQty.'|'.$detail->SatKecil.'|'.$detail->Price.'|'.$detail->DiscFormula.'|'.$detail->IsFree.'|'.$detail->ExSoId.'|'.$detail->PphPct.'|'.$detail->PpnPct.'|'.$detail->PpnAmount.'|'.$detail->PphAmount.'|'.$detail->Lqty.'|'.$detail->Sqty.'|'.$detail->IsiSatKecil.'|'.$detail->SatBesar;
+                            /*
                             if ($acl->CheckUserAccess("ar.invoice", "delete")) {
                                 printf('&nbsp<img src="%s" alt="Edit barang" title="Edit barang" style="cursor: pointer" onclick="return feditdetail(%s);"/>',$bedit,"'".$dtx."'");
                             }
+                            */
                             if ($acl->CheckUserAccess("ar.invoice", "delete")) {
                                 printf('&nbsp<img src="%s" alt="Hapus barang" title="Hapus barang" style="cursor: pointer" onclick="return fdeldetail(%s);"/>', $bclose, "'" . $dta . "'");
                             }
@@ -1000,7 +945,7 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                 <td colspan="7"><input class="easyui-combogrid" id="dExStock" name="dExStock" style="width:600px"/></td>
             </tr>
             <tr>
-                <td class="right bold">Kode Barang :</td>
+                <td class="right bold">Kode :</td>
                 <td colspan="5"><input type="text" class="easyui-textbox bold" id="aItemCode" name="aItemCode" size="12" value="" readonly/>
                     <input type="hidden" id="aItemId" name="aItemId" value="0"/>
                     <input type="hidden" id="aId" name="aId" value="0"/>
@@ -1018,12 +963,9 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                 </td>
             </tr>
             <tr>
-                <td class="right bold">L - QTY :</td>
-                <td><input class="easyui-numberbox"  data-options="min:0,groupSeparator:','" type="text" id="lQty" name="lQty" style="width:60px" value="0" required/>&nbsp;<span id="lUom"></span></td>
-                <td class="right bold">+ S - QTY :</td>
-                <td><input class="easyui-numberbox"  data-options="min:0,groupSeparator:','" type="text" id="sQty" name="sQty" style="width:60px" value="0" required/>&nbsp;<span id="sUom"></span></td>
-                <td class="right bold">= QTY :</td>
-                <td><input class="easyui-numberbox"  data-options="min:0,groupSeparator:','" type="text" id="aQty" name="aQty" style="width:60px" value="0" readonly/>&nbsp;<span id="qUom"></span></td>
+                <td class="right bold">QTY :</td>
+                <td><input class="easyui-numberbox"  data-options="min:0,groupSeparator:','" type="text" id="aQty" name="aQty" style="width:60px" value="0" required/>&nbsp;<span id="qUom"></span></td>
+                <td colspan="2" class="left bold">&nbsp;<span id="lUom"></span>&nbsp;<span id="sUom"></td>
             </tr>
             <tr>
                 <td class="right bold">Bonus/Free? :</td>
@@ -1033,7 +975,7 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                     </select>
                 </td>
                 <td class="right bold">Harga :</td>
-                <td><input class="easyui-numberbox"  data-options="min:0,groupSeparator:','" type="text" id="aPrice" name="aPrice" style="width:100px" value="0"/><span id="pUom"></span></td>
+                <td><input class="easyui-numberbox"  data-options="min:0,groupSeparator:',',precision:2" type="text" id="aPrice" name="aPrice" style="width:100px" value="0"/><span id="pUom"></span></td>
                 <td class="right bold">Jumlah :</td>
                 <td><input class="easyui-numberbox"  data-options="min:0,groupSeparator:','" type="text" id="aSubTotal" name="aSubTotal" style="width:130px" value="0" readonly/></td>
             </tr>

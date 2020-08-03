@@ -93,7 +93,7 @@ class FakturController extends AppController {
         $this->Set("dfaktur", $dfaktur);
 	}
 
-	public function add(){
+	public function add($pbulan = 0){
 	    require_once (MODEL . "ar/invoice.php");
         //proses rekap dll
         if (count($this->postData) > 0) {
@@ -101,8 +101,12 @@ class FakturController extends AppController {
             $bulan = $this->GetPostValue("Bulan");
             $output = $this->GetPostValue("Output");
         }else{
+            if ($pbulan > 0){
+                $bulan = $pbulan;
+            }else{
+                $bulan = $this->trxMonth;
+            }
             $tahun = $this->trxYear;
-            $bulan = $this->trxMonth;
             $output = 0;
         }
         $loader = new Invoice();
@@ -113,7 +117,7 @@ class FakturController extends AppController {
         $this->Set("invoices", $invoice);
     }
 
-    public function create(){
+    public function create($pbulan = 0){
         // Jika kena error no memory
         set_time_limit(600);
         ini_set("memory_limit", "512M");
@@ -137,7 +141,7 @@ class FakturController extends AppController {
                $ivd = $row['invoice_date'];
                //$ivn = $row['invoice_no'];
                $nfl = $row['nsf_pajak'];
-               if ($nfl == '' || $nfl == null){
+               if ($nfl == '' || $nfl == '-' || $nfl == null){
                    $nfb = $noseri->GetSnFaktur($this->userCompanyId,$ivd);
                    if ($nfb == '-'){
                        break;
@@ -146,17 +150,17 @@ class FakturController extends AppController {
                }
             }
         }
-        redirect_url("tax.faktur/add");
+        redirect_url("tax.faktur/add/".$pbulan);
     }
 
-    public function void(){
+    public function void($pbulan = 0){
         $ids = $this->GetPostValue("ids", array());
         //sudah divalidasi harus ada yg di post
         $qry = "Update t_ar_invoice_master a Set a.fp_date = null, a.nsf_pajak = null Where a.id IN ?ids";
         $this->connector->CommandText = $qry;
         $this->connector->AddParameter("?ids", $ids);
         $rs = $this->connector->ExecuteNonQuery();
-        redirect_url("tax.faktur/add");
+        redirect_url("tax.faktur/add/".$pbulan);
     }
 
     public function report(){

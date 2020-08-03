@@ -1229,7 +1229,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $result;
     }
 
-    public function LoadInvoiceDelivery ($areaId = 0, $whId = 0, $stDate, $enDate, $dStatus = 0){
+    public function LoadInvoiceDelivery ($cabId,$areaId = 0, $whId = 0, $stDate, $enDate, $dStatus = 0){
         //$sql = "Select a.* From vw_ar_invoice_delivery_detail a Where (a.invoice_date BETWEEN ?stDate and ?enDate)";
         $sql = "SELECT
 	`b`.`id` AS `id`,
@@ -1290,6 +1290,9 @@ FROM
 	)
 WHERE
 	`a`.`is_deleted` = 0 AND `a`.`invoice_status` <> 3 And (a.invoice_date BETWEEN ?stDate And ?enDate)";
+        if ($cabId > 0){
+            $sql.= " And a.cabang_id = ".$cabId;
+        }
         if ($areaId > 0){
             $sql.= " And d.area_id = ".$areaId;
         }
@@ -1297,7 +1300,7 @@ WHERE
             $sql.= " And a.gudang_id = ".$whId;
         }
         $sql.= " And a.delivery_status = ".$dStatus;
-        $sql.= " ORDER BY `d`.`cus_code`,`a`.`invoice_date`,`a`.`invoice_no`,`c`.`item_code`,`b`.`sales_qty`";
+        $sql.= " ORDER BY `a`.`invoice_date`,`d`.`cus_code`,`a`.`invoice_no`,`c`.`item_code`,`b`.`sales_qty`";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
         $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));

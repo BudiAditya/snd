@@ -9,18 +9,28 @@
 	<script type="text/javascript" src="<?php print($helper->path("public/js/jquery-ui.custom.min.js")); ?>"></script>
 	<script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
     <script type="text/javascript">
-        var urc = "<?php print($helper->site_url("ar.invoice/printout")); ?>";
+        var urc = "<?php print($helper->site_url("ar.invoice/printout/invoice")); ?>";
+        var urs = "<?php print($helper->site_url("ar.invoice/printout/surat")); ?>";
         $(document).ready(function() {
             $("#StartDate").customDatePicker({ showOn: "focus" });
             $("#EndDate").customDatePicker({ showOn: "focus" });
             $("#cbAll").change(function(e) { cbAll_Change(this, e);	});
 
-            $("#btnGenerate").click(function() {
+            $("#btnGenInvoice").click(function() {
                 var test = $(".cbIds:checked");
                 if (test.length == 0) {
                     alert("Belum ada data yang dipilih!");
                 }else {
                     $("#frd").attr('action', urc).submit();
+                }
+            });
+
+            $("#btnGenSurat").click(function() {
+                var test = $(".cbIds:checked");
+                if (test.length == 0) {
+                    alert("Belum ada data yang dipilih!");
+                }else {
+                    $("#frd").attr('action', urs).submit();
                 }
             });
         });
@@ -44,7 +54,7 @@
     <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
         <tr>
             <th class="bold" colspan="10">PROSES PENCETAKAN INVOICE (FAKTUR PENJUALAN)</th>
-            <th colspan="2" class="bold">Action</th>
+            <th colspan="2" class="bold">ACTION</th>
         </tr>
         <tr>
             <td><label for="AreaId">Area :</label></td>
@@ -92,7 +102,8 @@
                 <button type="submit" formaction="<?php print($helper->site_url("ar.invoice/ivcprint")); ?>"><b>GENERATE</b></button>
             </td>
             <td>
-                <b><input type="button" id="btnGenerate" class="button" value="PREVIEW"/></b>
+                <b><input type="button" id="btnGenInvoice" class="button" value="PREV FAKTUR"/></b>
+                <b><input type="button" id="btnGenSurat" class="button" value="SURAT JALAN"/></b>
             </td>
         </tr>
     </table>

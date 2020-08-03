@@ -34,7 +34,7 @@ class DeliveryController extends AppController {
             $edate = $sdate;
         }
         $loader = new Invoice();
-        $invoice= $loader->LoadInvoiceDelivery($areid,$whsid,$sdate,$edate,$dstts);
+        $invoice= $loader->LoadInvoiceDelivery($this->userCabangId,$areid,$whsid,$sdate,$edate,$dstts);
         $this->Set("areaId", $areid);
         $this->Set("whsId", $whsid);
         $this->Set("dStatus", $dstts);

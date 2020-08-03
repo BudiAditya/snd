@@ -9,8 +9,8 @@
 	<script type="text/javascript" src="<?php print($helper->path("public/js/jquery-ui.custom.min.js")); ?>"></script>
 	<script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
     <script type="text/javascript">
-        var urc = "<?php print($helper->site_url("tax.faktur/create")); ?>";
-        var urv = "<?php print($helper->site_url("tax.faktur/void")); ?>";
+        var urc = "<?php print($helper->site_url("tax.faktur/create/$bulan")); ?>";
+        var urv = "<?php print($helper->site_url("tax.faktur/void/$bulan")); ?>";
         $(document).ready(function() {
             $("#cbAll").change(function(e) { cbAll_Change(this, e);	});
 

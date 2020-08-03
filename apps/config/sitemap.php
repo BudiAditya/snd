@@ -21,7 +21,7 @@ $menu = $root->AddNode("PENJUALAN", null, "menu");
     $menu->AddNode("Transaksi", null, "title");
         $menu->AddNode("Sales Order (SO)", "ar.order");
         $menu->AddNode("Invoice Penjualan", "ar.invoice");
-        $menu->AddNode("Cetak Invoice", "ar.invoice/ivcprint");
+        $menu->AddNode("Cetak Invoice & Surat Jalan", "ar.invoice/ivcprint");
         $menu->AddNode("Penerimaan Piutang", "ar.receipt");
         $menu->AddNode("Retur Penjualan", "ar.arreturn");
         $menu->AddNode("Penagihan Piutang", "ar.collect");

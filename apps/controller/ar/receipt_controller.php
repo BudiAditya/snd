@@ -35,10 +35,11 @@ class ReceiptController extends AppController {
         $settings["columns"][] = array("name" => "a.admin_name", "display" => "Admin", "width" => 80);
         $settings["columns"][] = array("name" => "a.status_desc", "display" => "Status", "width" => 50);
 
-        $settings["filters"][] = array("name" => "a.cabang_code", "display" => "Kode Cabang");
-        $settings["filters"][] = array("name" => "a.receipt_no", "display" => "No. Receipt");
+        $settings["filters"][] = array("name" => "a.receipt_no", "display" => "No. Bukti");
         $settings["filters"][] = array("name" => "a.receipt_date", "display" => "Tanggal");
         $settings["filters"][] = array("name" => "a.debtor_name", "display" => "Nama Customer");
+        $settings["filters"][] = array("name" => "a.cara_bayar", "display" => "Cara Bayar");
+        $settings["filters"][] = array("name" => "a.bank_name", "display" => "Via Kas/Bank");
         $settings["filters"][] = array("name" => "a.status_desc", "display" => "Status");
 
         $settings["def_filter"] = 0;
@@ -86,7 +87,7 @@ class ReceiptController extends AppController {
                 $_GET["query"] = null;
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.receipt_date) = ".$this->trxYear." And month(a.receipt_date) = ".$this->trxMonth;
             } else {
-                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId;
+                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.receipt_date) = ".$this->trxYear;
             }
         }
 

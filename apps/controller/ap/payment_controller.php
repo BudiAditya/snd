@@ -91,7 +91,7 @@ class PaymentController extends AppController {
                 $_GET["query"] = null;
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.payment_date) = ".$this->trxYear." And month(a.payment_date) = ".$this->trxMonth;
             } else {
-                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId;
+                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.payment_date) = ".$this->trxYear;
             }
         }
 

@@ -800,7 +800,7 @@ WHERE id = ?id";
     }
 
     public function GetItemStocks($tahun,$gudangId,$filter) {
-        $sql = "SELECT a.item_id,a.item_code,a.item_name,a.s_uom_code,a.l_uom_code,a.qty_stock,coalesce(b.zone_1,0) as hrg_jual,a.s_uom_qty";
+        $sql = "SELECT a.item_id,a.item_code,a.item_name,a.s_uom_code,a.l_uom_code,a.qty_stock,coalesce(b.zone_1,0) as hrg_jual,a.s_uom_qty,b.uom_code as p_uom_code";
         $sql.= " From vw_ic_stock_list AS a Left Join m_item_prices b ON a.item_id = b.item_id";
         $sql.= " Where a.trx_year = $tahun And a.warehouse_id = $gudangId And a.qty_stock > 0";
         if ($filter != null){
