@@ -89,7 +89,6 @@ class CbTrxController extends AppController {
 			$settings["def_order"] = 2;
 			$settings["def_filter"] = 0;
 			$settings["singleSelect"] = false;
-
 		} else {
 			$settings["from"] = "vw_cb_transaction AS a";
             if ($_GET["query"] == "") {
@@ -103,7 +102,6 @@ class CbTrxController extends AppController {
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = ".$this->userCabangId;
             }
 		}
-
 		$dispatcher = Dispatcher::CreateInstance();
 		$dispatcher->Dispatch("utilities", "flexigrid", array(), $settings, null, true);
 	}

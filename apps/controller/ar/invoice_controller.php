@@ -47,7 +47,7 @@ class InvoiceController extends AppController {
 
         $settings["def_filter"] = 1;
         $settings["def_order"] = 2;
-        $settings["def_direction"] = "asc";
+        $settings["def_direction"] = "desc";
         $settings["singleSelect"] = false;
 
         if (!$router->IsAjaxRequest) {
@@ -250,8 +250,10 @@ class InvoiceController extends AppController {
                         printf("ER|A|%d|%s|%s",$invoice->Id,'0',$err);
                     }
                 }else{
-                    if ($invoice->PaymentType == 0){
+                    if ($invoice->PaymentType == 1){
                         $invoice->PaidAmount = 0;
+                    }else{
+                        $invoice->PaidAmount = $invoice->BaseAmount - $invoice->DiscAmount + $invoice->PpnAmount;
                     }
                     $invoice->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
                     $rs = $invoice->Update($invoiceId);
@@ -523,6 +525,9 @@ class InvoiceController extends AppController {
                 $invoicedetail->ItemId = $this->GetPostValue("aItemId");
                 $invoicedetail->ExSoId = $this->GetPostValue("aExSoId");
                 $invoicedetail->SalesQty = $this->GetPostValue("aQty");
+                $invoicedetail->Lqty = $this->GetPostValue("lQty");
+                $invoicedetail->Sqty = $this->GetPostValue("sQty");
+                $invoicedetail->Mqty = 0;
                 $invoicedetail->ReturnQty = 0;
                 $invoicedetail->Price = $this->GetPostValue("aPrice");
                 if ($this->GetPostValue("aDiscFormula") == '') {
@@ -685,6 +690,9 @@ class InvoiceController extends AppController {
                 $invoicedetail->ItemId = $this->GetPostValue("aItemId");
                 $invoicedetail->ExSoId = $this->GetPostValue("aExSoId");
                 $invoicedetail->SalesQty = $this->GetPostValue("aQty");
+                $invoicedetail->Lqty = $this->GetPostValue("lQty");
+                $invoicedetail->Sqty = $this->GetPostValue("sQty");
+                $invoicedetail->Mqty = 0;
                 $invoicedetail->Price = $this->GetPostValue("aPrice");
                 if ($this->GetPostValue("aDiscFormula") == '') {
                     $invoicedetail->DiscFormula = 0;
@@ -1152,7 +1160,7 @@ class InvoiceController extends AppController {
         $this->Set("report", $report);
     }
 
-    public function getItemSalePriceBySalesArea($customerId = 0,$itemId){
+    public function getItemSalePriceBySalesArea($customerId = 0,$itemId = 0){
         $dPrice = 'ERR|0';
         $sZone = 0;
         $iPrices = null;
@@ -1168,7 +1176,7 @@ class InvoiceController extends AppController {
                 if ($sZone > 0){
                     require_once (MODEL . "inventory/itemprices.php");
                     $iPrices = new ItemPrices();
-                    $iPrices = $iPrices->FindByItemId($this->userCabangId,$itemId);
+                    $iPrices = $iPrices->FindByItemId($this->userCompanyId,$itemId);
                     if ($iPrices != null){
                         switch ($sZone){
                             case 1:
@@ -1190,8 +1198,14 @@ class InvoiceController extends AppController {
                                 $dPrice = $iPrices->UomCode.'|'.$iPrices->pZone1;
                         }
                         $dPrice .= "|".$iPrices->LuomCode."|".$iPrices->SuomCode."|".$iPrices->SuomQty;
+                    }else {
+                        $dPrice = "ERR|3";
                     }
+                }else{
+                    $dPrice = "ERR|2";
                 }
+            }else{
+                $dPrice = "ERR|1";
             }
         }
         print $dPrice;
@@ -1213,7 +1227,7 @@ class InvoiceController extends AppController {
                 if ($sZone > 0){
                     require_once (MODEL . "inventory/itemprices.php");
                     $iPrices = new ItemPrices();
-                    $iPrices = $iPrices->FindByItemId($this->userCabangId,$itemId);
+                    $iPrices = $iPrices->FindByItemId($this->userCompanyId,$itemId);
                     if ($iPrices != null){
                         switch ($sZone){
                             case 1:

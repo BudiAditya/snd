@@ -480,7 +480,7 @@ WHERE id = ?id";
 
         // get issue
         $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,issue,relasi)";
-        $sqx.= " Select a.issue_date,concat('Issue - ',a.corr_no),'inventory.issue',a.qty,a.keterangan";
+        $sqx.= " Select a.issue_date,concat('Issue - ',a.issue_no),'inventory.issue',a.qty,a.keterangan";
         $sqx.= " From t_ic_issue as a";
         $sqx.= " Where a.item_id = ?item_id and Year(a.issue_date) = ?year and a.warehouse_id = ?gudang_id and a.is_status = 1";
         $this->connector->CommandText = $sqx;

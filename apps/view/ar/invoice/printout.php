@@ -123,11 +123,10 @@ foreach ($report as $idx => $invoice) {
         if ($doctype == 'invoice') {
             print('
                 <tr align="center">
-                    <td rowspan="2" width="3%">No.</td>
+                    <td rowspan="2" width="2%">No.</td>
                     <td rowspan="2" width="5%">BRAND</td>
                     <td rowspan="2" width="35%">NAMA PRODUK</td>
-                    <td rowspan="2" width="5%">QTY</td>
-                    <td rowspan="2" width="3%">UOM</td>
+                    <td colspan="2" width="10%">QTY</td>
                     <td rowspan="2" width="10%">HARGA</td>
                     <td colspan="2" width="10%">DISKON</td>
                     <td rowspan="2" width="10%">DPP</td>
@@ -135,6 +134,8 @@ foreach ($report as $idx => $invoice) {
                     <td rowspan="2" width="10%">JUMLAH</td>
                 </tr>
                 <tr align="center">
+                    <td width="5%" style="border-left: 0px; border-bottom: 1px solid !important;">L</td>
+                    <td width="5%" style="border-bottom: 1px solid !important;">S</td>
                     <td width="4%" style="border-bottom: 1px solid !important;">%</td>
                     <td width="6%" style="border-bottom: 1px solid !important;">Rp</td>
                 </tr>
@@ -146,9 +147,10 @@ foreach ($report as $idx => $invoice) {
                     <td width="5%">BRAND</td>
                     <td width="5%">KODE</td>
                     <td width="45%">NAMA PRODUK</td>
-                    <td width="5%">QTY</td>
-                    <td width="5%">UOM</td>
-                    <td width="15%">KETERANGAN</td>
+                    <td width="4%">L</td>
+                    <td width="4%">S</td>
+                    <td width="4%">Q</td>
+                    <td width="12%">KETERANGAN</td>
                 </tr>
             ');
         }
@@ -173,8 +175,13 @@ foreach ($report as $idx => $invoice) {
                 printf('<td align="center">%s. </td>', $nmr++);
                 printf('<td> %s</td>', $detail->EntityCode);
                 printf('<td> %s</td>', $detail->ItemDescs);
-                printf('<td align="right">%s&nbsp;</td>', $detail->SalesQty > 0 ? number_format($detail->SalesQty) : '');
-                printf('<td align="left">&nbsp;%s</td>', $detail->SatKecil);
+                if ($detail->Lqty == 0 && $detail->Sqty == 0){
+                    print('<td>&nbsp;</td>');
+                    printf('<td align="center">%s</td>', $detail->SalesQty > 0 ? number_format($detail->SalesQty) : '');
+                }else {
+                    printf('<td align="center">%s</td>', $detail->Lqty > 0 ? number_format($detail->Lqty) : '');
+                    printf('<td align="center">%s</td>', $detail->Sqty > 0 ? number_format($detail->Sqty) : '');
+                }
                 if ($detail->IsFree == 0) {
                     printf('<td align="right">%s</td>', number_format($detail->Price, 2));
                     if ($detail->DiscAmount > 0) {
@@ -195,8 +202,14 @@ foreach ($report as $idx => $invoice) {
                 printf('<td> %s</td>', $detail->EntityCode);
                 printf('<td> %s</td>', $detail->ItemCode);
                 printf('<td> %s</td>', $detail->ItemDescs);
-                printf('<td align="right">%s&nbsp;</td>', $detail->SalesQty > 0 ? number_format($detail->SalesQty) : '');
-                printf('<td align="left">&nbsp;%s</td>', $detail->SatKecil);
+                if ($detail->Lqty == 0 && $detail->Sqty == 0){
+                    print('<td>&nbsp;</td>');
+                    printf('<td align="center">%s</td>', $detail->SalesQty > 0 ? number_format($detail->SalesQty) : '');
+                }else {
+                    printf('<td align="center">%s</td>', $detail->Lqty > 0 ? number_format($detail->Lqty) : '');
+                    printf('<td align="center">%s</td>', $detail->Sqty > 0 ? number_format($detail->Sqty) : '');
+                }
+                printf('<td align="center">%s&nbsp;</td>', $detail->SalesQty > 0 ? number_format($detail->SalesQty) : '');
                 print('<td>&nbsp;</td>');
             }
             print('</tr>');
@@ -211,16 +224,19 @@ foreach ($report as $idx => $invoice) {
                 if ($doctype == 'invoice') {
                     print('<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
                 }else{
-                    print('<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
+                    print('<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>');
                 }
                 print('</tr>');
             }
         }
         print('<tr style="outline: thin solid">');
+        if ($lqty == 0 && $sqty == 0){
+            $sqty = $qqty;
+        }
         if ($doctype == 'invoice') {
-            printf('<td style="border-left: 0px !important;">&nbsp;</td><td class="right" colspan="7">T O T A L&nbsp;&nbsp;</td><td class="right">%s</td><td class="right">%s</td><td class="right" style="border-right: 0px !important;"><b>%s</b></td>', number_format($invoice->BaseAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
+            printf('<td style="border-left: 0px !important;">&nbsp;</td><td class="center" colspan="2">T O T A L</td><td class="center">%s</td><td class="center">%s</td><td colspan="3"></td><td class="right">%s</td><td class="right">%s</td><td class="right" style="border-right: 0px !important;"><b>%s</b></td>', $lqty, $sqty, number_format($invoice->BaseAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
         }else{
-            print('<td>&nbsp;</td>');
+            printf('<td style="border-left: 0px !important;" colspan="4">&nbsp;</td><td class="center">%s</td><td class="center">%s</td><td class="center">%s</td>', $lqty, $sqty, $qqty);
         }
         print('</tr>');
         print('</table>');

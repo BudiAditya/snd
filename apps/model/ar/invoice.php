@@ -316,6 +316,7 @@ class Invoice extends EntityBase {
 	, fp_date = ?fp_date
 	, nsf_pajak = ?nsf_pajak
 	, update_time = NOW()
+    , paid_amount = ?paid_amount
 WHERE id = ?id";
         $this->connector->AddParameter("?cabang_id", $this->CabangId);
         $this->connector->AddParameter("?gudang_id", $this->GudangId);
@@ -339,6 +340,7 @@ WHERE id = ?id";
         $this->connector->AddParameter("?fp_date", $this->FpDate);
         $this->connector->AddParameter("?nsf_pajak", $this->NsfPajak);
         $this->connector->AddParameter("?updateby_id", $this->UpdatebyId);
+        $this->connector->AddParameter("?paid_amount", str_replace(",","",$this->PaidAmount));
 		$this->connector->AddParameter("?id", $id);
 		$rs = $this->connector->ExecuteNonQuery();
         if ($rs == 1){
@@ -1247,6 +1249,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 	`c`.`qty_convert` AS `qty_convert`,
 	`c`.`c_uom_code` AS `c_uom_code`,
 	`b`.`sales_qty` AS `qty`,
+    b.l_qty,
+    b.m_qty,
+    b.s_qty,
 	`c`.`s_uom_qty` AS `s_uom_qty`,
 	`a`.`delivery_status` AS `delivery_status`,
 	`a`.`delivery_by` AS `delivery_by`,

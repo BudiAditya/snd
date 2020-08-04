@@ -8,6 +8,7 @@ class InvoiceDetail extends EntityBase {
     public $ItemCode;
     public $ItemId;
     public $Lqty = 0;
+    public $Mqty = 0;
     public $Sqty = 0;
 	public $SalesQty = 0;
 	public $SendQty = 0;
@@ -43,6 +44,9 @@ class InvoiceDetail extends EntityBase {
         $this->ItemCode = $row["item_code"];
 		$this->ItemDescs = $row["item_name"];
 		$this->SalesQty = $row["sales_qty"];
+        $this->Lqty = $row["l_qty"];
+        $this->Sqty = $row["s_qty"];
+        $this->Mqty = $row["m_qty"];
         $this->ReturnQty = $row["return_qty"];
 		$this->Price = $row["price"];
         $this->DiscFormula = $row["disc_formula"];
@@ -61,17 +65,6 @@ class InvoiceDetail extends EntityBase {
         $this->ExpDate = strtotime($row["exp_date"]);
         $this->ByAngkut = $row["by_angkut"];
         $this->IsiSatKecil = $row["bisisatkecil"];
-        if (($this->SalesQty >= $this->IsiSatKecil && $this->IsiSatKecil > 0) && ($this->SatBesar != $this->SatKecil)){
-            $aqty = array();
-            $sqty = round($this->SalesQty/$this->IsiSatKecil,2);
-            $aqty = explode('.',$sqty);
-            $lqty = $aqty[0];
-            $this->Lqty = $lqty;
-            $this->Sqty = $this->SalesQty - ($lqty * $this->IsiSatKecil);
-        }else {
-            $this->Lqty = 0;
-            $this->Sqty = $this->SalesQty;
-        }
         $this->IsPost = $row["is_post"];
 	}
 
@@ -133,12 +126,15 @@ class InvoiceDetail extends EntityBase {
 
 	public function Insert() {
 		$this->connector->CommandText =
-"INSERT INTO t_ar_invoice_detail(is_post,ex_so_id,by_angkut,is_free,invoice_id, item_id, item_descs, sales_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, exp_date, item_hpp)
-VALUES(?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, ?item_id, ?item_descs, ?sales_qty, ?return_qty, ?price, ?disc_formula, ?disc_amount, ?sub_total, ?pph_pct, ?pph_amount, ?ppn_pct, ?ppn_amount, ?exp_date, ?item_hpp)";
+"INSERT INTO t_ar_invoice_detail(l_qty,m_qty,s_qty,is_post,ex_so_id,by_angkut,is_free,invoice_id, item_id, item_descs, sales_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, exp_date, item_hpp)
+VALUES(?l_qty,?m_qty,?s_qty,?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, ?item_id, ?item_descs, ?sales_qty, ?return_qty, ?price, ?disc_formula, ?disc_amount, ?sub_total, ?pph_pct, ?pph_amount, ?ppn_pct, ?ppn_amount, ?exp_date, ?item_hpp)";
 		$this->connector->AddParameter("?invoice_id", $this->InvoiceId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
         $this->connector->AddParameter("?item_descs", $this->ItemDescs == null ? '-' : $this->ItemDescs);
 		$this->connector->AddParameter("?sales_qty", $this->SalesQty);
+        $this->connector->AddParameter("?l_qty", $this->Lqty);
+        $this->connector->AddParameter("?m_qty", $this->Mqty);
+        $this->connector->AddParameter("?s_qty", $this->Sqty);
         $this->connector->AddParameter("?return_qty", $this->ReturnQty);
 		$this->connector->AddParameter("?price", $this->Price);
         $this->connector->AddParameter("?disc_formula", $this->DiscFormula);
@@ -199,11 +195,17 @@ VALUES(?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, ?item_id, ?item_descs
 	, by_angkut = ?by_angkut
 	, item_hpp = ?item_hpp
 	, is_post = ?is_post
+    , l_qty = ?l_qty
+    , m_qty = ?m_qty
+    , s_qty = ?s_qty
 WHERE id = ?id";
         $this->connector->AddParameter("?invoice_id", $this->InvoiceId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
         $this->connector->AddParameter("?item_descs", $this->ItemDescs == null ? '-' : $this->ItemDescs);
         $this->connector->AddParameter("?sales_qty", $this->SalesQty);
+        $this->connector->AddParameter("?l_qty", $this->Lqty);
+        $this->connector->AddParameter("?m_qty", $this->Mqty);
+        $this->connector->AddParameter("?s_qty", $this->Sqty);
         $this->connector->AddParameter("?return_qty", $this->ReturnQty);
         $this->connector->AddParameter("?price", $this->Price);
         $this->connector->AddParameter("?disc_formula", $this->DiscFormula);

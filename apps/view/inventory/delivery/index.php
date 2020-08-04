@@ -141,17 +141,6 @@ if ($invoices != null) {
     $ivn = null;
     $ivi = 0;
     while ($data = $invoices->FetchAssoc()) {
-        $rqty = $data["qty"];
-        if ($rqty >= $data["s_uom_qty"] && $data["s_uom_qty"] > 0){
-            $aqty = array();
-            $sqty = round($rqty/$data["s_uom_qty"],2);
-            $aqty = explode('.',$sqty);
-            $lqty = $aqty[0];
-            $sqty = $rqty - ($lqty * $data["s_uom_qty"]);
-        }else {
-            $lqty = 0;
-            $sqty = $rqty;
-        }
         print('<tr>');
         if ($csc <> $data["cus_code"]) {
             printf('<td>%d</td>', $nmr++);
@@ -173,18 +162,18 @@ if ($invoices != null) {
         }
         printf('<td nowrap="nowrap">%s</td>',$data["item_code"]);
         printf('<td nowrap="nowrap">%s</td>',$data["item_name"]);
-        if ($lqty > 0) {
-            printf('<td nowrap="nowrap" align="right">%s</td>', number_format($lqty, 0));
+        if ($data["l_qty"] > 0) {
+            printf('<td nowrap="nowrap" align="right">%s</td>', number_format($data["l_qty"], 0));
         }else{
             print('<td>&nbsp;</td>');
         }
-        if ($sqty > 0){
-            printf('<td nowrap="nowrap" align="right">%s</td>',number_format($sqty,0));
+        if ($data["s_qty"] > 0){
+            printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["s_qty"],0));
         }else{
             print('<td>&nbsp;</td>');
         }
-        if ($rqty > 0){
-            printf('<td nowrap="nowrap" align="right">%s</td>',number_format($rqty,0));
+        if ($data["qty"] > 0){
+            printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["qty"],0));
         }else{
             print('<td>&nbsp;</td>');
         }
