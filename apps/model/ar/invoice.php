@@ -519,7 +519,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
 
     public function Load4ReportsRekapItem($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
         //laptype = 3
-        $sql = "SELECT d.entity_id,d.brand_name,c.item_code,c.item_name,c.s_uom_qty,c.qty_convert,b.price, coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
+        $sql = "SELECT d.entity_id,d.brand_name,c.item_code,c.item_name,c.s_uom_qty,c.qty_convert, coalesce(sum(b.l_qty),0) as sum_lqty, coalesce(sum(b.s_qty),0) as sum_sqty, coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
         $sql.= " WHERE a.is_deleted = 0 And a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
@@ -564,7 +564,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         if ($brandId > 0){
             $sql.= " and c.brand_id = ".$brandId;
         }
-        $sql.= " Group By d.entity_id,d.brand_name,c.item_code,c.item_name,c.s_uom_qty,c.qty_convert,b.price Order By c.item_name,c.item_code,b.price";
+        $sql.= " Group By d.entity_id,d.brand_name,c.item_code,c.item_name,c.s_uom_qty,c.qty_convert Order By c.item_name,c.item_code,b.price";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));

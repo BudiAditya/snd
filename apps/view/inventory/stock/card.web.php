@@ -98,12 +98,12 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                         $saldo = $row["saldo"];
                         printf('<td>%s</td>',$row["trx_type"]);
                     }else{
-                        $saldo = ($saldo + $row["awalcas"] + $row["masuk"] + $row["koreksi"]) - $row["keluar"];
+                        $saldo = ($saldo + $row["awal"] + $row["masuk"] + $row["koreksi"]) - $row["keluar"];
                         printf('<td><a href="%s" target="_blank">%s</a></td>',$helper->site_url($row["trx_url"]),$row["trx_type"]);
                     }
                     printf('<td>%s</td>',$row["relasi"]);
                     printf('<td>%s</td>',$row["notes"]);
-                    printf('<td class="right">%s</td>', $row["awalcas"] > 0 ? decFormat($row["awalcas"]) : '');
+                    printf('<td class="right">%s</td>', $row["awal"] > 0 ? decFormat($row["awal"]) : '');
                     printf('<td class="right">%s</td>', $row["masuk"] > 0 ? decFormat($row["masuk"]) : '');
                     printf('<td class="right">%s</td>', $row["keluar"] > 0 ? decFormat($row["keluar"]) : '');
                     printf('<td class="right">%s%s</td>', $row["koreksi"] > 0 ? '+' : '', $row["koreksi"] <> 0 ? decFormat($row["koreksi"]) : '');

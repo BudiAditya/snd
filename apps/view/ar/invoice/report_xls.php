@@ -2,14 +2,14 @@
 $phpExcel = new PHPExcel();
 $headers = array(
   'Content-Type: application/vnd.ms-excel'
-, 'Content-Disposition: attachment;filename="print-rekap-ar-invoice.xls"'
+, 'Content-Disposition: attachment;filename="sales-report.xls"'
 , 'Cache-Control: max-age=0'
 );
 $writer = new PHPExcel_Writer_Excel5($phpExcel);
 // Excel MetaData
 $phpExcel->getProperties()->setCreator("Rekasystem Infotama Inc (c) Budi Aditya")->setTitle("Print Laporan")->setCompany("Rekasystem Infotama Inc");
 $sheet = $phpExcel->getActiveSheet();
-$sheet->setTitle("Rekapitulasi AR Invoice");
+$sheet->setTitle("Rekapitulasi Penjualan");
 //helper for styling
 $center = array("alignment" => array("horizontal" => PHPExcel_Style_Alignment::HORIZONTAL_CENTER));
 $right = array("alignment" => array("horizontal" => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT));
@@ -36,36 +36,45 @@ $sheet->getStyle("A1");
 $sheet->setShowGridlines(false);
 $row++;
 if ($JnsLaporan < 3) {
-    $sheet->setCellValue("A$row", "REKAPITULASI A/R INVOICE");
+    if ($JnsLaporan == 1){
+        $sheet->setCellValue("A$row", "REKAPITULASI PENJUALAN");
+    }else{
+        $sheet->setCellValue("A$row", "DETAIL PENJUALAN");
+    }
     $row++;
     $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
     $row++;
     $sheet->setCellValue("A$row", "No.");
-    $sheet->setCellValue("B$row", "Cabang");
+    $sheet->setCellValue("B$row", "Cab");
     $sheet->setCellValue("C$row", "Tanggal");
     $sheet->setCellValue("D$row", "No. Invoice");
     $sheet->setCellValue("E$row", "Customer");
-    $sheet->setCellValue("F$row", "Keterangan");
-    $sheet->setCellValue("G$row", "Salesman");
-    $sheet->setCellValue("H$row", "JTP");
-    $sheet->setCellValue("I$row", "DPP");
-    $sheet->setCellValue("J$row", "PPN");
-    $sheet->setCellValue("K$row", "Jumlah");
-    $sheet->setCellValue("L$row", "Terbayar");
-    $sheet->setCellValue("M$row", "Outstanding");
-    if ($JnsLaporan == 2) {
-        $sheet->setCellValue("L$row", 'Kode Barang');
-        $sheet->setCellValue("M$row", 'Nama Barang');
-        $sheet->setCellValue("N$row", 'QTY');
-        $sheet->setCellValue("O$row", 'Harga');
-        $sheet->setCellValue("P$row", 'Disc(%)');
-        $sheet->setCellValue("Q$row", 'Discount');
-        $sheet->setCellValue("R$row", 'Jumlah');
+    $sheet->setCellValue("F$row", "Cs Code");
+    $sheet->setCellValue("G$row", "Area");
+    $sheet->setCellValue("H$row", "Salesman");
+    if ($JnsLaporan == 1) {
+        $sheet->setCellValue("I$row", "JTP");
+        $sheet->setCellValue("J$row", "DPP");
+        $sheet->setCellValue("K$row", "PPN");
+        $sheet->setCellValue("L$row", "Jumlah");
+        $sheet->setCellValue("M$row", "Retur");
+        $sheet->setCellValue("N$row", "Terbayar");
+        $sheet->setCellValue("O$row", "Outstanding");
+        $sheet->getStyle("A$row:O$row")->applyFromArray(array_merge($center, $allBorders));
+    }elseif ($JnsLaporan == 2) {
+        $sheet->setCellValue("I$row", 'Kode');
+        $sheet->setCellValue("J$row", 'Brand');
+        $sheet->setCellValue("K$row", 'Nama Barang');
+        $sheet->setCellValue("L$row", 'QTY');
+        $sheet->setCellValue("M$row", 'Harga');
+        $sheet->setCellValue("N$row", 'Jumlah');
+        $sheet->setCellValue("O$row", 'Discount');
+        $sheet->setCellValue("P$row", 'DPP');
+        $sheet->setCellValue("Q$row", 'PPN');
+        $sheet->setCellValue("R$row", 'TOTAL');
         $sheet->getStyle("A$row:R$row")->applyFromArray(array_merge($center, $allBorders));
-    }else {
-        $sheet->getStyle("A$row:M$row")->applyFromArray(array_merge($center, $allBorders));
     }
-    $nmr = 0;
+    $nmr = 1;
     $str = $row;
     if ($Reports != null) {
         $ivn = null;
@@ -75,38 +84,36 @@ if ($JnsLaporan < 3) {
         $tBalance = 0;
         while ($rpt = $Reports->FetchAssoc()) {
             $row++;
-            if ($ivn <> $rpt["invoice_no"]) {
-                $nmr++;
-                $sma = false;
-            } else {
-                $sma = true;
-            }
-            if (!$sma) {
-                $sheet->setCellValue("A$row", $nmr);
-                $sheet->getStyle("A$row")->applyFromArray($center);
-                $sheet->setCellValue("B$row", $rpt["cabang_code"]);
-                $sheet->setCellValue("C$row", date('d-m-Y', strtotime($rpt["invoice_date"])));
-                $sheet->setCellValue("D$row", $rpt["invoice_no"]);
-                $sheet->setCellValue("E$row", $rpt["customer_name"]);
-                $sheet->setCellValue("F$row", $rpt["invoice_descs"]);
-                $sheet->setCellValue("G$row", $rpt["sales_name"]);
-                $sheet->setCellValue("H$row", date('d-m-Y', strtotime($rpt["due_date"])));
-                $sheet->setCellValue("I$row", $rpt["base_amount"]-$rpt["disc_amount"]);
-                $sheet->setCellValue("J$row", $rpt["ppn_amount"]);
-                $sheet->setCellValue("K$row", $rpt["total_amount"]);
-                $sheet->setCellValue("L$row", $rpt["paid_amount"]);
-                $sheet->setCellValue("M$row", $rpt["balance_amount"]);
-                $sheet->getStyle("A$row:M$row")->applyFromArray(array_merge($allBorders));
-            }
-            if ($JnsLaporan == 2) {
-                $sheet->setCellValueExplicit("L$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
-                $sheet->setCellValue("M$row", $rpt['item_descs']);
-                $sheet->setCellValue("N$row", $rpt['qty']);
-                $sheet->setCellValue("O$row", $rpt['price']);
-                $sheet->setCellValue("P$row", $rpt['disc_formula']);
-                $sheet->setCellValue("Q$row", $rpt['disc_amount']);
-                $sheet->setCellValue("R$row", $rpt['sub_total']);
-                $sheet->getStyle("L$row:R$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("A$row", $nmr++);
+            $sheet->getStyle("A$row")->applyFromArray($center);
+            $sheet->setCellValueExplicit("B$row", $rpt["cabang_code"]);
+            $sheet->setCellValue("C$row", date('d-m-Y', strtotime($rpt["invoice_date"])));
+            $sheet->setCellValue("D$row", $rpt["invoice_no"]);
+            $sheet->setCellValue("E$row", $rpt["customer_name"]);
+            $sheet->setCellValueExplicit("F$row", $rpt["customer_code"],PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValue("G$row", $rpt["area_code"]);
+            $sheet->setCellValue("H$row", $rpt["sales_name"]);
+            if ($JnsLaporan == 1) {
+                $sheet->setCellValue("I$row", date('d-m-Y', strtotime($rpt["due_date"])));
+                $sheet->setCellValue("J$row", $rpt["base_amount"] - $rpt["disc_amount"]);
+                $sheet->setCellValue("K$row", $rpt["ppn_amount"]);
+                $sheet->setCellValue("L$row", $rpt["total_amount"]);
+                $sheet->setCellValue("M$row", $rpt["return_amount"]);
+                $sheet->setCellValue("N$row", $rpt["paid_amount"]);
+                $sheet->setCellValue("O$row", $rpt["balance_amount"]);
+                $sheet->getStyle("A$row:O$row")->applyFromArray(array_merge($allBorders));
+            }elseif ($JnsLaporan == 2) {
+                $sheet->setCellValue("I$row", $rpt['brand_name']);
+                $sheet->setCellValueExplicit("J$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
+                $sheet->setCellValue("K$row", $rpt['item_name']);
+                $sheet->setCellValue("L$row", $rpt['sales_qty']);
+                $sheet->setCellValue("M$row", $rpt['price']);
+                $sheet->setCellValue("N$row", $rpt['sub_total']);
+                $sheet->setCellValue("O$row", $rpt['disc_amount']);
+                $sheet->setCellValue("P$row", $rpt['sub_total']-$rpt['disc_amount']);
+                $sheet->setCellValue("Q$row", $rpt['ppn_amount']);
+                $sheet->setCellValue("R$row", $rpt['sub_total']-$rpt['disc_amount']+$rpt['ppn_amount']);
+                $sheet->getStyle("A$row:R$row")->applyFromArray(array_merge($allBorders));
             }
             $ivn = $rpt["invoice_no"];
         }
@@ -115,49 +122,68 @@ if ($JnsLaporan < 3) {
         $sheet->setCellValue("A$row", "GRAND TOTAL INVOICE");
         $sheet->mergeCells("A$row:H$row");
         $sheet->getStyle("A$row")->applyFromArray($center);
-        $sheet->setCellValue("I$row", "=SUM(I$str:I$edr)");
-        $sheet->setCellValue("J$row", "=SUM(J$str:J$edr)");
-        $sheet->setCellValue("K$row", "=SUM(K$str:K$edr)");
-        $sheet->setCellValue("L$row", "=SUM(L$str:L$edr)");
-        $sheet->setCellValue("M$row", "=SUM(M$str:M$edr)");
-        $sheet->setCellValue("R$row", "=SUM(R$str:R$edr)");
-        $sheet->getStyle("I$str:M$row")->applyFromArray($idrFormat);
-        $sheet->getStyle("N$str:R$row")->applyFromArray($idrFormat);
         if ($JnsLaporan == 1) {
-            $sheet->getStyle("A$row:M$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("J$row", "=SUM(J$str:J$edr)");
+            $sheet->setCellValue("K$row", "=SUM(K$str:K$edr)");
+            $sheet->setCellValue("L$row", "=SUM(L$str:L$edr)");
+            $sheet->setCellValue("M$row", "=SUM(M$str:M$edr)");
+            $sheet->setCellValue("N$row", "=SUM(N$str:N$edr)");
+            $sheet->setCellValue("O$row", "=SUM(O$str:O$edr)");
+            $sheet->getStyle("J$str:O$row")->applyFromArray($idrFormat);
+            $sheet->getStyle("A$row:O$row")->applyFromArray(array_merge($allBorders));
         }else{
+            $sheet->setCellValue("M$row", "=SUM(M$str:M$edr)");
+            $sheet->setCellValue("N$row", "=SUM(N$str:N$edr)");
+            $sheet->setCellValue("O$row", "=SUM(O$str:O$edr)");
+            $sheet->setCellValue("P$row", "=SUM(P$str:P$edr)");
+            $sheet->setCellValue("Q$row", "=SUM(Q$str:Q$edr)");
+            $sheet->setCellValue("R$row", "=SUM(R$str:R$edr)");
+            $sheet->getStyle("L$str:R$row")->applyFromArray($idrFormat);
             $sheet->getStyle("A$row:R$row")->applyFromArray(array_merge($allBorders));
         }
         $row++;
     }
 }elseif ($JnsLaporan == 3){
     // rekap item yang terjual
-    $sheet->setCellValue("A$row", "REKAPITULASI ITEM TERJUAL");
+    $sheet->setCellValue("A$row", "REKAPITULASI BARANG TERJUAL");
     $row++;
     $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
     $row++;
     $sheet->setCellValue("A$row", "No.");
-    $sheet->setCellValue("B$row", "Kode");
-    $sheet->setCellValue("C$row", "Nama Barang");
-    $sheet->setCellValue("D$row", "Harga");
-    $sheet->setCellValue("E$row", "Q T Y");
-    $sheet->setCellValue("F$row", "Satuan");
-    $sheet->setCellValue("G$row", "Nilai Penjualan");
-    $sheet->getStyle("A$row:G$row")->applyFromArray(array_merge($center, $allBorders));
+    $sheet->setCellValue("B$row", "Brand");
+    $sheet->setCellValue("C$row", "Kode");
+    $sheet->setCellValue("D$row", "Nama Barang");
+    $sheet->setCellValue("E$row", "L");
+    $sheet->setCellValue("F$row", "S");
+    $sheet->setCellValue("G$row", "PCS");
+    $sheet->setCellValue("H$row", "LTR");
+    $sheet->setCellValue("I$row", "DPP");
+    $sheet->setCellValue("J$row", "PPN");
+    $sheet->setCellValue("K$row", "NILAI");
+    $sheet->getStyle("A$row:K$row")->applyFromArray(array_merge($center, $allBorders));
     $nmr = 0;
     $str = $row;
     if ($Reports != null) {
         while ($rpt = $Reports->FetchAssoc()) {
             $row++;
             $nmr++;
+            if ($rpt["entity_id"] == 1) {
+                $cqty = round($rpt["sum_qty"] * $rpt["qty_convert"], 2);
+            }else{
+                $cqty = 0;
+            }
             $sheet->setCellValue("A$row", $nmr);
-            $sheet->setCellValue("B$row", $rpt['item_code']);
-            $sheet->setCellValue("C$row", $rpt['item_descs']);
-            $sheet->setCellValue("D$row", $rpt['price']);
-            $sheet->setCellValue("E$row", $rpt['sum_qty']);
-            $sheet->setCellValue("F$row", $rpt['satuan']);
-            $sheet->setCellValue("G$row", $rpt['sum_total'] + $rpt['sum_tax']);
-            $sheet->getStyle("A$row:G$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("B$row", $rpt['brand_name']);
+            $sheet->setCellValueExplicit("C$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValue("D$row", $rpt['item_name']);
+            $sheet->setCellValue("E$row", $rpt['sum_lqty']);
+            $sheet->setCellValue("F$row", $rpt['sum_sqty']);
+            $sheet->setCellValue("G$row", $rpt['sum_qty']);
+            $sheet->setCellValue("H$row", $cqty);
+            $sheet->setCellValue("I$row", $rpt['sum_dpp']);
+            $sheet->setCellValue("J$row", $rpt['sum_ppn']);
+            $sheet->setCellValue("K$row", $rpt['sum_dpp']+$rpt['sum_ppn']);
+            $sheet->getStyle("A$row:K$row")->applyFromArray(array_merge($allBorders));
         }
         $edr = $row;
         $row++;
@@ -165,9 +191,14 @@ if ($JnsLaporan < 3) {
         $sheet->mergeCells("A$row:D$row");
         $sheet->getStyle("A$row")->applyFromArray($center);
         $sheet->setCellValue("E$row","=SUM(E$str:E$edr)");
+        $sheet->setCellValue("F$row","=SUM(F$str:F$edr)");
         $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
-        $sheet->getStyle("D$str:G$row")->applyFromArray($idrFormat);
-        $sheet->getStyle("A$row:G$row")->applyFromArray(array_merge($allBorders));
+        $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
+        $sheet->setCellValue("I$row","=SUM(I$str:I$edr)");
+        $sheet->setCellValue("J$row","=SUM(J$str:J$edr)");
+        $sheet->setCellValue("K$row","=SUM(K$str:K$edr)");
+        $sheet->getStyle("E$str:K$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:K$row")->applyFromArray(array_merge($allBorders));
     }
 }elseif ($JnsLaporan == 4){
     // rekap per outlet
@@ -254,10 +285,10 @@ if ($JnsLaporan < 3) {
     }
 }
 // Flush to client
-
 foreach ($headers as $header) {
     header($header);
 }
+
 // Hack agar client menutup loading dialog box... (Ada JS yang checking cookie ini pada common.js)
 $writer->save("php://output");
 

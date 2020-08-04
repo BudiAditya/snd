@@ -8,6 +8,7 @@ class PurchaseDetail extends EntityBase {
     public $ItemCode;
     public $ItemId;
     public $Lqty = 0;
+    public $Mqty = 0;
     public $Sqty = 0;
 	public $PurchaseQty = 0;
     public $ReturnQty = 0;
@@ -40,6 +41,7 @@ class PurchaseDetail extends EntityBase {
         $this->ItemCode = $row["item_code"];
 		$this->ItemDescs = $row["item_name"];
         $this->Lqty = $row["l_qty"];
+        $this->Mqty = $row["m_qty"];
         $this->Sqty = $row["s_qty"];
 		$this->PurchaseQty = $row["purchase_qty"];
         $this->ReturnQty = $row["return_qty"];
@@ -60,17 +62,6 @@ class PurchaseDetail extends EntityBase {
         $this->ExpDate = strtotime($row["exp_date"]);
         $this->ByAngkut = $row["by_angkut"];
         $this->IsiSatKecil = $row["bisisatkecil"];
-        if ($this->PurchaseQty >= $this->IsiSatKecil){
-            $aqty = array();
-            $sqty = round($this->PurchaseQty/$this->IsiSatKecil,2);
-            $aqty = explode('.',$sqty);
-            $lqty = $aqty[0];
-            $this->Lqty = $lqty;
-            $this->Sqty = $this->PurchaseQty - ($lqty * $this->IsiSatKecil);
-        }else {
-            $this->Lqty = 0;
-            $this->Sqty = $this->PurchaseQty;
-        }
 	}
 
     public function FormatExpDate($format = HUMAN_DATE) {
@@ -131,12 +122,13 @@ class PurchaseDetail extends EntityBase {
 
 	public function Insert() {
 		$this->connector->CommandText =
-"INSERT INTO t_ap_purchase_detail(ex_po_id,by_angkut,is_free,grn_id, item_id, item_descs, l_qty, s_qty, purchase_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, batch_no, exp_date)
-VALUES(?ex_po_id,?by_angkut,?is_free,?grn_id, ?item_id, ?item_descs, ?l_qty, ?s_qty, ?purchase_qty, ?return_qty, ?price, ?disc_formula, ?disc_amount, ?sub_total, ?pph_pct, ?pph_amount, ?ppn_pct, ?ppn_amount, ?batch_no, ?exp_date)";
+"INSERT INTO t_ap_purchase_detail(ex_po_id,by_angkut,is_free,grn_id, item_id, item_descs, l_qty, m_qty, s_qty, purchase_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, batch_no, exp_date)
+VALUES(?ex_po_id,?by_angkut,?is_free,?grn_id, ?item_id, ?item_descs, ?l_qty, ?m_qty, ?s_qty, ?purchase_qty, ?return_qty, ?price, ?disc_formula, ?disc_amount, ?sub_total, ?pph_pct, ?pph_amount, ?ppn_pct, ?ppn_amount, ?batch_no, ?exp_date)";
 		$this->connector->AddParameter("?grn_id", $this->GrnId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
         $this->connector->AddParameter("?item_descs", $this->ItemDescs == null ? '-' : $this->ItemDescs);
         $this->connector->AddParameter("?l_qty", $this->Lqty);
+        $this->connector->AddParameter("?m_qty", $this->Mqty);
         $this->connector->AddParameter("?s_qty", $this->Sqty);
 		$this->connector->AddParameter("?purchase_qty", $this->PurchaseQty);
         $this->connector->AddParameter("?return_qty", $this->ReturnQty);
@@ -187,6 +179,7 @@ VALUES(?ex_po_id,?by_angkut,?is_free,?grn_id, ?item_id, ?item_descs, ?l_qty, ?s_
 	, sub_total = ?sub_total
 	, item_id = ?item_id
 	, l_qty = ?l_qty
+	, m_qty = ?m_qty
 	, s_qty = ?s_qty
 	, disc_formula = ?disc_formula
 	, disc_amount = ?disc_amount
@@ -204,6 +197,7 @@ WHERE id = ?id";
         $this->connector->AddParameter("?item_id", $this->ItemId);
         $this->connector->AddParameter("?item_descs", $this->ItemDescs == null ? '-' : $this->ItemDescs);
         $this->connector->AddParameter("?l_qty", $this->Lqty);
+        $this->connector->AddParameter("?m_qty", $this->Mqty);
         $this->connector->AddParameter("?s_qty", $this->Sqty);
         $this->connector->AddParameter("?purchase_qty", $this->PurchaseQty);
         $this->connector->AddParameter("?return_qty", $this->ReturnQty);

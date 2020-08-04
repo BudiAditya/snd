@@ -441,6 +441,8 @@ class PurchaseController extends AppController {
             $purchasedetail->ItemId = $this->GetPostValue("aItemId");
             $purchasedetail->ExPoId = $this->GetPostValue("aExPoId");
             $purchasedetail->PurchaseQty = $this->GetPostValue("aQty");
+            $purchasedetail->Lqty = $this->GetPostValue("lQty");
+            $purchasedetail->Sqty = $this->GetPostValue("sQty");
             $purchasedetail->ReturnQty = 0;
             $purchasedetail->Price = $this->GetPostValue("aPrice");
             if ($this->GetPostValue("aDiscFormula") == ''){
@@ -484,6 +486,8 @@ class PurchaseController extends AppController {
             $purchasedetail->ExPoId = $this->GetPostValue("aExPoId");
             $purchasedetail->ItemId = $this->GetPostValue("aItemId");
             $purchasedetail->PurchaseQty = $this->GetPostValue("aQty");
+            $purchasedetail->Lqty = $this->GetPostValue("lQty");
+            $purchasedetail->Sqty = $this->GetPostValue("sQty");
             $purchasedetail->ReturnQty = $this->GetPostValue("rQty");
             $purchasedetail->Price = $this->GetPostValue("aPrice");
             if ($this->GetPostValue("aDiscFormula") == ''){
@@ -647,11 +651,11 @@ class PurchaseController extends AppController {
         $this->Set("report", $report);
     }
 
-    public function getitems_json($principalId = 0,$order = "a.item_code"){
+    public function getitems_json($suppId = 0,$order = "a.item_code"){
         require_once(MODEL . "inventory/items.php");
         $filter = isset($_POST['q']) ? strval($_POST['q']) : '';
         $items = new Items();
-        $itemlists = $items->GetJSonItems($this->userCompanyId,$this->userCabangId,$principalId,$filter,$order);
+        $itemlists = $items->GetJSonItems($this->userCompanyId,$this->userCabangId,$suppId,$filter,$order);
         echo json_encode($itemlists);
     }
 

@@ -50,14 +50,14 @@ if($stkcard != null) {
         if ($nmr == 1){
             $saldo = $rpt["saldo"];
         }else{
-            $saldo = ($saldo + $rpt["awalcas"] + $rpt["masuk"]) - $rpt["keluar"] + $rpt["koreksi"];
+            $saldo = ($saldo + $rpt["awal"] + $rpt["masuk"]) - $rpt["keluar"] + $rpt["koreksi"];
         }
         $sheet->setCellValue("A$row",$nmr);
         $sheet->setCellValue("B$row",$rpt["trx_date"]);
         $sheet->setCellValue("C$row",$rpt["trx_type"]);
         $sheet->setCellValue("D$row",$rpt["relasi"]);
         $sheet->setCellValue("E$row",$rpt["notes"]);
-        $sheet->setCellValue("F$row",$rpt["awalcas"]);
+        $sheet->setCellValue("F$row",$rpt["awal"]);
         $sheet->setCellValue("G$row",$rpt["masuk"]);
         $sheet->setCellValue("H$row",$rpt["keluar"]);
         $sheet->setCellValue("I$row",$rpt["koreksi"]);

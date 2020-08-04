@@ -197,13 +197,15 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
         <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
             <tr>
                 <th>No.</th>
+                <th>Cab</th>
                 <th>Tanggal</th>
                 <th>No. Invoice</th>
                 <th>Customer</th>
+                <th nowrap="nowrap">Cs Code</th>
                 <th>Area</th>
+                <th>Salesman</th>
                 <?php
                 if ($JnsLaporan == 1){
-                    print("<th>Salesman</th>");
                     print("<th>JTP</th>");
                     print("<th>D P P</th>");
                     print("<th>P P N</th>");
@@ -212,8 +214,8 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     print("<th>Terbayar</th>");
                     print("<th>Outstanding</th>");
                 }elseif ($JnsLaporan == 2){
-                    print("<th nowrap='nowrap'>Kode</th>");
                     print("<th nowrap='nowrap'>Brand</th>");
+                    print("<th nowrap='nowrap'>Kode</th>");
                     print("<th nowrap='nowrap'>Nama Barang</th>");
                     print("<th>QTY</th>");
                     print("<th>Harga</th>");
@@ -239,46 +241,35 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 $ivn = null;
                 $sma = false;
                 while ($row = $Reports->FetchAssoc()) {
-                    if ($ivn <> $row["invoice_no"]){
-                        $nmr++;
-                        $sma = false;
-                    }else{
-                        $sma = true;
-                    }
-                    if (!$sma) {
-                        $url = $helper->site_url("ar.invoice/view/" . $row["id"]);
-                        print("<tr valign='Top'>");
-                        printf("<td>%s</td>", $nmr);
-                        //printf("<td nowrap='nowrap'>%s</td>", $row["cabang_code"]);
-                        printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["invoice_date"])));
-                        printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["invoice_no"]);
-                        printf("<td nowrap='nowrap'>%s</td>", $row["customer_name"]);
-                        printf("<td nowrap='nowrap'>%s</td>", $row["area_name"]);
-                        if ($JnsLaporan == 1){
-                            printf("<td nowrap='nowrap'>%s</td>", $row["sales_name"]);
-                            printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["due_date"])));
-                            printf("<td align='right'>%s</td>", number_format($row["base_amount"] - $row["disc_amount"], 0));
-                            printf("<td align='right'>%s</td>", number_format($row["ppn_amount"], 0));
-                            printf("<td align='right'>%s</td>", number_format($row["total_amount"], 0));
-                            printf("<td align='right'>%s</td>", number_format($row["return_amount"], 0));
-                            printf("<td align='right'>%s</td>", number_format($row["paid_amount"], 0));
-                            printf("<td align='right'>%s</td>", number_format($row["balance_amount"], 0));
-                            print("</tr>");
-                            $tDpp+= $row["base_amount"] - $row["disc_amount"];
-                            $tPpn+= $row["ppn_amount"];
-                            $tOtal+= $row["total_amount"];
-                            $tReturn+= $row["return_amount"];
-                            $tTerbayar+= $row["paid_amount"];
-                            $tSisa+= $row["balance_amount"];
-                        }
-                    }
-                    if ($JnsLaporan == 2){
-                        if ($sma) {
-                            print("</tr>");
-                            print("<td colspan='5'>&nbsp;</td>");
-                        }
-                        printf("<td nowrap='nowrap'>%s</td>", $row['item_code']);
+                    $nmr++;
+                    $url = $helper->site_url("ar.invoice/view/" . $row["id"]);
+                    print("<tr valign='Top'>");
+                    printf("<td>%s</td>", $nmr);
+                    printf("<td nowrap='nowrap'>%s</td>", $row["cabang_code"]);
+                    printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["invoice_date"])));
+                    printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["invoice_no"]);
+                    printf("<td nowrap='nowrap'>%s</td>", $row["customer_name"]);
+                    printf("<td nowrap='nowrap'>%s</td>", $row["customer_code"]);
+                    printf("<td nowrap='nowrap'>%s</td>", $row["area_code"]);
+                    printf("<td nowrap='nowrap'>%s</td>", $row["sales_name"]);
+                    if ($JnsLaporan == 1){
+                        printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["due_date"])));
+                        printf("<td align='right'>%s</td>", number_format($row["base_amount"] - $row["disc_amount"], 0));
+                        printf("<td align='right'>%s</td>", number_format($row["ppn_amount"], 0));
+                        printf("<td align='right'>%s</td>", number_format($row["total_amount"], 0));
+                        printf("<td align='right'>%s</td>", number_format($row["return_amount"], 0));
+                        printf("<td align='right'>%s</td>", number_format($row["paid_amount"], 0));
+                        printf("<td align='right'>%s</td>", number_format($row["balance_amount"], 0));
+                        print("</tr>");
+                        $tDpp+= $row["base_amount"] - $row["disc_amount"];
+                        $tPpn+= $row["ppn_amount"];
+                        $tOtal+= $row["total_amount"];
+                        $tReturn+= $row["return_amount"];
+                        $tTerbayar+= $row["paid_amount"];
+                        $tSisa+= $row["balance_amount"];
+                    }elseif ($JnsLaporan == 2){
                         printf("<td nowrap='nowrap'>%s</td>", $row['brand_name']);
+                        printf("<td nowrap='nowrap'>%s</td>", $row['item_code']);
                         printf("<td nowrap='nowrap'>%s</td>", $row['item_name']);
                         printf("<td align='right'>%s</td>", number_format($row['sales_qty'], 0));
                         printf("<td align='right' >%s</td>", number_format($row['price'], 0));
@@ -296,7 +287,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     $ivn = $row["invoice_no"];
                 }
             print("<tr class='bold'>");
-            print("<td colspan='7' align='right'>Total Invoice</td>");
+            print("<td colspan='10' align='right'>Total Invoice</td>");
             if ($JnsLaporan == 1) {
                 printf("<td align='right'>%s</td>", number_format($tDpp, 0));
                 printf("<td align='right'>%s</td>", number_format($tPpn, 0));
@@ -322,13 +313,13 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
         <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
             <tr>
                 <th>No.</th>
-                <th>Kode</th>
                 <th>Brand</th>
+                <th>Kode</th>
                 <th>Nama Produk</th>
-                <th>Harga</th>
                 <th>L</th>
                 <th>S</th>
-                <th>C</th>
+                <th>PCS</th>
+                <th>LTR</th>
                 <th>DPP</th>
                 <th>PPN</th>
                 <th>Nilai</th>
@@ -341,52 +332,44 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             $tlqty = 0;
             $tsqty = 0;
             $tcqty = 0;
+            $tqty  = 0;
             $tdpp = 0;
             $tppn = 0;
             $stotal = 0;
             while ($row = $Reports->FetchAssoc()) {
                 $nmr++;
-                if ($row["sum_qty"] >= $row["s_uom_qty"] && $row["s_uom_qty"] > 0){
-                    $aqty = array();
-                    $sqty = round($row["sum_qty"]/$row["s_uom_qty"],2);
-                    $aqty = explode('.',$sqty);
-                    $lqty = $aqty[0];
-                    $sqty = $row["sum_qty"] - ($lqty * $row["s_uom_qty"]);
-                }else {
-                    $lqty = 0;
-                    $sqty = $row["sum_qty"];
-                }
                 if ($row["entity_id"] == 1) {
-                    $cqty = round($row["sum_qty"] * $row["qty_convert"], 0);
+                    $cqty = round($row["sum_qty"] * $row["qty_convert"], 2);
                 }else{
                     $cqty = 0;
                 }
                 print("<tr valign='Top'>");
                 printf("<td>%s</td>", $nmr);
-                printf("<td>%s</td>",$row['item_code']);
                 printf("<td>%s</td>",$row['brand_name']);
+                printf("<td>%s</td>",$row['item_code']);
                 printf("<td>%s</td>",$row['item_name']);
-                printf("<td align='right'>%s</td>",number_format($row['price'],0));
-                printf("<td align='right'>%s</td>",number_format($lqty,0));
-                printf("<td align='right'>%s</td>",number_format($sqty,0));
-                printf("<td align='right'>%s</td>",number_format($cqty,0));
+                printf("<td align='right'>%s</td>", $row['sum_lqty'] == 0 ? '' : number_format($row['sum_lqty'],0));
+                printf("<td align='right'>%s</td>", $row['sum_sqty'] == 0 ? '' : number_format($row['sum_sqty'],0));
+                printf("<td align='right'>%s</td>", $row['sum_qty'] == 0 ? '' : number_format($row['sum_qty'],0));
+                printf("<td align='right'>%s</td>",$cqty == 0 ? '' : number_format($cqty,2));
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_ppn'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp']+$row['sum_ppn'],0));
                 print("</tr>");
-                $tlqty+= $lqty;
-                $tsqty+= $sqty;
+                $tlqty+= $row['sum_lqty'];
+                $tsqty+= $row['sum_sqty'];
+                $tqty+= $row['sum_qty'];
                 $tcqty+= $cqty;
                 $tdpp+= $row['sum_dpp'];
                 $tppn+= $row['sum_ppn'];
                 $stotal+= $row['sum_dpp']+$row['sum_ppn'];
             }
             print("<tr class='bold'>");
-            print("<td colspan='5' align='right'>Total.....</td>");
-            //printf("<td align='right'>%s</td>",number_format($lqty,0));
-            //printf("<td align='right'>%s</td>",number_format($sqty,0));
-            print("<td colspan='2'>LITER</td>");
-            printf("<td align='right'>%s</td>",number_format($tcqty,0));
+            print("<td colspan='4' align='right'>Total.....</td>");
+            printf("<td align='right'>%s</td>",number_format($tlqty,0));
+            printf("<td align='right'>%s</td>",number_format($tsqty,0));
+            printf("<td align='right'>%s</td>",number_format($tqty,0));
+            printf("<td align='right'>%s</td>",number_format($tcqty,2));
             printf("<td align='right'>%s</td>",number_format($tdpp,0));
             printf("<td align='right'>%s</td>",number_format($tppn,0));
             printf("<td align='right'>%s</td>",number_format($stotal,0));

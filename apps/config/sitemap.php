@@ -30,7 +30,7 @@ $menu = $root->AddNode("PENJUALAN", null, "menu");
     $menu->AddNode("Laporan", null, "title");
         $menu->AddNode("Statistik Penjualan", "ar.statistic");
         $menu->AddNode("Sales Order", "ar.order/report");
-        $menu->AddNode("Penjualan", "ar.invoice/report");
+        $menu->AddNode("Laporan Penjualan", "ar.invoice/report");
         $menu->AddNode("Retur Penjualan", "ar.arreturn/report");
         $subMenu = $menu->AddNode("Kontrol Piutang", null, "submenu");
             $subMenu->AddNode("Penerimaan Piutang", "ar.receipt/report");
