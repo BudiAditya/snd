@@ -191,6 +191,45 @@ ORDER BY a.customer_name ASC, a.invoice_date ASC;";
         $this->Set("company", $company->LoadById($this->userCompanyId));
         $this->Set("report", $report);
     }
+
+    public function getOrList($id = 0){
+        print('<tr>
+            <th>No.</th>
+            <th>Tanggal</th>
+            <th>No. Bukti</th>
+            <th>Nilai</th>
+        </tr>');
+    }
+
+    public function getRtList($id = 0){
+        print('<tr>
+            <th>No.</th>
+            <th>Tanggal</th>
+            <th>No. Bukti</th>
+            <th>Nilai</th>
+        </tr>');
+    }
+
+    public function getIvList($id = 0){
+        $data = null;
+        $list = new Report();
+        $list = $list->getIvReceiptList($id);
+        if ($list == null){
+            $data = 'Belum ada data!';
+        }else{
+            $nmr = 1;
+            $total = 0;
+            $data = '<table cellpadding="0" cellspacing="0" class="tablePadding tableBorder" style="font-size: 12px;font-family: tahoma">';
+            $data.= '<tr><th>No.</th><th>Tgl. Invoice</th><th>JTP</th><th>No. Invoice</th><th>Nilai</th></tr>';
+            while ($rs = $list->FetchAssoc()){
+                $data.= sprintf('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td align="right">%s</td></tr>',$nmr++,$rs['tanggal'],$rs['jtp'],$rs['no_bukti'],number_format($rs['nilai'],0));
+                $total+= $rs["nilai"];
+            }
+            $data.= sprintf('<tr><td colspan="4" align="right">Total..</td><td align="right">%s</td></tr>',number_format($total,0));
+            $data.= '</table>';
+        }
+        print($data);
+    }
 }
 
 

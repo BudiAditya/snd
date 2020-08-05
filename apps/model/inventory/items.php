@@ -299,7 +299,7 @@ WHERE id = ?bid';
     public function GetJSonItems($entityId,$cabangId,$suppId = 0,$filter = null,$sort = 'a.item_code',$order = 'ASC') {
         $sql = "SELECT a.id as item_id,a.item_code,a.item_name,a.l_uom_code,a.s_uom_code,a.s_uom_qty,0 as hrg_beli,0 as hrg_jual,0 as qty_order FROM vw_ic_items as a Where a.is_deleted = 0 And a.is_aktif = 1";
         if ($suppId > 0){
-            $sql.= " And a.supplier_id = $suppId";
+            $sql.= " And a.principal_id = $suppId";
         }
         if ($filter != null){
             $sql.= " And (a.item_name Like '%$filter%' or a.item_code Like '%$filter%')";

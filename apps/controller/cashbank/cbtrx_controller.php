@@ -22,14 +22,14 @@ class CbTrxController extends AppController {
 		$settings = array();
 
 		$settings["columns"][] = array("name" => "a.id", "display" => "ID", "width" => 0);
-		//$settings["columns"][] = array("name" => "a.kode_cabang", "display" => "Cabang", "width" => 50);
+		$settings["columns"][] = array("name" => "a.kode_cabang", "display" => "Cabang", "width" => 40);
         $settings["columns"][] = array("name" => "a.trx_date", "display" => "Tanggal", "width" => 70);
         $settings["columns"][] = array("name" => "a.trx_no", "display" => "No. Bukti", "width" => 85);
-        $settings["columns"][] = array("name" => "a.xmode", "display" => "Mode", "width" => 50);
+        $settings["columns"][] = array("name" => "a.xmode", "display" => "Mode", "width" => 40);
         $settings["columns"][] = array("name" => "a.bank_name", "display" => "Kas/Bank", "width" => 100);
 		$settings["columns"][] = array("name" => "a.trx_descs", "display" => "Keterangan", "width" => 250);
-        $settings["columns"][] = array("name" => "a.reff_no", "display" => "Reff No.", "width" => 100);
-        $settings["columns"][] = array("name" => "a.relasi_name", "display" => "Atas Nama", "width" => 100);
+        $settings["columns"][] = array("name" => "a.reff_no", "display" => "Reff No.", "width" => 80);
+        $settings["columns"][] = array("name" => "a.relasi_name", "display" => "Atas Nama", "width" => 200);
         $settings["columns"][] = array("name" => "format(a.trx_amount,0)", "display" => "Jumlah", "width" => 80, "align" => "right");
         $settings["columns"][] = array("name" => "a.xstatus", "display" => "Status", "width" => 50);
         $settings["columns"][] = array("name" => "a.user_id", "display" => "Admin", "width" => 50);

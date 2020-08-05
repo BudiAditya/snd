@@ -595,31 +595,33 @@ class InvoiceController extends AppController {
                             break;        // Break loop stocks
                         }
                         // update hpp detail
-
                         if ($hpp > 0) {
+                            $flagSuccess = true;
                             $invoicedetail->ItemHpp = round($hpp / $invoicedetail->SalesQty, 2);
                             $invoicedetail->IsPost = 1;
                             if ($invoicedetail->UpdateHpp() > 0) {
                                 $flagSuccess = true;
                             } else {
-                                $flagSuccess = false;
-                                $errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                                break;
+                                //$flagSuccess = false;
+                                //$errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                //break;
                             }
                         }else{
                             $lhpp = new Stock();
                             $lhpp = $lhpp->GetLastHpp($this->trxYear,$invoice->GudangId,$invoicedetail->ItemId);
                             if ($lhpp > 0){
+                                $flagSuccess = true;
                                 $invoicedetail->ItemHpp = $lhpp;
                                 $invoicedetail->IsPost = 1;
                                 if ($invoicedetail->UpdateHpp() > 0) {
                                     $flagSuccess = true;
                                 } else {
-                                    $flagSuccess = false;
-                                    $errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                                    break;
+                                    //$flagSuccess = false;
+                                    //$errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                    //break;
                                 }
                             }else{
+                                $flagSuccess = true;
                                 $dhpp = new Stock();
                                 $dhpp = $dhpp->GetDefaultHpp($invoicedetail->ItemId);
                                 if ($dhpp > 0) {
@@ -628,14 +630,14 @@ class InvoiceController extends AppController {
                                     if ($invoicedetail->UpdateHpp() > 0) {
                                         $flagSuccess = true;
                                     } else {
-                                        $flagSuccess = false;
-                                        $errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                                        break;
+                                        //$flagSuccess = false;
+                                        //$errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                        //break;
                                     }
                                 }else{
-                                    $flagSuccess = false;
-                                    $errors[] = sprintf("%s -> Item: [%s] %s Message: HPP Tidak dihitung (Kosong) ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                                    break;
+                                    //$flagSuccess = false;
+                                    //$errors[] = sprintf("%s -> Item: [%s] %s Message: HPP Tidak dihitung (Kosong) ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                    //break;
                                 }
                             }
                         }

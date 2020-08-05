@@ -261,7 +261,7 @@ class ReceiptController extends AppController {
         $cabCode = $cabang->Kode;
         $cabName = $cabang->Cabang;
         $loader = new KasBank();
-        $kasbanks = $loader->LoadByCabangId($this->userCabangId);
+        $kasbanks = $loader->LoadByCompanyId($this->userCompanyId);
         $loader = new PaymentType();
         $paymenttypes = $loader->LoadAll();
         //kirim ke view
@@ -306,7 +306,7 @@ class ReceiptController extends AppController {
         $cabCode = $cabang->Kode;
         $cabName = $cabang->Cabang;
         $loader = new KasBank();
-        $kasbanks = $loader->LoadByCabangId($this->userCabangId);
+        $kasbanks = $loader->LoadByCompanyId($this->userCompanyId);
         $loader = new PaymentType();
         $paymenttypes = $loader->LoadAll();
         //kirim ke view

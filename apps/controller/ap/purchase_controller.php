@@ -356,7 +356,7 @@ class PurchaseController extends AppController {
         $cabCode = $cabang->Kode;
         $cabName = $cabang->Cabang;
         $loader = new Warehouse();
-        $gudangs = $loader->LoadByCabangId($this->userCabangId);
+        $gudangs = $loader->LoadByCompanyId($this->userCabangId);
         //kirim ke view
         $this->Set("gudangs", $gudangs);
         $this->Set("userLevel", $this->userLevel);

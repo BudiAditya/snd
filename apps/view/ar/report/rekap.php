@@ -6,12 +6,21 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
 <head>
 	<title>SND System - Rekapitulasi Piutang</title>
 	<meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
-	<link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/common.css")); ?>"/>
-	<link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/jquery-ui.css")); ?>"/>
-	<script type="text/javascript" src="<?php print($helper->path("public/js/jquery.min.js")); ?>"></script>
-	<script type="text/javascript" src="<?php print($helper->path("public/js/jquery-ui.custom.min.js")); ?>"></script>
-	<script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/common.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/jquery-ui.css")); ?>"/>
+
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-themes/default/easyui.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-themes/icon.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-themes/color.css")); ?>"/>
+    <link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/easyui-demo/demo.css")); ?>"/>
+
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.min.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery-ui.custom.min.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.idletimer.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
     <script type="text/javascript" src="<?php print($helper->path("public/js/auto-numeric.js")); ?>"></script>
+    <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.easyui.min.js")); ?>"></script>
+
     <script type="text/javascript">
         $(document).ready(function() {
             $("#StartDate").customDatePicker({ showOn: "focus" });
@@ -86,7 +95,9 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
 </form>
 <!-- start web report -->
 <div id="printArea">
-<?php  if ($Reports != null){ ?>
+<?php
+$bsearch = base_url('public/images/button/').'search.png';
+    if ($Reports != null){ ?>
         <h3>REKAPITULASI PIUTANG</h3>
         <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
         <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
@@ -99,6 +110,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <th>Retur</th>
                 <th>Pembayaran</th>
                 <th>Saldo</th>
+                <th>Action</th>
             </tr>
             <?php
                 $nmr = 1;
@@ -129,6 +141,11 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     printf("<td align='right'>%s</td>", number_format($row["retur"], 0));
                     printf("<td align='right'>%s</td>", number_format($row["receipt"], 0));
                     printf("<td align='right'>%s</td>", number_format($saldo, 0));
+                    if ($row["idx"] > 0) {
+                        printf('<td align="center"><img src="%s" alt="List" title="Perincian" id="bList" style="cursor: pointer" onclick="return fViewList(%d,%d,%s);"/></td>', $bsearch, $row["idx"],$row["id"],"'".$row["no_bukti"]."'");
+                    }else{
+                        print('<td>&nbsp;</td>');
+                    }
                     print("</tr>");
                     $invoice+= $row["invoice"];
                     $receipt+= $row["receipt"];
@@ -139,7 +156,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf("<td align='right'>%s</td>", number_format($invoice, 0));
                 printf("<td align='right'>%s</td>", number_format($retur, 0));
                 printf("<td align='right'>%s</td>", number_format($receipt, 0));
-                print("<td>&nbsp;</td>");
+                print("<td colspan='2'>&nbsp;</td>");
                 print("</tr>");
             ?>
         </table>
@@ -151,6 +168,15 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
         ?>
     <?php } ?>
 </div>
+<!-- modal list -->
+<div id="dList" class="easyui-dialog" style="width:500px;height:300px;padding:5px 5px"
+    closed="true" buttons="#dlg-buttons">
+    <div id="htmList"></div>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dList').dialog('close')" style="width:90px">Tutup</a>
+</div>
+
 <script type="text/javascript">
     function printDiv(divName) {
         //if (confirm('Print Invoice ini?')) {
@@ -163,6 +189,25 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
 
         document.body.innerHTML = originalContents;
         //}
+    }
+
+    function fViewList(pType,pId,pBukti) {
+        var pTitle = null;
+        var url = "<?=base_url('ar/report/');?>";
+        if (pType == 1){
+            pTitle = 'Perincian Pembayaran '+pBukti;
+            url = url+'getOrList/'+pId;
+        }else if (pType == 2){
+            pTitle = 'Perincian Retur '+pBukti;
+            url = url+'getRtList/'+pId;
+        }else {
+            pTitle = 'Perincian Yang dibayar '+pBukti;
+            url = url+'getIvList/'+pId;
+        }
+        $.get(url,function (data) {
+            $("#htmList").html(data);
+            $('#dList').dialog('open').dialog('setTitle',pTitle);
+        });
     }
 </script>
 <!-- </body> -->

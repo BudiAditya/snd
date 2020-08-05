@@ -123,6 +123,22 @@ class Report extends EntityBase {
         $rs = $this->connector->ExecuteQuery();
         return $rs;
     }
+
+    public function getIvReceiptList ($orId){
+        $sqx = "Select b.invoice_date as tanggal,b.due_date as jtp,b.invoice_no as no_bukti,a.allocate_amount as nilai";
+        $sqx.= " From t_ar_receipt_detail a Join vw_ar_invoice_master b On a.invoice_id = b.id Where a.receipt_id = $orId Order By b.invoice_date,b.invoice_no";
+        $this->connector->CommandText = $sqx;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function getOrInvoiceList ($orId){
+        $sqx = "Select b.invoice_date as tanggal,b.due_date as jtp,b.invoice_no as no_bukti,a.allocate_amount as nilai";
+        $sqx.= " From t_ar_receipt_detail a Join vw_ar_invoice_master b On a.invoice_id = b.id Where a.receipt_id = $orId Order By b.invoice_date,b.invoice_no";
+        $this->connector->CommandText = $sqx;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
 }
 
 

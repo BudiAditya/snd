@@ -287,7 +287,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     $ivn = $row["invoice_no"];
                 }
             print("<tr class='bold'>");
-            print("<td colspan='10' align='right'>Total Invoice</td>");
+            print("<td colspan='9' align='right'>Total Invoice</td>");
             if ($JnsLaporan == 1) {
                 printf("<td align='right'>%s</td>", number_format($tDpp, 0));
                 printf("<td align='right'>%s</td>", number_format($tPpn, 0));
@@ -297,7 +297,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf("<td align='right'>%s</td>", number_format($tSisa, 0));
             }
             if ($JnsLaporan == 2) {
-                print("<td colspan='3'>&nbsp;</td>");
+                print("<td colspan='4'>&nbsp;</td>");
                 printf("<td align='right'>%s</td>", number_format($subTotal, 0));
                 printf("<td align='right'>%s</td>", number_format($tDsc, 0));
                 printf("<td align='right'>%s</td>", number_format($tDpp, 0));
