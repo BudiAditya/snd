@@ -18,7 +18,6 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
     <script type="text/javascript" src="<?php print($helper->path("public/js/jquery-ui.custom.min.js")); ?>"></script>
     <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.idletimer.js")); ?>"></script>
     <script type="text/javascript" src="<?php print($helper->path("public/js/common.js")); ?>"></script>
-    <script type="text/javascript" src="<?php print($helper->path("public/js/auto-numeric.js")); ?>"></script>
     <script type="text/javascript" src="<?php print($helper->path("public/js/jquery.easyui.min.js")); ?>"></script>
 
     <script type="text/javascript">
@@ -97,69 +96,69 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
 <div id="printArea">
 <?php
 $bsearch = base_url('public/images/button/').'search.png';
-    if ($Reports != null){ ?>
-        <h3>REKAPITULASI PIUTANG</h3>
-        <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
-        <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
-            <tr>
-                <th>No.</th>
-                <th>Tanggal</th>
-                <th>No. Bukti</th>
-                <th>Customer</th>
-                <th>Penjualan</th>
-                <th>Retur</th>
-                <th>Pembayaran</th>
-                <th>Saldo</th>
-                <th>Action</th>
-            </tr>
-            <?php
-                $nmr = 1;
-                $saldo = 0;
-                $invoice = 0;
-                $retur = 0;
-                $receipt = 0;
-                $url = null;
-                while ($row = $Reports->FetchAssoc()) {
-                    if ($nmr == 1){
-                        $saldo = $row["saldo"];
-                    }else{
-                        $saldo = $saldo + ($row["invoice"] - ($row["retur"] + $row["receipt"]));
-                    }
-                    if ($row["idx"] == 1){
-                        $url = $helper->site_url("ar.invoice/view/" . $row["id"]);
-                    }elseif ($row["idx"] == 2){
-                        $url = $helper->site_url("ar.arreturn/view/" . $row["id"]);
-                    }elseif ($row["idx"] == 3){
-                        $url = $helper->site_url("ar.receipt/view/" . $row["id"]);
-                    }
-                    print("<tr valign='Midle'>");
-                    printf("<td>%s</td>", $nmr++);
-                    printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["trx_date"])));
-                    printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["no_bukti"]);
-                    printf("<td nowrap='nowrap'>%s</td>", $row["customer"]);
-                    printf("<td align='right'>%s</td>", number_format($row["invoice"], 0));
-                    printf("<td align='right'>%s</td>", number_format($row["retur"], 0));
-                    printf("<td align='right'>%s</td>", number_format($row["receipt"], 0));
-                    printf("<td align='right'>%s</td>", number_format($saldo, 0));
-                    if ($row["idx"] > 0) {
-                        printf('<td align="center"><img src="%s" alt="List" title="Perincian" id="bList" style="cursor: pointer" onclick="return fViewList(%d,%d,%s);"/></td>', $bsearch, $row["idx"],$row["id"],"'".$row["no_bukti"]."'");
-                    }else{
-                        print('<td>&nbsp;</td>');
-                    }
-                    print("</tr>");
-                    $invoice+= $row["invoice"];
-                    $receipt+= $row["receipt"];
-                    $retur+= $row["retur"];
+if ($Reports != null){ ?>
+    <h3>REKAPITULASI PIUTANG</h3>
+    <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
+    <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
+        <tr>
+            <th>No.</th>
+            <th>Tanggal</th>
+            <th>No. Bukti</th>
+            <th>Customer</th>
+            <th>Penjualan</th>
+            <th>Retur</th>
+            <th>Pembayaran</th>
+            <th>Saldo</th>
+            <th>Action</th>
+        </tr>
+        <?php
+            $nmr = 1;
+            $saldo = 0;
+            $invoice = 0;
+            $retur = 0;
+            $receipt = 0;
+            $url = null;
+            while ($row = $Reports->FetchAssoc()) {
+                if ($nmr == 1){
+                    $saldo = $row["saldo"];
+                }else{
+                    $saldo = $saldo + ($row["invoice"] - ($row["retur"] + $row["receipt"]));
                 }
-                print("<tr class='bold'>");
-                print("<td colspan='4'>T o t a l </td>");
-                printf("<td align='right'>%s</td>", number_format($invoice, 0));
-                printf("<td align='right'>%s</td>", number_format($retur, 0));
-                printf("<td align='right'>%s</td>", number_format($receipt, 0));
-                print("<td colspan='2'>&nbsp;</td>");
+                if ($row["idx"] == 1){
+                    $url = $helper->site_url("ar.invoice/view/" . $row["id"]);
+                }elseif ($row["idx"] == 2){
+                    $url = $helper->site_url("ar.arreturn/view/" . $row["id"]);
+                }elseif ($row["idx"] == 3){
+                    $url = $helper->site_url("ar.receipt/view/" . $row["id"]);
+                }
+                print("<tr valign='Midle'>");
+                printf("<td>%s</td>", $nmr++);
+                printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["trx_date"])));
+                printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["no_bukti"]);
+                printf("<td nowrap='nowrap'>%s</td>", $row["customer"]);
+                printf("<td align='right'>%s</td>", number_format($row["invoice"], 0));
+                printf("<td align='right'>%s</td>", number_format($row["retur"], 0));
+                printf("<td align='right'>%s</td>", number_format($row["receipt"], 0));
+                printf("<td align='right'>%s</td>", number_format($saldo, 0));
+                if ($row["idx"] > 0) {
+                    printf('<td align="center"><img src="%s" alt="List" title="Perincian" id="bList" style="cursor: pointer" onclick="return fViewList(%d,%d,%s);"/></td>', $bsearch, $row["idx"],$row["id"],"'".$row["no_bukti"]."'");
+                }else{
+                    print('<td>&nbsp;</td>');
+                }
                 print("</tr>");
-            ?>
-        </table>
+                $invoice+= $row["invoice"];
+                $receipt+= $row["receipt"];
+                $retur+= $row["retur"];
+            }
+            print("<tr class='bold'>");
+            print("<td colspan='4'>T o t a l </td>");
+            printf("<td align='right'>%s</td>", number_format($invoice, 0));
+            printf("<td align='right'>%s</td>", number_format($retur, 0));
+            printf("<td align='right'>%s</td>", number_format($receipt, 0));
+            print("<td colspan='2'>&nbsp;</td>");
+            print("</tr>");
+        ?>
+    </table>
 <?php } ?>
     <br>
     <?php if($Reports != null){ ?>

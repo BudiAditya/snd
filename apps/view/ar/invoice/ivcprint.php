@@ -134,6 +134,11 @@ if ($invoices != null) {
     <?php
     $nmr = 1;
     $url = null;
+    $tsub = 0;
+    $tdis = 0;
+    $tdpp = 0;
+    $tppn = 0;
+    $ttot = 0;
     while ($data = $invoices->FetchAssoc()) {
         $url = $helper->site_url("ar.invoice/view/" . $data["id"]);
         print('<tr>');
@@ -156,7 +161,23 @@ if ($invoices != null) {
         }
         printf('<td class="center"><input type="checkbox" class="cbIds" name="ids[]" value="%d" checked="checked"/></td>', $data["id"]);
         print('</tr>');
+        $tsub += $data["sub_total"];
+        $tdis += $data["discount"];
+        $tdpp += $data["sub_total"]-$data["discount"];
+        $tppn += $data["ppn"];
+        $ttot += ($data["sub_total"]-$data["discount"])+$data["ppn"];
     }
+    printf('
+        <tr class="bold">
+            <td colspan="6" align="right">Total..</td>
+            <td align="right">%s</td>
+            <td align="right">%s</td>
+            <td align="right">%s</td>
+            <td align="right">%s</td>
+            <td align="right">%s</td>
+            <td colspan="3">&nbsp;</td>
+        </tr>
+        ',number_format($tsub,0),number_format($tdis,0),number_format($tdpp,0),number_format($tppn,0),number_format($ttot,0));
     print('</table>');
     print('</form>');
 }

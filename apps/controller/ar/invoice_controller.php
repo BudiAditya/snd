@@ -27,8 +27,8 @@ class InvoiceController extends AppController {
         //$settings["columns"][] = array("name" => "a.entity_cd", "display" => "Entity", "width" => 30);
         //$settings["columns"][] = array("name" => "a.cabang_code", "display" => "Cabang", "width" => 50);
         $settings["columns"][] = array("name" => "a.invoice_date", "display" => "Tanggal", "width" => 60);
-        $settings["columns"][] = array("name" => "a.invoice_no", "display" => "No. Invoice", "width" => 100);
-        $settings["columns"][] = array("name" => "concat(b.cus_name,'(',b.cus_code,')')", "display" => "Nama Customer", "width" => 200);
+        $settings["columns"][] = array("name" => "a.invoice_no", "display" => "No. Invoice", "width" => 80);
+        $settings["columns"][] = array("name" => "concat(b.cus_code,' - ',b.cus_name)", "display" => "Nama Customer", "width" => 230);
         //$settings["columns"][] = array("name" => "a.invoice_descs", "display" => "Keterangan", "width" => 150);
         $settings["columns"][] = array("name" => "if(a.payment_type = 0,'Cash','Credit')", "display" => "Cara Bayar", "width" => 55);
         $settings["columns"][] = array("name" => "a.invoice_date + INTERVAL a.credit_terms DAY", "display" => "JTP", "width" => 60);
@@ -36,8 +36,10 @@ class InvoiceController extends AppController {
         $settings["columns"][] = array("name" => "format(a.return_amount,0)", "display" => "Retur", "width" => 70, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.paid_amount,0)", "display" => "Terbayar", "width" => 70, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.base_amount - a.disc_amount + a.ppn_amount + a.other_costs_amount - (a.paid_amount + a.return_amount),0)", "display" => "OutStanding", "width" => 70, "align" => "right");
-        $settings["columns"][] = array("name" => "c.sales_name", "display" => "Salesman", "width" => 100);
+        $settings["columns"][] = array("name" => "c.sales_name", "display" => "Salesman", "width" => 120);
         $settings["columns"][] = array("name" => "if(a.invoice_status = 0,'Draft',if(a.invoice_status = 1,'Posted',if(a.invoice_status = 2,'Approved','Void')))", "display" => "Status", "width" => 50);
+        $settings["columns"][] = array("name" => "coalesce(d.user_id,'-')", "display" => "Admin", "width" => 80);
+        $settings["columns"][] = array("name" => "coalesce(a.create_time,'-')", "display" => "Waktu Input", "width" => 100);
 
         $settings["filters"][] = array("name" => "a.invoice_no", "display" => "No. Invoice");
         $settings["filters"][] = array("name" => "a.invoice_date", "display" => "Tanggal");
@@ -99,7 +101,7 @@ class InvoiceController extends AppController {
 
         } else {
             //$settings["from"] = "vw_ar_invoice_master AS a";
-            $settings["from"] = "t_ar_invoice_master AS a JOIN m_customer AS b ON a.customer_id = b.id JOIN m_salesman AS c ON a.sales_id = c.id";
+            $settings["from"] = "t_ar_invoice_master AS a JOIN m_customer AS b ON a.customer_id = b.id JOIN m_salesman AS c ON a.sales_id = c.id LEFT JOIN sys_users d ON a.createby_id = d.user_uid";
             if ($_GET["query"] == "") {
                 $_GET["query"] = null;
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.invoice_date) = ".$this->trxYear." And month(a.invoice_date) = ".$this->trxMonth;

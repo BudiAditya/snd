@@ -648,6 +648,22 @@ On a.id = b.grn_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDiscount
         $data.= ",".$row["December"];
         return $data;
     }
+
+    public function LoadPurchase4Approval ($cabId = 0,$stDate, $enDate, $pStatus = 0){
+        $sql = "SELECT a.* FROM vw_ap_purchase_master a WHERE a.is_deleted = 0 AND (a.grn_date BETWEEN ?stDate And ?enDate)";
+        if ($cabId > 0){
+            $sql.= " And a.cabang_id = ".$cabId;
+        }
+        if ($pStatus > -1){
+            $sql.= " And a.grn_status = ".$pStatus;
+        }
+        $sql.= " ORDER BY a.grn_date,a.grn_no";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
 }
 
 

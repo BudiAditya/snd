@@ -76,14 +76,16 @@ class PaymentController extends AppController {
             if ($acl->CheckUserAccess("ap.payment", "view")) {
                 $settings["actions"][] = array("Text" => "Laporan", "Url" => "ap.payment/report", "Class" => "bt_report", "ReqId" => 0);
             }
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
             if ($acl->CheckUserAccess("ap.payment", "approve")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "Approve Payment", "Url" => "ap.payment/approve", "Class" => "bt_approve", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Pembayaran terlebih dahulu sebelum proses approval.",
                     "Confirm" => "Apakah anda menyetujui data pembayaran yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
                 $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "ap.payment/unapprove", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Pembayaran terlebih dahulu sebelum proses pembatalan.",
                     "Confirm" => "Apakah anda mau membatalkan approval data pembayaran yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Proses Approval", "Url" => "ap.payment/approval", "Class" => "bt_approve", "ReqId" => 0);
             }
         } else {
             $settings["from"] = "vw_ap_payment_master AS a";
@@ -589,7 +591,25 @@ class PaymentController extends AppController {
         echo json_encode($itemlists);
     }
 
-    public function approve() {
+    public function approval(){
+        if (count($this->postData) > 0) {
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+            $pvsts = $this->GetPostValue("pvStatus");
+        }else{
+            $sdate = time();
+            $edate = $sdate;
+            $pvsts = 1;
+        }
+        $loader = new Payment();
+        $pvs = $loader->LoadPayment4Approval($this->userCabangId,$sdate,$edate,$pvsts);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("pvStatus", $pvsts);
+        $this->Set("pvs", $pvs);
+    }
+
+    public function approve($token = 0) {
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di Approve !");
@@ -605,22 +625,41 @@ class PaymentController extends AppController {
             $payment = $payment->FindById($id);
             /** @var $payment Payment */
             // process payment
-            if($payment->PaymentStatus == 1 && $payment->BalanceAmount < 1000 && $payment->PaymentAmount > 0){
-                $rs = $payment->Approve($payment->Id,$uid);
-                if ($rs) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ap.payment','Approve Pembayaran',$payment->PaymentNo,'Success');
-                    $infos[] = sprintf("Data Pembayaran No: '%s' (%s) telah berhasil di-approve.", $payment->PaymentNo, $payment->PaymentDescs);
+            if ($token == 1) {
+                if ($payment->PaymentStatus == 1 && $payment->BalanceAmount < 1000 && $payment->PaymentAmount > 0) {
+                    $rs = $payment->Approve($payment->Id, $uid);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ap.payment', 'Approve Pembayaran', $payment->PaymentNo, 'Success');
+                        $infos[] = sprintf("Data Pembayaran No: '%s' (%s) telah berhasil di-approve.", $payment->PaymentNo, $payment->PaymentDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ap.payment', 'Approve Pembayaran', $payment->PaymentNo, 'Failed');
+                        $errors[] = sprintf("Maaf, Gagal proses approve Data Pembayaran: '%s'. Message: %s", $payment->PaymentNo, $this->connector->GetErrorMessage());
+                    }
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ap.payment','Approve Pembayaran',$payment->PaymentNo,'Failed');
-                    $errors[] = sprintf("Maaf, Gagal proses approve Data Pembayaran: '%s'. Message: %s", $payment->PaymentNo, $this->connector->GetErrorMessage());
+                    if ($payment->PaymentStatus <> 1) {
+                        $errors[] = sprintf("Data Pembayaran No.%s tidak berstatus -Posted- !", $payment->PaymentNo);
+                    } elseif ($payment->PaymentAmount == 0) {
+                        $errors[] = sprintf("Data Pembayaran No.%s nilai pembayaran kosong !", $payment->PaymentNo);
+                    } elseif ($payment->BalanceAmount >= 1000) {
+                        $errors[] = sprintf("Data Pembayaran No.%s masih ada sisa pembayaran belum dialokasikan !", $payment->PaymentNo);
+                    }
                 }
             }else{
-                if ($payment->PaymentStatus <> 1) {
-                    $errors[] = sprintf("Data Pembayaran No.%s tidak berstatus -Posted- !", $payment->PaymentNo);
-                }elseif ($payment->PaymentAmount == 0){
-                    $errors[] = sprintf("Data Pembayaran No.%s nilai pembayaran kosong !", $payment->PaymentNo);
-                }elseif ($payment->BalanceAmount >= 1000){
-                    $errors[] = sprintf("Data Pembayaran No.%s masih ada sisa pembayaran belum dialokasikan !", $payment->PaymentNo);
+                if($payment->PaymentStatus == 2){
+                    $rs = $payment->Unapprove($payment->Id,$uid);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId,'ap.payment','Un-approve Pembayaran',$payment->PaymentNo,'Success');
+                        $infos[] = sprintf("Approval Data Pembayaran No: '%s' (%s) telah berhasil di-batalkan.", $payment->PaymentNo, $payment->PaymentDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId,'ap.payment','Un-approve Pembayaran',$payment->PaymentNo,'Failed');
+                        $errors[] = sprintf("Maaf, Gagal proses pembatalan Data Pembayaran: '%s'. Message: %s", $payment->PaymentNo, $this->connector->GetErrorMessage());
+                    }
+                }else{
+                    if ($payment->PaymentStatus == 1){
+                        $errors[] = sprintf("Data Pembayaran No.%s masih berstatus -Posted- !",$payment->PaymentNo);
+                    }else{
+                        $errors[] = sprintf("Data Pembayaran No.%s masih berstatus -Draf/Void- !",$payment->PaymentNo);
+                    }
                 }
             }
         }

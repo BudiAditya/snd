@@ -42,7 +42,7 @@ $sheet->setCellValue("A$row",$company_name);
 $sheet->getStyle("A1");
 $sheet->setShowGridlines(false);
 $row++;
-$sheet->setCellValue("A$row","REKAPITULASI TRANSAKSI KAS / BANK");
+$sheet->setCellValue("A$row","REKAPITULASI TRANSAKSI KAS/BANK");
 $row++;
 $sheet->setCellValue("A$row","Dari Tgl. ".date('d-m-Y',$StartDate)." - ".date('d-m-Y',$EndDate));
 $row++;
@@ -52,7 +52,7 @@ $sheet->setCellValue("C$row","Tanggal");
 $sheet->setCellValue("D$row","No. Bukti");
 $sheet->setCellValue("E$row","Mode");
 $sheet->setCellValue("F$row","Kas / Bank");
-$sheet->setCellValue("G$row","Asuransi / Relasi");
+$sheet->setCellValue("G$row","Relasi");
 $sheet->setCellValue("H$row","Keterangan");
 $sheet->setCellValue("I$row","Refferensi");
 if ($TrxMode == 0){
@@ -93,10 +93,10 @@ if ($Reports != null){
         $sheet->getStyle("A$row")->applyFromArray($center);
         $sheet->setCellValue("B$row",$rpt["kode_cabang"]);
         $sheet->setCellValue("C$row",date('d-m-Y',strtotime($rpt["trx_date"])));
-        $sheet->setCellValue("D$row",$rpt["doc_no"]);
+        $sheet->setCellValue("D$row",$rpt["trx_no"]);
         $sheet->setCellValue("E$row",$rpt["xmode"]);
         $sheet->setCellValue("F$row",$rpt["bank_name"]);
-        $sheet->setCellValue("G$row",$rpt["contact_name"]);
+        $sheet->setCellValue("G$row",$rpt["relasi_name"]);
         $sheet->setCellValue("H$row",$rpt["trx_descs"]);
         $sheet->setCellValue("I$row",$rpt["reff_no"]);
         if ($TrxMode == 0){
@@ -104,8 +104,10 @@ if ($Reports != null){
             $sheet->setCellValue("K$row",$kredit);
             $sheet->setCellValue("L$row",$saldo);
             $sheet->setCellValue("M$row",$rpt["user_id"]);
-            if ($rpt["trx_status"] == 1){
-                $sheet->setCellValue("N$row","Posted");
+            if ($rpt["trx_status"] == 1) {
+                $sheet->setCellValue("N$row", "Posted");
+            }elseif ($rpt["trx_status"] == 2){
+                    $sheet->setCellValue("N$row","Approved");
             }else{
                 $sheet->setCellValue("N$row","Draft");
             }
@@ -148,6 +150,7 @@ if ($Reports != null){
 foreach ($headers as $header) {
     header($header);
 }
+
 // Hack agar client menutup loading dialog box... (Ada JS yang checking cookie ini pada common.js)
 $writer->save("php://output");
 

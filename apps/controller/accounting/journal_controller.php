@@ -65,22 +65,26 @@ class JournalController extends AppController {
 
             if ($acl->CheckUserAccess("accounting.journal", "verify")) {
                 $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "Verifikasi Journal", "Url" => "accounting.journal/verify/1", "Class" => "bt_approve", "ReqId" => 2,
+                $settings["actions"][] = array("Text" => "Verifikasi", "Url" => "accounting.journal/verify/1", "Class" => "bt_approve", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Journal terlebih dahulu sebelum proses approval.\nPERHATIAN: Mohon memilih tepat satu data.",
                     "Confirm" => "Apakah anda menyetujui data journal yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
                 $settings["actions"][] = array("Text" => "Batal Verifikasi", "Url" => "accounting.journal/verify/0", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Journal terlebih dahulu sebelum proses pembatalan.\nPERHATIAN: Mohon memilih tepat satu data.",
                     "Confirm" => "Apakah anda mau membatalkan approval data journal yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Proses Verifikasi", "Url" => "accounting.journal/verifikasi", "Class" => "bt_approve", "ReqId" => 0);
             }
 
             if ($acl->CheckUserAccess("accounting.journal", "approve")) {
                 $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "Approve Journal", "Url" => "accounting.journal/approve/1", "Class" => "bt_approve", "ReqId" => 2,
+                $settings["actions"][] = array("Text" => "Approve", "Url" => "accounting.journal/approve/1", "Class" => "bt_approve", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Journal terlebih dahulu sebelum proses approval.\nPERHATIAN: Mohon memilih tepat satu data.",
                     "Confirm" => "Apakah anda menyetujui data journal yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
                 $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "accounting.journal/approve/0", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Journal terlebih dahulu sebelum proses pembatalan.\nPERHATIAN: Mohon memilih tepat satu data.",
                     "Confirm" => "Apakah anda mau membatalkan approval data journal yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Proses Approval", "Url" => "accounting.journal/approval", "Class" => "bt_approve", "ReqId" => 0);
             }
 
         } else {
@@ -447,6 +451,42 @@ class JournalController extends AppController {
             $this->persistence->SaveState("error", "<ul><li>" . implode("</li><li>", $errors) . "</li></ul>");
         }
         redirect_url("accounting.journal");
+    }
+
+    public function verifikasi(){
+        if (count($this->postData) > 0) {
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+            $tsts = $this->GetPostValue("tStatus");
+        }else{
+            $sdate = time();
+            $edate = $sdate;
+            $tsts = 0;
+        }
+        $loader = new Journal();
+        $trxs = $loader->LoadJournal4Approval($this->userCabangId,$sdate,$edate,$tsts);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("tStatus", $tsts);
+        $this->Set("trxs", $trxs);
+    }
+
+    public function approval(){
+        if (count($this->postData) > 0) {
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+            $tsts = $this->GetPostValue("tStatus");
+        }else{
+            $sdate = time();
+            $edate = $sdate;
+            $tsts = 1;
+        }
+        $loader = new Journal();
+        $trxs = $loader->LoadJournal4Approval($this->userCabangId,$sdate,$edate,$tsts);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("tStatus", $tsts);
+        $this->Set("trxs", $trxs);
     }
 }
 

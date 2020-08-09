@@ -1,6 +1,6 @@
 <?php
 
-class ErasysAcl extends AclBase {
+class RekasysAcl extends AclBase {
     private static $SESSION_NAME;
     private $mapping = array(
         1 => "add",

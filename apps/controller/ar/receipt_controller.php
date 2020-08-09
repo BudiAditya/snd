@@ -167,8 +167,8 @@ class ReceiptController extends AppController {
             $receipt->WarkatNo = $this->GetPostValue("WarkatNo");
             $receipt->WarkatDate = strtotime($this->GetPostValue("WarkatDate"));
             $receipt->ReturnNo = $this->GetPostValue("ReturnNo");
-            $receipt->ReceiptAmount = $this->GetPostValue("ReceiptAmount");
-            $receipt->AllocateAmount = $this->GetPostValue("AllocateAmount");
+            $receipt->ReceiptAmount = str_replace(',','', $this->GetPostValue("ReceiptAmount"));
+            $receipt->AllocateAmount = str_replace(',','', $this->GetPostValue("AllocateAmount"));
             if ($this->GetPostValue("ReceiptStatus") == null || $this->GetPostValue("ReceiptStatus") == 0){
                 $receipt->ReceiptStatus = 1;
             }else{
@@ -592,7 +592,7 @@ class ReceiptController extends AppController {
             /** @var $receipt Receipt */
             // process receipt
             if ($token == 1) {
-                if ($receipt->ReceiptStatus == 1 && $receipt->ReceiptAmount > 0 && $receipt->BalanceAmount < 1000) {
+                if ($receipt->ReceiptStatus == 1 && $receipt->ReceiptAmount > 0 && $receipt->BalanceAmount < 5000) {
                     $rs = $receipt->Approve($receipt->Id, $uid);
                     if ($rs) {
                         $log = $log->UserActivityWriter($this->userCabangId, 'ar.receipt', 'Approve Receipt', $receipt->ReceiptNo, 'Success');
@@ -606,7 +606,7 @@ class ReceiptController extends AppController {
                         $errors[] = sprintf("Data Receipt No.%s tidak berstatus -Posted- !", $receipt->ReceiptNo);
                     } elseif ($receipt->ReceiptAmount == 0) {
                         $errors[] = sprintf("Data Receipt No.%s nilai penerimaan masih kosong !", $receipt->ReceiptNo);
-                    } elseif ($receipt->BalanceAmount >= 1000) {
+                    } elseif ($receipt->BalanceAmount >= 5000) {
                         $errors[] = sprintf("Data Receipt No.%s nilai penerimaan masih ada yang belum dialokasikan !", $receipt->ReceiptNo);
                     }
                 }

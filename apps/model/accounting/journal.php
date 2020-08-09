@@ -375,6 +375,22 @@ class Journal extends EntityBase {
         $data.= ",".$row["December"];
         return $data;
     }
+
+    public function LoadJournal4Approval ($cabId = 0,$stDate, $enDate, $tStatus = 0){
+        $sql = "SELECT a.* FROM vw_ac_journal_master a WHERE a.is_deleted = 0 And (a.journal_date BETWEEN ?stDate And ?enDate)";
+        if ($cabId > 0){
+            $sql.= " And a.cabang_id = ".$cabId;
+        }
+        if ($tStatus > -1){
+            $sql.= " And a.journal_status = ".$tStatus;
+        }
+        $sql.= " ORDER BY a.journal_date,a.journal_no";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
 }
 
 

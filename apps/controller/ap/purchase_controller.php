@@ -83,6 +83,8 @@ class PurchaseController extends AppController {
                 $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "ap.purchase/unapprove", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Pembelian terlebih dahulu sebelum proses pembatalan.",
                     "Confirm" => "Apakah anda mau membatalkan approval data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Proses Approval", "Url" => "ap.purchase/approval", "Class" => "bt_approve", "ReqId" => 0);
             }
 
         } else {
@@ -659,7 +661,25 @@ class PurchaseController extends AppController {
         echo json_encode($itemlists);
     }
 
-    public function approve() {
+    public function approval(){
+        if (count($this->postData) > 0) {
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+            $gnsts = $this->GetPostValue("gnStatus");
+        }else{
+            $sdate = time();
+            $edate = $sdate;
+            $gnsts = 1;
+        }
+        $loader = new Purchase();
+        $grns = $loader->LoadPurchase4Approval($this->userCabangId,$sdate,$edate,$gnsts);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("gnStatus", $gnsts);
+        $this->Set("grns", $grns);
+    }
+
+    public function approve($token = 0) {
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di Approve !");
@@ -675,17 +695,36 @@ class PurchaseController extends AppController {
             $purchase = $purchase->FindById($id);
             /** @var $purchase Purchase */
             // process purchase
-            if($purchase->GrnStatus == 1){
-                $rs = $purchase->Approve($purchase->Id,$uid);
-                if ($rs) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ap.purchase','Approve Pembelian',$purchase->GrnNo,'Success');
-                    $infos[] = sprintf("Data Pembelian No: '%s' (%s) telah berhasil di-approve.", $purchase->GrnNo, $purchase->GrnDescs);
+            if ($token == 1) {
+                if ($purchase->GrnStatus == 1) {
+                    $rs = $purchase->Approve($purchase->Id, $uid);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ap.purchase', 'Approve Pembelian', $purchase->GrnNo, 'Success');
+                        $infos[] = sprintf("Data Pembelian No: '%s' (%s) telah berhasil di-approve.", $purchase->GrnNo, $purchase->GrnDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ap.purchase', 'Approve Pembelian', $purchase->GrnNo, 'Failed');
+                        $errors[] = sprintf("Maaf, Gagal proses approve Data Pembelian: '%s'. Message: %s", $purchase->GrnNo, $this->connector->GetErrorMessage());
+                    }
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'ap.purchase','Approve Pembelian',$purchase->GrnNo,'Failed');
-                    $errors[] = sprintf("Maaf, Gagal proses approve Data Pembelian: '%s'. Message: %s", $purchase->GrnNo, $this->connector->GetErrorMessage());
+                    $errors[] = sprintf("Data Pembelian No.%s sudah berstatus -Approved- !", $purchase->GrnNo);
                 }
             }else{
-                $errors[] = sprintf("Data Pembelian No.%s sudah berstatus -Approved- !",$purchase->GrnNo);
+                if($purchase->GrnStatus == 2){
+                    $rs = $purchase->Unapprove($purchase->Id,$uid);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId,'ap.purchase','Un-approve Pembelian',$purchase->GrnNo,'Success');
+                        $infos[] = sprintf("Approval Data Pembelian No: '%s' (%s) telah berhasil di-batalkan.", $purchase->GrnNo, $purchase->GrnDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId,'ap.purchase','Un-approve Pembelian',$purchase->GrnNo,'Failed');
+                        $errors[] = sprintf("Maaf, Gagal proses pembatalan Data Pembelian: '%s'. Message: %s", $purchase->GrnNo, $this->connector->GetErrorMessage());
+                    }
+                }else{
+                    if ($purchase->GrnStatus == 1){
+                        $errors[] = sprintf("Data Pembelian No.%s masih berstatus -POSTED- !",$purchase->GrnNo);
+                    }else{
+                        $errors[] = sprintf("Data Pembelian No.%s masih berstatus -DRAFT- !",$purchase->GrnNo);
+                    }
+                }
             }
         }
         if (count($infos) > 0) {

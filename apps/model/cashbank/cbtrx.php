@@ -332,6 +332,22 @@ WHERE id = ?id";
         }
         return $val;
     }
+
+    public function LoadTrx4Approval ($cabId = 0,$stDate, $enDate, $tStatus = 0){
+        $sql = "SELECT a.* FROM vw_cb_transaction a WHERE a.is_deleted = 0 And (a.trx_date BETWEEN ?stDate And ?enDate)";
+        if ($cabId > 0){
+            $sql.= " And a.cabang_id = ".$cabId;
+        }
+        if ($tStatus > -1){
+            $sql.= " And a.trx_status = ".$tStatus;
+        }
+        $sql.= " ORDER BY a.trx_date,a.trx_no";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
 }
 
 // End of file: bank.php

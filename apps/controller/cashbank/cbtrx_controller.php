@@ -65,26 +65,28 @@ class CbTrxController extends AppController {
 					"Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses penghapusan.\nPERHATIAN: Mohon memilih tepat satu data.",
 					"Confirm" => "Apakah anda mau menghapus data transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
 			}
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
             if ($acl->CheckUserAccess("cashbank.cbtrx", "view")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "Laporan", "Url" => "cashbank.cbtrx/report", "Class" => "bt_report", "ReqId" => 0);
             }
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
-            if ($acl->CheckUserAccess("cashbank.cbtrx", "approve")) {
-                $settings["actions"][] = array("Text" => "Approval", "Url" => "cashbank.cbtrx/approve", "Class" => "bt_approve", "ReqId" => 2,
-                    "Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses approval.\nPERHATIAN: Mohon memilih tepat satu data.",
-                    "Confirm" => "Apakah anda menyetujui data transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-            }
-            if ($acl->CheckUserAccess("cashbank.cbtrx", "approve")) {
-                $settings["actions"][] = array("Text" => "Batal Approval", "Url" => "cashbank.cbtrx/unapprove", "Class" => "bt_reject", "ReqId" => 2,
-                    "Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses pembatalan.\nPERHATIAN: Mohon memilih tepat satu data.",
-                    "Confirm" => "Apakah anda mau membatalkan approval data transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-            }
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
+            /*
             if ($acl->CheckUserAccess("cashbank.cbtrx", "view")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "Print Bukti", "Url" => "cashbank.cbtrx/cetakpdf/%s", "Class" => "bt_print", "ReqId" => 1,
                     "Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses cetak.\nPERHATIAN: Mohon memilih tepat satu data.",
                     "Confirm" => "Apakah anda akan mencetak transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+            }
+            */
+            if ($acl->CheckUserAccess("cashbank.cbtrx", "approve")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Approval", "Url" => "cashbank.cbtrx/approve", "Class" => "bt_approve", "ReqId" => 2,
+                    "Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses approval.\nPERHATIAN: Mohon memilih tepat satu data.",
+                    "Confirm" => "Apakah anda menyetujui data transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "Batal Approval", "Url" => "cashbank.cbtrx/unapprove", "Class" => "bt_reject", "ReqId" => 2,
+                    "Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses pembatalan.\nPERHATIAN: Mohon memilih tepat satu data.",
+                    "Confirm" => "Apakah anda mau membatalkan approval data transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Proses Approval", "Url" => "cashbank.cbtrx/approval", "Class" => "bt_approve", "ReqId" => 0);
             }
 			$settings["def_order"] = 2;
 			$settings["def_filter"] = 0;
@@ -99,7 +101,7 @@ class CbTrxController extends AppController {
                     $settings["where"] = "a.cabang_id = " . $this->userCabangId . " And year(a.trx_date) = " . $this->trxYear . " And month(a.trx_date) = " . $this->trxMonth;
                 }
             } else {
-                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = ".$this->userCabangId;
+                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = ".$this->userCabangId . " And year(a.trx_date) = " . $this->trxYear;
             }
 		}
 		$dispatcher = Dispatcher::CreateInstance();
@@ -298,8 +300,25 @@ class CbTrxController extends AppController {
 		redirect_url("cashbank.cbtrx");
 	}
 
-    public function approve(){
+    public function approval(){
+        if (count($this->postData) > 0) {
+            $sdate = strtotime($this->GetPostValue("stDate"));
+            $edate = strtotime($this->GetPostValue("enDate"));
+            $tsts = $this->GetPostValue("tStatus");
+        }else{
+            $sdate = time();
+            $edate = $sdate;
+            $tsts = 0;
+        }
+        $loader = new CbTrx();
+        $trxs = $loader->LoadTrx4Approval($this->userCabangId,$sdate,$edate,$tsts);
+        $this->Set("stDate", $sdate);
+        $this->Set("enDate", $edate);
+        $this->Set("tStatus", $tsts);
+        $this->Set("trxs", $trxs);
+    }
 
+    public function approve($token = 0){
         $ids = $this->GetGetValue("id", array());
         if (count($ids) == 0) {
             $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di Approve !");
@@ -315,18 +334,38 @@ class CbTrxController extends AppController {
             /** @var $cbtrx CbTrx */
             $cbtrx = $cbtrx->LoadById($id);
             // process jurnal
-            if($cbtrx->TrxStatus < 2){
-                $cbtrx->UpdatedById = AclManager::GetInstance()->GetCurrentUser()->Id;
-                $rs = $cbtrx->Approve($cbtrx->Id);
-                if ($rs) {
-                    $log = $log->UserActivityWriter($this->userCabangId,'cashbank.cbtrx','Approve CashBook Trx',$cbtrx->TrxNo,'Success');
-                    $infos[] = sprintf("Data Transaksi: %s (%s) sudah di-Approved", $cbtrx->TrxNo, $cbtrx->TrxDescs);
+            if ($token == 1) {
+                if ($cbtrx->TrxStatus < 2) {
+                    $cbtrx->UpdatedById = AclManager::GetInstance()->GetCurrentUser()->Id;
+                    $rs = $cbtrx->Approve($cbtrx->Id);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'cashbank.cbtrx', 'Approve CashBook Trx', $cbtrx->TrxNo, 'Success');
+                        $infos[] = sprintf("Data Transaksi: %s (%s) sudah di-Approved", $cbtrx->TrxNo, $cbtrx->TrxDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId, 'cashbank.cbtrx', 'Approve CashBook Trx', $cbtrx->TrxNo, 'Failed');
+                        $errors[] = sprintf("Gagal Approve Data Transaksi: %s (%s). Error: %s", $cbtrx->TrxNo, $cbtrx->TrxDescs, $this->connector->GetErrorMessage());
+                    }
                 } else {
-                    $log = $log->UserActivityWriter($this->userCabangId,'cashbank.cbtrx','Approve CashBook Trx',$cbtrx->TrxNo,'Failed');
-                    $errors[] = sprintf("Gagal Approve Data Transaksi: %s (%s). Error: %s", $cbtrx->TrxNo, $cbtrx->TrxDescs, $this->connector->GetErrorMessage());
+                    $errors[] = sprintf("Maaf Data Transaksi No. %s tidak bisa diproses karena sudah berstatus -APPROVED-!", $cbtrx->TrxNo);
                 }
             }else{
-                $errors[] = sprintf("Maaf Data Transaksi No. %s tidak bisa diproses karena sudah berstatus -APPROVED-!",$cbtrx->TrxNo);
+                if($cbtrx->TrxStatus == 2 && $cbtrx->CreateMode == 0){
+                    $cbtrx->UpdatedById = AclManager::GetInstance()->GetCurrentUser()->Id;
+                    $rs = $cbtrx->Unapprove($cbtrx->Id);
+                    if ($rs) {
+                        $log = $log->UserActivityWriter($this->userCabangId,'cashbank.cbtrx','Un-Approve CashBook Trx',$cbtrx->TrxNo,'Success');
+                        $infos[] = sprintf("Data Transaksi: %s (%s) sudah di-Unapproved", $cbtrx->TrxNo, $cbtrx->TrxDescs);
+                    } else {
+                        $log = $log->UserActivityWriter($this->userCabangId,'cashbank.cbtrx','Un-Approve CashBook Trx',$cbtrx->TrxNo,'Failed');
+                        $errors[] = sprintf("Gagal Unapprove Data Transaksi: %s (%s). Error: %s", $cbtrx->TrxNo, $cbtrx->TrxDescs, $this->connector->GetErrorMessage());
+                    }
+                }else{
+                    if ($cbtrx->CreateMode == 1){
+                        $errors[] = sprintf("Maaf Data Transaksi No. %s tidak bisa diproses secara manual!", $cbtrx->TrxNo);
+                    }else {
+                        $errors[] = sprintf("Maaf Data Transaksi No. %s tidak boleh diproses karena sudah berstatus -POSTED-!", $cbtrx->TrxNo);
+                    }
+                }
             }
         }
         if (count($infos) > 0) {
@@ -435,12 +474,6 @@ class CbTrxController extends AppController {
             $this->persistence->SaveState("error", "Harap memilih Data Transaksi terlebih dahulu sebelum mencetak bukti.");
             redirect_url("cashbank.cbtrx");
         }
-        require_once(MODEL . "master/company.php");
-        require_once(MODEL . "master/coadetail.php");
-        require_once(MODEL . "master/cabang.php");
-        require_once(MODEL . "master/trxtype.php");
-        require_once(MODEL . "master/bank.php");
-        require_once(MODEL . "master/contacts.php");
         $loader = null;
         $cbtrx = new CbTrx();
         $cbtrx = $cbtrx->LoadById($id);
@@ -452,22 +485,7 @@ class CbTrxController extends AppController {
             $this->persistence->SaveState("error", sprintf("Maaf Data Transaksi No. %s masih berstatus -DRAFT- tidak boleh dicetak!",$cbtrx->TrxNo));
             redirect_url("cashbank.cbtrx");
         }
-        $loader = new Cabang($cbtrx->CabangId);
-        $cabang = $loader->Cabang;
-        $loader = new Company($cbtrx->EntityId);
-        $company_name = $loader->CompanyName;
-        $loader = new TrxType($cbtrx->TrxTypeId);
-        $refftypeid = $loader->RefftypeId;
-        $loader = new Customer($cbtrx->ContactId);
-        $customer_name = $loader->CustomerName;
-        $loader = new Supplier($cbtrx->CreditorId);
-        $supplier_name = $loader->Nama;
         $this->Set("cbtrx", $cbtrx);
-        $this->Set("refftypeid", $refftypeid);
-        $this->Set("company_name", $company_name);
-        $this->Set("cabang", $cabang);
-        $this->Set("customer_name", $customer_name);
-        $this->Set("supplier_name", $supplier_name);
     }
 
     public function report(){

@@ -28,7 +28,7 @@ define("APP_NAME", "REKASYS - SND System");
  * Ex: SimpleAcl class then you specify 'Simple' without quote
  * WARNING: Changes maybe require to remove all user cookies and sessions data (depend on the code implemented).
  */
-define("ACL_TYPE", "Erasys");
+define("ACL_TYPE", "Rekasys");
 
 /**
  * Tell the system to use which persistence model.

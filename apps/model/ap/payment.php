@@ -415,6 +415,22 @@ WHERE id = ?id";
         $this->connector->CommandText = "Update t_ap_payment_master a Set a.payment_type_id = $wti,a.warkat_bank_id = $wbi WHERE a.id = $id";
         return $this->connector->ExecuteNonQuery();
     }
+
+    public function LoadPayment4Approval ($cabId = 0,$stDate, $enDate, $pStatus = 0){
+        $sql = "SELECT a.* FROM vw_ap_payment_master a WHERE a.is_deleted = 0 AND (a.payment_date BETWEEN ?stDate And ?enDate)";
+        if ($cabId > 0){
+            $sql.= " And a.cabang_id = ".$cabId;
+        }
+        if ($pStatus > -1){
+            $sql.= " And a.payment_status = ".$pStatus;
+        }
+        $sql.= " ORDER BY a.payment_date,a.payment_no";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
 }
 
 

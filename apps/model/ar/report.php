@@ -132,10 +132,34 @@ class Report extends EntityBase {
         return $rs;
     }
 
-    public function getOrInvoiceList ($orId){
-        $sqx = "Select b.invoice_date as tanggal,b.due_date as jtp,b.invoice_no as no_bukti,a.allocate_amount as nilai";
-        $sqx.= " From t_ar_receipt_detail a Join vw_ar_invoice_master b On a.invoice_id = b.id Where a.receipt_id = $orId Order By b.invoice_date,b.invoice_no";
+    public function getOrInvoiceList ($ivId){
+        $sqx = "Select b.receipt_date as tanggal,b.receipt_no as no_bukti,a.allocate_amount as nilai";
+        $sqx.= " From t_ar_receipt_detail a Join vw_ar_receipt_master b On a.receipt_id = b.id Where a.invoice_id = $ivId Order By b.receipt_date,b.receipt_no";
         $this->connector->CommandText = $sqx;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function getIvoiceList ($cabId = 0,$csId = 0,$salesId = 0,$stLunas = -1,$stDate,$enDate){
+        $sqx = "Select a.* From vw_ar_invoice_master a Where a.is_deleted = 0 And a.invoice_status <> 3 And a.payment_type = 1 And a.invoice_date Between ?stDate And ?enDate";
+        if ($cabId > 0){
+            $sqx.= " And a.cabang_id = $cabId";
+        }
+        if ($csId > 0){
+            $sqx.= " And a.customer_id = $csId";
+        }
+        if ($salesId > 0){
+            $sqx.= " And a.sales_id = $salesId";
+        }
+        if ($stLunas == 0){
+            $sqx.= " And a.balance_amount > 5000";
+        }elseif ($stLunas == 1){
+            $sqx.= " And a.balance_amount < 5000";
+        }
+        $sqx.= " Order By a.invoice_date,a.invoice_no";
+        $this->connector->CommandText = $sqx;
+        $this->connector->AddParameter("?stDate", date('Y-m-d', $stDate));
+        $this->connector->AddParameter("?enDate", date('Y-m-d', $enDate));
         $rs = $this->connector->ExecuteQuery();
         return $rs;
     }

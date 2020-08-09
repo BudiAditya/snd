@@ -107,6 +107,9 @@ if ($receipts != null) {
         <?php
         $nmr = 1;
         $url = null;
+        $tram = 0;
+        $talm = 0;
+        $tsis = 0;
         while ($data = $receipts->FetchAssoc()) {
             $url = $helper->site_url("ar.receipt/view/" . $data["id"]);
             print('<tr>');
@@ -132,7 +135,20 @@ if ($receipts != null) {
             }
             printf('<td class="center"><input type="checkbox" class="cbIds" name="id[]" value="%d" checked="checked"/></td>', $data["id"]);
             print('</tr>');
-        } ?>
+            $tram += $data["receipt_amount"];
+            $talm += $data["allocate_amount"];
+            $tsis += $data["receipt_amount"]-$data["allocate_amount"];
+        }
+        printf('
+        <tr class="bold">
+            <td colspan="6" align="right">Total..</td>
+            <td align="right">%s</td>
+            <td align="right">%s</td>
+            <td align="right">%s</td>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        ',number_format($tram,0),number_format($talm,0),number_format($tsis,0));
+        ?>
     </table>
 </form>
 <?php } ?>

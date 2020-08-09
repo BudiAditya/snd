@@ -193,12 +193,24 @@ ORDER BY a.customer_name ASC, a.invoice_date ASC;";
     }
 
     public function getOrList($id = 0){
-        print('<tr>
-            <th>No.</th>
-            <th>Tanggal</th>
-            <th>No. Bukti</th>
-            <th>Nilai</th>
-        </tr>');
+        $data = null;
+        $list = new Report();
+        $list = $list->getOrInvoiceList($id);
+        if ($list == null){
+            $data = 'Belum ada data!';
+        }else{
+            $nmr = 1;
+            $total = 0;
+            $data = '<table cellpadding="0" cellspacing="0" class="tablePadding tableBorder" style="font-size: 12px;font-family: tahoma">';
+            $data.= '<tr><th>No.</th><th>Tgl. Bayar</th><th>No. Receipt</th><th>Nilai</th></tr>';
+            while ($rs = $list->FetchAssoc()){
+                $data.= sprintf('<tr><td>%s</td><td>%s</td><td>%s</td><td align="right">%s</td></tr>',$nmr++,$rs['tanggal'],$rs['no_bukti'],number_format($rs['nilai'],0));
+                $total+= $rs["nilai"];
+            }
+            $data.= sprintf('<tr><td colspan="3" align="right">Total..</td><td align="right">%s</td></tr>',number_format($total,0));
+            $data.= '</table>';
+        }
+        print($data);
     }
 
     public function getRtList($id = 0){
@@ -229,6 +241,72 @@ ORDER BY a.customer_name ASC, a.invoice_date ASC;";
             $data.= '</table>';
         }
         print($data);
+    }
+
+    public function list_piutang(){
+        // report list piutang
+        require_once(MODEL . "ar/customer.php");
+        require_once(MODEL . "master/company.php");
+        require_once(MODEL . "master/cabang.php");
+        require_once(MODEL . "master/salesman.php");
+        // Intelligent time detection...
+        //$month = (int)date("n");
+        //$year = (int)date("Y");
+        $month = $this->trxMonth;
+        $year = $this->trxYear;
+        $loader = null;
+        if (count($this->postData) > 0) {
+            // proses rekap disini
+            $sCabangId = $this->GetPostValue("CabangId");
+            $sContactsId = $this->GetPostValue("ContactsId");
+            $sSalesId = $this->GetPostValue("SalesId");
+            $sPaymentStatus = $this->GetPostValue("PaymentStatus");
+            $sStartDate = strtotime($this->GetPostValue("StartDate"));
+            $sEndDate = strtotime($this->GetPostValue("EndDate"));
+            $sOutput = $this->GetPostValue("Output");
+        }else{
+            $sCabangId = 0;
+            $sContactsId = 0;
+            $sSalesId = 0;
+            $sPaymentStatus = -1;
+            $sOutput = 0;
+            $sStartDate = mktime(0, 0, 0, $month, 1, $year);
+            if ($month == 12) {
+                $sEndDate = mktime(0, 0, 0, $month, 31, $year);
+            }else{
+                $sEndDate = mktime(0, 0, 0, $month + 1, 0, $year);
+            }
+        }
+        $list = new Report();
+        $reports = $list->getIvoiceList($sCabangId,$sContactsId,$sSalesId,$sPaymentStatus,$sStartDate,$sEndDate);
+        // ambil data yang diperlukan
+        $customer = new Customer();
+        $customer = $customer->LoadAll();
+        $loader = new Company($this->userCompanyId);
+        $this->Set("company_name", $loader->CompanyName);
+        $loader = new Salesman();
+        $sales = $loader->LoadAll();
+        //load data cabang
+        $loader = new Cabang();
+        $cabCode = null;
+        $cabName = null;
+        $cabang = $loader->LoadAllowedCabId($this->userCabIds);
+        // kirim ke view
+        $this->Set("cabangs", $cabang);
+        $this->Set("customers",$customer);
+        $this->Set("sales",$sales);
+        $this->Set("CabangId",$sCabangId);
+        $this->Set("ContactsId",$sContactsId);
+        $this->Set("SalesId",$sSalesId);
+        $this->Set("StartDate",$sStartDate);
+        $this->Set("EndDate",$sEndDate);
+        $this->Set("PaymentStatus",$sPaymentStatus);
+        $this->Set("Output",$sOutput);
+        $this->Set("Reports",$reports);
+        $this->Set("userCabId",$this->userCabangId);
+        $this->Set("userCabCode",$cabCode);
+        $this->Set("userCabName",$cabName);
+        $this->Set("userLevel",$this->userLevel);
     }
 }
 
