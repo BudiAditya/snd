@@ -131,18 +131,14 @@ class Correction extends EntityBase {
             $this->connector->CommandText = "SELECT LAST_INSERT_ID();";
             $this->Id = (int)$this->connector->ExecuteScalar();
             $ret = $this->Id;
-            $this->connector->CommandText = "SELECT fc_ic_correction_post($ret) As valresult;";
-            $rs = $this->connector->ExecuteQuery();
-            $row = $rs->FetchAssoc();
-            return strval($row["valresult"]);
         }
 		return $ret;
 	}
 
 	public function Delete($id) {
-        $this->connector->CommandText = "SELECT fc_ic_correction_unpost($id) As valresult;";
-        $rs = $this->connector->ExecuteQuery();
-        $row = $rs->FetchAssoc();
+        //$this->connector->CommandText = "SELECT fc_ic_correction_unpost($id) As valresult;";
+        //$rs = $this->connector->ExecuteQuery();
+        //$row = $rs->FetchAssoc();
 		$this->connector->CommandText = 'Delete From t_ic_stock_correction Where id = ?id';
         $this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteNonQuery();
@@ -205,6 +201,14 @@ class Correction extends EntityBase {
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
         $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function UpdateAmount() {
+        $this->connector->CommandText = 'Update t_ic_stock_correction a Set a.corr_amt = ?price, a.corr_status = 1 Where id = ?id';
+        $this->connector->AddParameter("?id", $this->Id);
+        $this->connector->AddParameter("?price", $this->CorrAmt);
+        $rs = $this->connector->ExecuteNonQuery();
         return $rs;
     }
 }

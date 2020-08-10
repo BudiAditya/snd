@@ -375,7 +375,7 @@ WHERE id = ?id";
                 `trx_date`  date NOT NULL ,
                 `trx_type`  varchar(50),
                 `trx_url`  varchar(50),
-                `relasi`  varchar(50),
+                `relasi`  varchar(250),
                 `price`  int(11) DEFAULT 0,
                 `awal`  decimal(11,2) NOT NULL DEFAULT 0,
                 `masuk`  decimal(11,2) NOT NULL DEFAULT 0,
@@ -392,7 +392,7 @@ WHERE id = ?id";
                 `trx_date`  date NOT NULL ,
                 `trx_type`  varchar(50),
                 `trx_url`  varchar(50),
-                `relasi`  varchar(50),
+                `relasi`  varchar(250),
                 `price`  int(11) DEFAULT 0,
                 `awal`  decimal(11,2) NOT NULL DEFAULT 0,
                 `masuk`  decimal(11,2) NOT NULL DEFAULT 0,
@@ -479,7 +479,7 @@ WHERE id = ?id";
         $rs = $this->connector->ExecuteNonQuery();
 
         // get issue
-        $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,issue,relasi)";
+        $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,keluar,relasi)";
         $sqx.= " Select a.issue_date,concat('Issue - ',a.issue_no),'inventory.issue',a.qty,a.keterangan";
         $sqx.= " From t_ic_issue as a";
         $sqx.= " Where a.item_id = ?item_id and Year(a.issue_date) = ?year and a.warehouse_id = ?gudang_id and a.is_status = 1";
@@ -751,7 +751,7 @@ WHERE id = ?id";
         $rs = $this->connector->ExecuteNonQuery();
 
         // try get all tmp card data
-        $sqx = "Select c.entity_id,a.item_id, b.item_code, b.item_name, b.s_uom_code as satuan, b.s_uom_qty, b.c_uom_code, b.qty_convert, sum(a.awal) as sAwal, sum(a.beli) as sBeli, sum(a.asyin) as sAsyin, sum(a.xin) as sXin, sum(a.rjual) as sRjual, sum(a.asyout) as sAsyout, sum(a.jual) as sJual, sum(a.xout) as sXout, sum(a.rbeli) as sRbeli, sum(a.koreksi) as sKoreksi ";
+        $sqx = "Select c.entity_id,a.item_id, b.item_code, b.item_name, b.s_uom_code as satuan, b.s_uom_qty, b.c_uom_code, b.qty_convert, sum(a.awal) as sAwal, sum(a.beli) as sBeli, sum(a.asyin) as sAsyin, sum(a.xin) as sXin, sum(a.rjual) as sRjual, sum(a.asyout) as sAsyout, sum(a.jual) as sJual, sum(a.xout) as sXout, sum(a.rbeli) as sRbeli, sum(a.koreksi) as sKoreksi, sum(a.issue) as sIssue";
         $sqx.= " From tmp_mutasi as a Join m_items as b On a.item_id = b.id Join m_item_brand c ON b.brand_id = c.id";
         if ($entityId > 0){
             $sqx.= " Where c.entity_id = ".$entityId;

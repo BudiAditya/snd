@@ -94,7 +94,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <th rowspan="2">Satuan</th>
                 <th rowspan="2">Awal</th>
                 <th colspan="3">Masuk</th>
-                <th colspan="3">Keluar</th>
+                <th colspan="4">Keluar</th>
                 <th rowspan="2">Koreksi</th>
                 <th colspan="4">Stock Akhir</th>
             </tr>
@@ -105,6 +105,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <th>Penjualan</th>
                 <th>Dikirim</th>
                 <th>Retur</th>
+                <th>Issue</th>
                 <th>Q</th>
                 <th>L</th>
                 <th>S</th>
@@ -121,6 +122,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 $kxo = 0;
                 $krb = 0;
                 $kor = 0;
+                $kis = 0;
                 $ain = 0;
                 $aot = 0;
                 $sld = 0;
@@ -147,8 +149,9 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     printf('<td class="right">%s</td>',$row["sJual"] > 0 ? decFormat($row["sJual"]) : '');
                     printf('<td class="right">%s</td>',$row["sXout"] > 0 ? decFormat($row["sXout"]) : '');
                     printf('<td class="right">%s</td>',$row["sRbeli"] > 0 ? decFormat($row["sRbeli"]) : '');
+                    printf('<td class="right">%s</td>',$row["sIssue"] <> 0 ? decFormat($row["sIssue"]) : '');
                     printf('<td class="right">%s</td>',$row["sKoreksi"] <> 0 ? decFormat($row["sKoreksi"]) : '');
-                    $sld = ($row["sAwal"] + $row["sBeli"] + $row["sAsyin"] + $row["sXin"] + $row["sRjual"]) - ($row["sJual"] + $row["sAsyout"] + $row["sXout"] + $row["sRbeli"]) + $row["sKoreksi"];
+                    $sld = ($row["sAwal"] + $row["sBeli"] + $row["sAsyin"] + $row["sXin"] + $row["sRjual"]) - ($row["sJual"] + $row["sAsyout"] + $row["sXout"] + $row["sRbeli"] + $row["sIssue"]) + $row["sKoreksi"];
                     if ($sld >= $row["s_uom_qty"] && $row["s_uom_qty"] > 0){
                         $aqty = array();
                         $sqty = round($sld/$row["s_uom_qty"],2);
@@ -178,6 +181,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     $kxo+= $row["sXout"];
                     $krb+= $row["sRbeli"];
                     $kor+= $row["sKoreksi"];
+                    $kis+= $row["sIssue"];
                     $ain+= $row["sAsyin"];
                     $aot+= $row["sAsyout"];
                     $ssl+= $sld;
@@ -194,6 +198,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf('<td class="bold right">%s</td>',decFormat($kjl,2));
                 printf('<td class="bold right">%s</td>',decFormat($kxo,2));
                 printf('<td class="bold right">%s</td>',decFormat($krb,2));
+                printf('<td class="bold right">%s</td>',decFormat($kis,2));
                 printf('<td class="bold right">%s</td>',decFormat($kor,2));
                 printf('<td class="bold right">%s</td>',decFormat($ssl,2));
                 printf('<td class="bold right">%s</td>',decFormat($tlqty,2));

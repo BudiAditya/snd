@@ -75,27 +75,181 @@ class CorrectionController extends AppController {
 
     public function add() {
         require_once (MODEL . "master/warehouse.php");
+        require_once(MODEL . "inventory/stock.php");
         $correction = new Correction();
         $log = new UserAdmin();
         if (count($this->postData) > 0) {
             $correction->WarehouseId = $this->GetPostValue("WarehouseId");
             $correction->CorrDate = $this->GetPostValue("CorrDate");
             $correction->ItemId = $this->GetPostValue("ItemId");
+            $correction->ItemUom = $this->GetPostValue("ItemUom");
+            $correction->ItemCode = $this->GetPostValue("ItemCode");
             $correction->SysQty = $this->GetPostValue("SysQty");
             $correction->WhsQty = $this->GetPostValue("WhsQty");
             $correction->CorrQty = $this->GetPostValue("CorrQty");
-            $correction->CorrReason = 'Selisih Stock';
+            $correction->CorrReason = $this->GetPostValue("CorrReason");
             $correction->CorrStatus = 0;
             $correction->CorrAmt = 0;
             if ($this->ValidateData($correction)) {
                 $correction->CreatebyId = $this->userUid;
                 $correction->CorrNo = $correction->GetCorrectionDocNo($this->userCabangId);
-                $rs = $correction->Insert();
-                if ($rs > 0) {
+                $flagSuccess = false;
+                $this->connector->BeginTransaction();
+                if ($correction->Insert()) {
+                    if ($correction->CorrQty < 0){
+                        $stock = new Stock();
+                        $stocks = $stock->LoadStocksFifo($this->userAccYear, $correction->ItemId, $correction->ItemUom, $correction->WarehouseId);
+                        // Set variable-variable pendukung
+                        $remainingQty = $correction->CorrQty;
+                        $hpp = 0;
+                        /** @var $stocks Stock[] */
+                        foreach ($stocks as $stock) {
+                            // Buat object stock keluarnya
+                            $istock = new Stock();
+                            $istock->TrxYear = $this->userAccYear;
+                            $istock->CreatedById = $this->userUid;
+                            $istock->StockTypeCode = 104;                // Item Issue dari IS
+                            $istock->ReffId = $correction->Id;
+                            $istock->TrxDate = $correction->CorrDate;
+                            $istock->WarehouseId = $correction->WarehouseId;    // Gudang asal!
+                            $istock->ItemId = $correction->ItemId;
+                            //$issue->Qty = $stock->QtyBalance;			// Depend on case...
+                            $istock->UomCode = $correction->ItemUom;
+                            $istock->Price = $stock->Price;                // Ya pastilah pake angka ini...
+                            $istock->UseStockId = $stock->Id;            // Kasi tau kalau issue ini based on stock id mana
+                            $istock->QtyBalance = null;                    // Klo issue harus NULL
+                            $istock->UpdatedById = $this->userUid;
+                            if ($remainingQty > $stock->QtyBalance) {
+                                // Waduh stock pertama ga cukup... gpp kita coba habiskan dulu...
+                                $istock->Qty = $stock->QtyBalance;            // Berhubung barang yang dikeluarkan tidak cukup ambil dari sisanya
+                                $remainingQty -= $stock->QtyBalance;        // Kita masih perlu...
+                                $stock->QtyBalance = 0;                        // Habis...
+                            } else {
+                                // Barang di gudang mencukupi atau PAS
+                                $istock->Qty = $remainingQty;
+                                $stock->QtyBalance -= $remainingQty;
+                                $remainingQty = 0;
+                            }
+                            $hpp += $istock->Qty * $istock->Price;
+                            // Apapun yang terjadi masukkan data issue stock
+                            if ($istock->Insert() > 0) {
+                                $flagSuccess = true;
+                            } else {
+                                $errno = 1;
+                                $flagSuccess = false;
+                                $errors[] = sprintf("%s -> Item Code:  %s Message: Stock tidak cukup!", $correction->CorrNo, $correction->ItemCode);
+                                break;        // Break loop stocks
+                            }
+                            // update hpp detail
+                            if ($hpp > 0) {
+                                $flagSuccess = true;
+                                $correction->CorrAmt = round($hpp / $correction->Qty, 2);
+                                $correction->CorrStatus = 1;
+                                if ($correction->UpdateAmount() > 0) {
+                                    $flagSuccess = true;
+                                } else {
+                                    $errno = 2;
+                                    $flagSuccess = false;
+                                    $errors[] = sprintf("%s -> Item: %s Message: Gagal update hpp item invoice ! Message: %s", $correction->CorrNo, $correction->ItemCode, $this->connector->GetErrorMessage());
+                                    break;
+                                }
+                            } else {
+                                $lhpp = new Stock();
+                                $lhpp = $lhpp->GetLastHpp($this->userAccYear, $correction->WarehouseId, $correction->ItemId);
+                                if ($lhpp > 0) {
+                                    $flagSuccess = true;
+                                    $correction->CorrAmt = $lhpp;
+                                    $correction->CorrStatus = 1;
+                                    if ($correction->UpdateAmount() > 0) {
+                                        $flagSuccess = true;
+                                    } else {
+                                        $errno = 3;
+                                        $flagSuccess = false;
+                                        $errors[] = sprintf("%s -> Item: %s Message: Gagal update hpp item invoice ! Message: %s", $correction->CorrNo, $correction->ItemCode, $this->connector->GetErrorMessage());
+                                        break;
+                                    }
+                                } else {
+                                    $flagSuccess = true;
+                                    $dhpp = new Stock();
+                                    $dhpp = $dhpp->GetDefaultHpp($correction->ItemId);
+                                    if ($dhpp > 0) {
+                                        $correction->CorrAmt = round($dhpp / $correction->Qty, 2);
+                                        $correction->CorrStatus = 1;
+                                        if ($correction->UpdateAmount() > 0) {
+                                            $flagSuccess = true;
+                                        } else {
+                                            $errno = 4;
+                                            $flagSuccess = false;
+                                            $errors[] = sprintf("%s -> Item: %s Message: Gagal update hpp item invoice ! Message: %s", $correction->CorrNo, $correction->ItemCode, $this->connector->GetErrorMessage());
+                                            break;
+                                        }
+                                    } else {
+                                        $errno = 5;
+                                        $flagSuccess = false;
+                                        $errors[] = sprintf("%s -> Item: %s Message: Gagal update hpp item invoice ! Message: %s", $correction->CorrNo, $correction->ItemCode, $this->connector->GetErrorMessage());
+                                        break;
+                                    }
+                                }
+                            }
+                            // Update Qty Balance
+                            if ($stock->Update($stock->Id) > 0) {
+                                $flagSuccess = true;
+                            } else {
+                                $errno = 6;
+                                $flagSuccess = false;
+                                $errors[] = sprintf("%s -> Item: %s Message: Gagal update data stock ! Message: %s", $correction->CorrNo, $correction->ItemCode, $this->connector->GetErrorMessage());
+                                break;        // Break loop stocks
+                            }
+                            // OK jangan lupa update data cost
+                            if ($remainingQty <= 0) {
+                                $flagSuccess = true;
+                                // Barang yang di issue sudah mencukupi... (TIDAK ERROR !)
+                                break;
+                            }
+                        }
+                    }elseif ($correction->CorrQty > 0){
+                        $lhpp = new Stock();
+                        $lhpp = $lhpp->GetLastHpp($this->userAccYear, $correction->WarehouseId, $correction->ItemId);
+                        if ($lhpp > 0) {
+                            $flagSuccess = true;
+                            $hpp = $lhpp;
+                        } else {
+                            $flagSuccess = true;
+                            $dhpp = new Stock();
+                            $dhpp = $dhpp->GetDefaultHpp($correction->ItemId);
+                            if ($dhpp > 0) {
+                                $hpp = $dhpp;
+                            } else {
+                                $errno = 5;
+                            }
+                        }
+                        $correction->CorrAmt = $hpp;
+                        $correction->UpdateAmount();
+                        //create fifo data
+                        $sql = "Insert Into t_ic_stock_fifo (trx_year,stock_type_code,reff_id,trx_date,warehouse_id,item_id,qty,uom_code,price,qty_balance)";
+                        $sql.= " Values (?trx_year,104,?id,?trx_date,?wh_id,?item_id,?qty,?uom_code,?hpp,?qbl)";
+                        $this->connector->CommandText = $sql;
+                        $this->connector->AddParameter("?trx_year", $this->userAccYear);
+                        $this->connector->AddParameter("?id", $correction->Id);
+                        $this->connector->AddParameter("?trx_date", $correction->CorrDate);
+                        $this->connector->AddParameter("?wh_id", $correction->WarehouseId);
+                        $this->connector->AddParameter("?item_id", $correction->ItemId);
+                        $this->connector->AddParameter("?qty", $correction->CorrQty);
+                        $this->connector->AddParameter("?uom_code", $correction->ItemUom);
+                        $this->connector->AddParameter("?hpp", $correction->CorrAmt);
+                        $this->connector->AddParameter("?qbl", $correction->CorrQty);
+                        $rs = $this->connector->ExecuteNonQuery();
+                    }else{
+                        $flagSuccess = false;
+                    }
+                }
+                if ($flagSuccess){
+                    $this->connector->CommitTransaction();
                     $log = $log->UserActivityWriter($this->userCabangId,'inventory.correction','Add New Item Stock Correction -> Stock Correction: '.$correction->ItemId.' - '.$correction->SysQty,'-','Success');
                     $this->persistence->SaveState("info", sprintf("Data Stock Correction: %s (%s) sudah berhasil disimpan", $correction->ItemId, $correction->SysQty));
                     redirect_url("inventory.correction");
                 } else {
+                    $this->connector->RollbackTransaction();
                     $log = $log->UserActivityWriter($this->userCabangId,'inventory.correction','Add New Item Stock Correction -> Stock Correction: '.$correction->ItemId.' - '.$correction->SysQty,'-','Failed');
                     $this->Set("error", "Gagal pada saat menyimpan data.. Message: " . $this->connector->GetErrorMessage());
                 }
@@ -119,13 +273,43 @@ class CorrectionController extends AppController {
             $this->persistence->SaveState("error", "Maaf data yang diminta tidak dapat ditemukan atau sudah dihapus.");
             redirect_url("inventory.correction");
         }
-        $rs = $correction->Delete($id);
-        if ($rs == 1) {
+        $flagSuccess = true;
+        $this->connector->BeginTransaction();
+        if ($correction->Delete($id)){
+            require_once(MODEL . "inventory/stock.php");
+            $stock = new  Stock();
+            $stock = $stock->FindByTypeReffId($this->userAccYear, 104, $id);
+            if ($stock == null) {
+                $flagSuccess = false;
+            } else {
+                /** @var $stock Stock[] */
+                foreach ($stock as $dstock) {
+                    $cstock = new Stock($dstock->UseStockId);
+                    if ($cstock == null) {
+                        $flagSuccess = false;
+                    } else {
+                        $cstock->QtyBalance += $dstock->Qty;
+                        $rs = $cstock->Update($dstock->UseStockId);
+                        if (!$rs) {
+                            $flagSuccess = false;
+                        }
+                    }
+                }
+                if ($flagSuccess) {
+                    $stock = new Stock();
+                    $stock->UpdatedById = $this->userUid;
+                    $stock->VoidByTypeReffId($this->userAccYear, 104, $id);
+                }
+            }
+        }
+        if ($flagSuccess) {
+            $this->connector->CommitTransaction();
             $log = $log->UserActivityWriter($this->userCabangId,'inventory.correction','Delete Item Stock Correction -> Stock Correction: '.$correction->ItemId.' - '.$correction->SysQty,'-','Success');
             $this->persistence->SaveState("info", sprintf("Stock Correction Barang: %s (%s) sudah dihapus", $correction->ItemId, $correction->SysQty));
         } else {
+            $this->connector->RollbackTransaction();
             $log = $log->UserActivityWriter($this->userCabangId,'inventory.correction','Delete Item Stock Correction -> Stock Correction: '.$correction->ItemId.' - '.$correction->SysQty,'-','Failed');
-            $this->persistence->SaveState("error", sprintf("Gagal menghapus jenis kontak: %s (%s). Error: %s", $correction->ItemId, $correction->SysQty, $this->connector->GetErrorMessage()));
+            $this->persistence->SaveState("error", sprintf("Gagal menghapus Stock Correction: %s (%s). Error: %s", $correction->ItemId, $correction->SysQty, $this->connector->GetErrorMessage()));
         }
         redirect_url("inventory.correction");
     }

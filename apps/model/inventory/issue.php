@@ -3,20 +3,17 @@ class Issue extends EntityBase {
 	public $Id;
 	public $CabangId;
 	public $WarehouseId;
-    public $CorrNo;
+    public $IssueDate;
+    public $IssueNo;
+    public $DebetAccId = 0;
+    public $Keterangan;
 	public $ItemId;
     public $ItemCode;
-    public $ItemName;
     public $ItemUom;
-    public $CorrDate;   
-    public $CorrQty = 0;
-    public $CorrReason;
-    public $CorrStatus;
-    public $SysQty = 0;
-    public $WhsQty = 0;
-    public $CorrAmt = 0;
+    public $Qty = 0;
+    public $Price = 0;
+    public $IsStatus;
     public $CreatebyId;
-    public $UpdatebyId;
 
 	public function __construct($id = null) {
 		parent::__construct();
@@ -29,24 +26,21 @@ class Issue extends EntityBase {
 		$this->Id = $row["id"];
 		$this->CabangId = $row["cabang_id"];
         $this->WarehouseId = $row["warehouse_id"];
-        $this->CorrNo = $row["corr_no"];
-        $this->CorrDate = strtotime($row["corr_date"]);
+        $this->IssueDate = strtotime($row["issue_date"]);
+        $this->IssueNo = $row["issue_no"];
+        $this->DebetAccId = $row["debet_acc_id"];
+        $this->Keterangan = $row["keterangan"];
 		$this->ItemId = $row["item_id"];
         $this->ItemCode = $row["item_code"];
-        $this->ItemName = $row["item_name"];
         $this->ItemUom = $row["satuan"];
-        $this->CorrReason = $row["corr_reason"];
-        $this->SysQty = $row["sys_qty"];
-        $this->WhsQty = $row["whs_qty"];
-        $this->CorrQty = $row["corr_qty"];
-        $this->CorrAmt = $row["corr_amt"];
-        $this->CorrStatus = $row["corr_status"];
+        $this->Qty = $row["qty"];
+        $this->Price = $row["price"];
+        $this->IsStatus = $row["is_status"];
         $this->CreatebyId = $row["createby_id"];
-        $this->UpdatebyId = $row["updateby_id"];
 	}
 
-    public function FormatCorrDate($format = HUMAN_DATE) {
-        return is_int($this->CorrDate) ? date($format, $this->CorrDate) : date($format, strtotime(date('Y-m-d')));
+    public function FormatIssueDate($format = HUMAN_DATE) {
+        return is_int($this->IssueDate) ? date($format, $this->IssueDate) : date($format, strtotime(date('Y-m-d')));
     }
 
 	/**
@@ -56,9 +50,9 @@ class Issue extends EntityBase {
 	 */
 	public function LoadAll($cabangId = 0,$orderBy = "a.warehouse_id, a.item_code") {
         if ($cabangId == 0){
-            $this->connector->CommandText = "SELECT a.* FROM vw_ic_stock_correction AS a ORDER BY $orderBy";
+            $this->connector->CommandText = "SELECT a.* FROM vw_ic_issue AS a ORDER BY $orderBy";
         }else{
-            $this->connector->CommandText = "SELECT a.* FROM vw_ic_stock_correction AS a Where a.cabang_id = $cabangId ORDER BY $orderBy";
+            $this->connector->CommandText = "SELECT a.* FROM vw_ic_issue AS a Where a.cabang_id = $cabangId ORDER BY $orderBy";
         }
 		$rs = $this->connector->ExecuteQuery();
 		$result = array();
@@ -77,7 +71,7 @@ class Issue extends EntityBase {
 	 * @return Location
 	 */
 	public function FindById($id) {
-		$this->connector->CommandText = "SELECT a.* FROM vw_ic_stock_correction AS a WHERE a.id = ?id";
+		$this->connector->CommandText = "SELECT a.* FROM vw_ic_issue AS a WHERE a.id = ?id";
 		$this->connector->AddParameter("?id", $id);
 		$rs = $this->connector->ExecuteQuery();
 
@@ -90,7 +84,7 @@ class Issue extends EntityBase {
 	}
 
     public function FindByKode($cabangId,$itemCode) {
-        $this->connector->CommandText = "SELECT a.* FROM vw_ic_stock_correction AS a WHERE a.cabang_id = ?cabangId And a.item_code = ?itemCode";
+        $this->connector->CommandText = "SELECT a.* FROM vw_ic_issue AS a WHERE a.cabang_id = ?cabangId And a.item_code = ?itemCode";
         $this->connector->AddParameter("?cabangId", $cabangId);
         $this->connector->AddParameter("?itemCode", $itemCode);
         $rs = $this->connector->ExecuteQuery();
@@ -111,19 +105,18 @@ class Issue extends EntityBase {
 	}
 
 	public function Insert() {
-        $sql = 'INSERT INTO t_ic_stock_correction (warehouse_id, corr_no, corr_date, item_id, corr_reason, sys_qty, whs_qty, corr_qty, corr_status, corr_amt, createby_id, create_time) ';
-        $sql.= ' VALUES(?warehouse_id, ?corr_no, ?corr_date, ?item_id, ?corr_reason, ?sys_qty, ?whs_qty, ?corr_qty, ?corr_status, ?corr_amt, ?createby_id,now())';
+        $sql = "INSERT INTO t_ic_issue (warehouse_id, issue_no, issue_date, item_id, keterangan, price, debet_acc_id, qty, is_status, createby_id, create_time)";
+        $sql.= " VALUES(?warehouse_id, ?issue_no, ?issue_date, ?item_id, ?keterangan, ?price, ?debet_acc_id, ?qty, ?is_status, ?createby_id,now())";
 		$this->connector->CommandText = $sql;
         $this->connector->AddParameter("?warehouse_id", $this->WarehouseId);
-        $this->connector->AddParameter("?corr_no", $this->CorrNo,"char");
-        $this->connector->AddParameter("?corr_date", $this->CorrDate);
+        $this->connector->AddParameter("?issue_no", $this->IssueNo,"char");
+        $this->connector->AddParameter("?issue_date", date('Y-m-d', $this->IssueDate));
         $this->connector->AddParameter("?item_id", $this->ItemId);
-        $this->connector->AddParameter("?corr_reason", $this->CorrReason);
-        $this->connector->AddParameter("?sys_qty", $this->SysQty);
-        $this->connector->AddParameter("?whs_qty", $this->WhsQty);
-        $this->connector->AddParameter("?corr_qty", $this->CorrQty);
-        $this->connector->AddParameter("?corr_amt", $this->CorrAmt);
-        $this->connector->AddParameter("?corr_status", $this->CorrStatus);
+        $this->connector->AddParameter("?keterangan", $this->Keterangan);
+        $this->connector->AddParameter("?price", $this->Price);
+        $this->connector->AddParameter("?debet_acc_id", $this->DebetAccId);
+        $this->connector->AddParameter("?qty", $this->Qty);
+        $this->connector->AddParameter("?is_status", $this->IsStatus);
         $this->connector->AddParameter("?createby_id", $this->CreatebyId);
         $rs = $this->connector->ExecuteNonQuery();
         $ret = 0;
@@ -131,41 +124,32 @@ class Issue extends EntityBase {
             $this->connector->CommandText = "SELECT LAST_INSERT_ID();";
             $this->Id = (int)$this->connector->ExecuteScalar();
             $ret = $this->Id;
-            $this->connector->CommandText = "SELECT fc_ic_correction_post($ret) As valresult;";
-            $rs = $this->connector->ExecuteQuery();
-            $row = $rs->FetchAssoc();
-            return strval($row["valresult"]);
         }
 		return $ret;
 	}
 
 	public function Delete($id) {
-        $this->connector->CommandText = "SELECT fc_ic_correction_unpost($id) As valresult;";
-        $rs = $this->connector->ExecuteQuery();
-        $row = $rs->FetchAssoc();
-		$this->connector->CommandText = 'Delete From t_ic_stock_correction Where id = ?id';
+		$this->connector->CommandText = 'Delete From t_ic_issue Where id = ?id';
         $this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteNonQuery();
         return $rs;
     }
 
-    public function Void($id) {
-        $this->connector->CommandText = "SELECT fc_ic_correction_unpost($id) As valresult;";
-        $rs = $this->connector->ExecuteQuery();
-        $row = $rs->FetchAssoc();
-        $this->connector->CommandText = 'Update t_ic_stock_correction a Set a.corr_status = 3 Where a.id = ?id';
-        $this->connector->AddParameter("?id", $id);
+    public function UpdatePrice() {
+        $this->connector->CommandText = 'Update t_ic_issue a Set a.price = ?price, a.is_status = 1 Where id = ?id';
+        $this->connector->AddParameter("?id", $this->Id);
+        $this->connector->AddParameter("?price", $this->Price);
         $rs = $this->connector->ExecuteNonQuery();
         return $rs;
     }
 
     public function GetIssueDocNo($cabangId){
         $sql = 'Select fc_sys_getdocno(?cbi,?txc,?txd) As valout;';
-        $txc = 'CR';
+        $txc = 'IS';
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?cbi", $cabangId);
         $this->connector->AddParameter("?txc", $txc);
-        $this->connector->AddParameter("?txd", $this->CorrDate);
+        $this->connector->AddParameter("?txd", date('Y-m-d', $this->IssueDate));
         $rs = $this->connector->ExecuteQuery();
         $val = null;
         if($rs){
@@ -176,14 +160,14 @@ class Issue extends EntityBase {
     }
 
     public function Load4Reports($cabangId = 0,$gudangId = 0, $startDate = null, $endDate = null) {
-        $sql = "SELECT a.* FROM vw_ic_stockcorrection AS a WHERE a.corr_status <> 3 and a.corr_date BETWEEN ?startdate and ?enddate";
+        $sql = "SELECT a.* FROM vw_ic_issue AS a WHERE a.is_status <> 3 and a.issue_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
         }
         if ($gudangId > 0){
             $sql.= " and a.warehouse_id = ".$gudangId;
         }
-        $sql.= " Order By a.corr_date,a.corr_no,a.item_code,a.id";
+        $sql.= " Order By a.issue_date,a.issue_no,a.item_code,a.id";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
@@ -192,8 +176,8 @@ class Issue extends EntityBase {
     }
 
     public function LoadRekap4Reports($cabangId = 0,$gudangId = 0, $startDate = null, $endDate = null) {
-        $sql = "SELECT a.cabang_code,a.wh_code,a.item_code,a.bnama,a.bsatkecil,sum(a.corr_qty) as qty FROM vw_ic_stockcorrection AS a";
-        $sql.= " WHERE a.corr_status <> 3 and a.corr_date BETWEEN ?startdate and ?enddate";
+        $sql = "SELECT a.cabang_code,a.wh_code,a.item_code,a.bnama,a.bsatkecil,sum(a.qty) as qty FROM vw_ic_issue AS a";
+        $sql.= " WHERE a.is_status <> 3 and a.issue_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
         }

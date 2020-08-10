@@ -105,6 +105,7 @@ class CoaDetail extends EntityBase {
 		}
 		return $result;
 	}
+
     public function LoadCashBookAccount($companyId = 0, $cabangId = 0) {
 		$sql = "SELECT a.*, b.psaldo FROM m_account AS a JOIN m_lk_rekap_detail AS b ON a.kd_induk = b.kd_induk WHERE left(a.kode,6) IN ('110.01','110.02')";
 		if ($companyId > 0){
@@ -114,6 +115,28 @@ class CoaDetail extends EntityBase {
 			$sql.= " And (a.cabang_id = ".$cabangId." or a.xmode = 0)";
 		}
 		$sql.= " ORDER BY a.kode";
+        $this->connector->CommandText = $sql;
+        $rs = $this->connector->ExecuteQuery();
+        $result = array();
+        if ($rs != null) {
+            while ($row = $rs->FetchAssoc()) {
+                $temp = new CoaDetail();
+                $temp->FillProperties($row);
+                $result[] = $temp;
+            }
+        }
+        return $result;
+    }
+
+    public function LoadCostAccount($companyId = 0, $cabangId = 0) {
+        $sql = "SELECT a.*, b.psaldo FROM m_account AS a JOIN m_lk_rekap_detail AS b ON a.kd_induk = b.kd_induk WHERE left(a.kode,3) IN ('510','520')";
+        if ($companyId > 0){
+            $sql.= " And a.company_id = ".$companyId;
+        }
+        if ($cabangId > 0){
+            $sql.= " And (a.cabang_id = ".$cabangId." or a.xmode = 0)";
+        }
+        $sql.= " ORDER BY a.kode";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         $result = array();

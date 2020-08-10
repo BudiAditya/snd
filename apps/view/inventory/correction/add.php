@@ -125,11 +125,15 @@
                 <td class="bold right"><label for="CorrQty">Koreksi :</label></td>
                 <td><input type="text" class="right bold" id="CorrQty" name="CorrQty" value="<?php print($correction->CorrQty); ?>" size="10" readonly/></td>
             </tr>
+            <tr>
+                <td class="bold right"><label for="CorrReason">Keterangan :</label></td>
+                <td colspan="5"><input type="text" name="CorrReason" id="CorrReason" style="width: 500px" value="<?=$correction->CorrReason;?>" required/></td>
+            </tr>
 			<tr>
 				<td>&nbsp;</td>
 				<td colspan="3"><button type="submit" class="button">SIMPAN</button>
                     &nbsp&nbsp
-                    <a href="<?php print($helper->site_url("inventory.correction")); ?>" class="button">Batal</a>
+                    <a href="<?php print($helper->site_url("inventory.correction")); ?>" class="button">KEMBALI</a>
                 </td>
 			</tr>
 		</table>
