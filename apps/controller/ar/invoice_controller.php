@@ -495,20 +495,33 @@ class InvoiceController extends AppController {
             redirect_url("ar.invoice");
         }
         $ExSoId = $invoice->ExSoId;
-        // periksa status po
+        $ItemCount = $this->InvoiceItemsCount($invoiceId) ;
+        // periksa status invoice
         if($invoice->InvoiceStatus < 2){
             $invoice->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
-            if($this->InvoiceItemsCount($invoiceId) > 0 && $this->void_detail($invoiceId) == 0){
-                $this->persistence->SaveState("error", sprintf("Maaf hapus dulu detail Invoice No. %s sebelum diproses!",$invoice->InvoiceNo));
-                redirect_url("ar.invoice");
-            }
-            if ($invoice->Void($invoiceId,$ExSoId) == 1) {
-                $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Success');
-                $this->persistence->SaveState("info", sprintf("Data Invoice No: %s sudah berhasil batalkan", $invoice->InvoiceNo));
+            if($ItemCount > 0){
+                if ($this->void_detail($invoiceId,$ItemCount) == 0) {
+                    $this->persistence->SaveState("error", sprintf("Maaf hapus dulu detail Invoice No. %s sebelum diproses!", $invoice->InvoiceNo));
+                    redirect_url("ar.invoice");
+                }else{
+                    if ($invoice->Void($invoiceId,$ExSoId) == 1) {
+                        $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Success');
+                        $this->persistence->SaveState("info", sprintf("Data Invoice No: %s sudah berhasil batalkan", $invoice->InvoiceNo));
+                    }else{
+                        $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Failed');
+                        $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s gagal dibatalkan", $invoice->InvoiceNo));
+                    }
+                }
             }else{
-                $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Failed');
-                $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s gagal dibatalkan", $invoice->InvoiceNo));
+                if ($invoice->Void($invoiceId,$ExSoId) == 1) {
+                    $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Success');
+                    $this->persistence->SaveState("info", sprintf("Data Invoice No: %s sudah berhasil batalkan", $invoice->InvoiceNo));
+                }else{
+                    $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice',$invoice->InvoiceNo,'Failed');
+                    $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s gagal dibatalkan", $invoice->InvoiceNo));
+                }
             }
+
         }else{
             $this->persistence->SaveState("error", sprintf("Maaf, Data Invoice No: %s sudah berstatus -APPROVED-", $invoice->InvoiceNo));
         }
@@ -928,7 +941,7 @@ class InvoiceController extends AppController {
         }
     }
 
-    public function void_detail($invId = 0) {
+    public function void_detail($invId = 0, $itemCount = 0) {
         // Cek datanya
         //$log = new UserAdmin();
         $invoicedetail = new InvoiceDetail();
@@ -938,10 +951,11 @@ class InvoiceController extends AppController {
             return 0;
         }
         require_once(MODEL . "inventory/stock.php");
-        $flagSuccess = true;
+        $count = 0;
         $this->connector->BeginTransaction();
         /** @var $invoicedetail InvoiceDetail[] */
         foreach ($invoicedetail as $detail) {
+           $flagSuccess = true;
            $id = $detail->Id;
            $stock = new  Stock();
            $stock = $stock->FindByTypeReffId($this->trxYear, 101, $id);
@@ -962,6 +976,7 @@ class InvoiceController extends AppController {
                    }
                }
                if ($flagSuccess) {
+                   $count++;
                    //update stock
                    $stock = new Stock();
                    $stock->UpdatedById = $this->userUid;
@@ -972,13 +987,13 @@ class InvoiceController extends AppController {
                    $detail->UpdateHpp();
                }
            }
-           if ($flagSuccess) {
-               $this->connector->CommitTransaction();
-               return 1;
-           } else {
-               $this->connector->RollbackTransaction();
-               return 0;
-           }
+        }
+        if ($flagSuccess && ($itemCount == $count)) {
+            $this->connector->CommitTransaction();
+            return $count;
+        } else {
+            $this->connector->RollbackTransaction();
+            return 0;
         }
     }
 

@@ -138,7 +138,7 @@ class TransferController extends AppController {
         $this->Set("whfrom", $whfrom);
         //load data gudang tujuan
         $loader = new Warehouse();
-        $whdest = $loader->LoadByNotCabangId($this->userCabangId);
+        $whdest = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("whdest", $whdest);
 	}
 
@@ -222,7 +222,7 @@ class TransferController extends AppController {
         $this->Set("whfrom", $whfrom);
         //load data gudang tujuan
         $loader = new Warehouse();
-        $whdest = $loader->LoadByNotCabangId($this->userCabangId);
+        $whdest = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("whdest", $whdest);
     }
 

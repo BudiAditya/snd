@@ -658,7 +658,7 @@ WHERE id = ?id";
         $rs = $this->connector->ExecuteNonQuery();
 
         // get saldo awal dari transaksi sebelumnya
-        $sqx = "Insert Into `tmp_mutasi` (item_id,awal) Select a.item_id,sum((a.awal+a.beli+a.xin+a.rjual+a.asyin)-(a.jual+a.xout+a.rbeli+a.asyout)+a.koreksi) From tmp_prev as a Group By a.item_id";
+        $sqx = "Insert Into `tmp_mutasi` (item_id,awal) Select a.item_id,sum((a.awal+a.beli+a.xin+a.rjual+a.asyin)-(a.jual+a.xout+a.rbeli+a.asyout+a.issue)+a.koreksi) From tmp_prev as a Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
 

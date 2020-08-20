@@ -305,11 +305,11 @@ class CorrectionController extends AppController {
         if ($flagSuccess) {
             $this->connector->CommitTransaction();
             $log = $log->UserActivityWriter($this->userCabangId,'inventory.correction','Delete Item Stock Correction -> Stock Correction: '.$correction->ItemId.' - '.$correction->SysQty,'-','Success');
-            $this->persistence->SaveState("info", sprintf("Stock Correction Barang: %s (%s) sudah dihapus", $correction->ItemId, $correction->SysQty));
+            $this->persistence->SaveState("info", sprintf("Stock Correction Barang: %s (%s) sudah dihapus", $correction->CorrNo, $correction->ItemCode));
         } else {
             $this->connector->RollbackTransaction();
             $log = $log->UserActivityWriter($this->userCabangId,'inventory.correction','Delete Item Stock Correction -> Stock Correction: '.$correction->ItemId.' - '.$correction->SysQty,'-','Failed');
-            $this->persistence->SaveState("error", sprintf("Gagal menghapus Stock Correction: %s (%s). Error: %s", $correction->ItemId, $correction->SysQty, $this->connector->GetErrorMessage()));
+            $this->persistence->SaveState("error", sprintf("Gagal menghapus Stock Correction: %s (%s). Error: %s", $correction->CorrNo, $correction->ItemCode, $this->connector->GetErrorMessage()));
         }
         redirect_url("inventory.correction");
     }

@@ -60,8 +60,8 @@
                         ?>
                     </select>
                 </td>
-                <td class="bold right"><label for="SubCategoryId">Kategori :</label></td>
-                <td><select id="SubCategoryId" name="SubCategoryId" disabled style="width: 150px">
+                <td class="bold right"><label for="SubCategoryId1">Kategori :</label></td>
+                <td><select id="SubCategoryId1" name="SubCategoryId1" disabled style="width: 150px">
                         <option value="">-- Pilih Kategori Produk --</option>
                         <?php
                         /** @var $subcategories ItemSubCategory[] */
@@ -74,6 +74,7 @@
                         }
                         ?>
                     </select>
+                    <input type="hidden" value="<?=$items->SubCategoryId;?>" name="SubCategoryId" id="SubCategoryId"/>
                 </td>
             </tr>
             <tr>

@@ -1,4 +1,7 @@
 <?php
+/** @var $stock Stock */
+/** @var $whs Warehouse */
+/** @var $its Items */
 $phpExcel = new PHPExcel();
 $headers = array(
     'Content-Type: application/vnd.ms-excel'
@@ -23,9 +26,9 @@ $sheet->setShowGridlines(false);
 $row++;
 $sheet->setCellValue("A$row","KARTU STOCK BARANG");
 $row++;
-$sheet->setCellValue("A$row","Cabang/Gudang: ".$stock->KdCabang.' - '.$stock->NmCabang);
+$sheet->setCellValue("A$row","Gudang: ".$whs->WhCode.' - '.$whs->WhName);
 $row++;
-$sheet->setCellValue("A$row","Nama Barang: ".$stock->ItemName.' ('.$stock->ItemCode.')');
+$sheet->setCellValue("A$row","Nama Barang: ".$its->ItemName.' ('.$its->ItemCode.')');
 $row++;
 //$sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $startDate) . " - " . date('d-m-Y', $endDate));
 //$row++;

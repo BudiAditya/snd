@@ -188,7 +188,7 @@ class ItemsController extends AppController {
             $items->ItemCode = $this->GetPostValue("ItemCode");
             $items->OldCode = $this->GetPostValue("OldCode");
             $items->ItemName = $this->GetPostValue("ItemName");
-            //$items->SubCategoryId = $this->GetPostValue("SubCategoryId");
+            $items->SubCategoryId = $this->GetPostValue("SubCategoryId");
             //$items->BarCode = $this->GetPostValue("BarCode");
             $items->PrincipalId = $this->GetPostValue("PrincipalId");
             $items->BrandId = $this->GetPostValue("BrandId");

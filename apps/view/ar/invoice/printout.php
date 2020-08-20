@@ -234,7 +234,7 @@ foreach ($report as $idx => $invoice) {
             $sqty = $qqty;
         }
         if ($doctype == 'invoice') {
-            printf('<td style="border-left: 0px !important;">&nbsp;</td><td class="center" colspan="2">T O T A L</td><td class="center">%s</td><td class="center">%s</td><td colspan="3"></td><td class="right">%s</td><td class="right">%s</td><td class="right" style="border-right: 0px !important;"><b>%s</b></td>', $lqty, $sqty, number_format($invoice->BaseAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
+            printf('<td style="border-left: 0px !important;">&nbsp;</td><td class="center" colspan="2">T O T A L</td><td class="center">%s</td><td class="center">%s</td><td colspan="3"></td><td class="right">%s</td><td class="right">%s</td><td class="right" style="border-right: 0px !important;"><b>%s</b></td>', $lqty, $sqty, number_format($invoice->BaseAmount - $invoice->DiscAmount), number_format($invoice->PpnAmount), number_format($invoice->TotalAmount));
         }else{
             printf('<td style="border-left: 0px !important;" colspan="4">&nbsp;</td><td class="center">%s</td><td class="center">%s</td><td class="center">%s</td>', $lqty, $sqty, $qqty);
         }

@@ -34,8 +34,8 @@ $sheet->setCellValue("D$row","Satuan");
 $sheet->setCellValue("E$row","Awal");
 $sheet->setCellValue("F$row","Masuk");
 $sheet->setCellValue("J$row","Keluar");
-$sheet->setCellValue("N$row","Koreksi");
-$sheet->setCellValue("O$row","Saldo");
+$sheet->setCellValue("O$row","Koreksi");
+$sheet->setCellValue("P$row","Saldo");
 $str = $row;
 $row++;
 $sheet->setCellValue("F$row","Pembelian");
@@ -46,15 +46,16 @@ $sheet->setCellValue("J$row","Penjualan");
 $sheet->setCellValue("K$row","Produksi");
 $sheet->setCellValue("L$row","Dikirim");
 $sheet->setCellValue("M$row","Retur");
+$sheet->setCellValue("N$row","Issue");
 $sheet->mergeCells("A$str:A$row");
 $sheet->mergeCells("B$str:B$row");
 $sheet->mergeCells("C$str:C$row");
 $sheet->mergeCells("D$str:D$row");
 $sheet->mergeCells("F$str:I$str");
-$sheet->mergeCells("J$str:M$str");
-$sheet->mergeCells("N$str:N$row");
+$sheet->mergeCells("J$str:N$str");
 $sheet->mergeCells("O$str:O$row");
-$sheet->getStyle("A$str:O$row")->applyFromArray(array_merge($center, $allBorders));
+$sheet->mergeCells("P$str:P$row");
+$sheet->getStyle("A$str:P$row")->applyFromArray(array_merge($center, $allBorders));
 $nmr = 0;
 $str = $row;
 if($mstock != null) {
@@ -74,9 +75,10 @@ if($mstock != null) {
         $sheet->setCellValue("K$row",$rpt["sAsyout"]);
         $sheet->setCellValue("L$row",$rpt["sXout"]);
         $sheet->setCellValue("M$row",$rpt["sRbeli"]);
-        $sheet->setCellValue("N$row",$rpt["sKoreksi"]);
-        $sheet->setCellValue("O$row","=((E$row+F$row+G$row+H$row+I$row)-(J$row+K$row+L$row+M$row))+N$row");
-        $sheet->getStyle("A$row:O$row")->applyFromArray(array_merge($allBorders));
+        $sheet->setCellValue("N$row",$rpt["sIssue"]);
+        $sheet->setCellValue("O$row",$rpt["sKoreksi"]);
+        $sheet->setCellValue("P$row","=((E$row+F$row+G$row+H$row+I$row)-(J$row+K$row+L$row+M$row+N$row))+O$row");
+        $sheet->getStyle("A$row:P$row")->applyFromArray(array_merge($allBorders));
     }
     $edr = $row;
     $row++;
@@ -94,8 +96,9 @@ if($mstock != null) {
     $sheet->setCellValue("M$row","=SUM(M$str:M$edr)");
     $sheet->setCellValue("N$row","=SUM(N$str:N$edr)");
     $sheet->setCellValue("O$row","=SUM(O$str:O$edr)");
-    $sheet->getStyle("E$str:O$row")->applyFromArray($idrFormat);
-    $sheet->getStyle("A$row:O$row")->applyFromArray(array_merge($allBorders));
+    $sheet->setCellValue("P$row","=SUM(P$str:P$edr)");
+    $sheet->getStyle("E$str:P$row")->applyFromArray($idrFormat);
+    $sheet->getStyle("A$row:P$row")->applyFromArray(array_merge($allBorders));
     $row++;
 }
 // Flush to client
