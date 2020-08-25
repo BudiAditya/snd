@@ -208,10 +208,9 @@ class StockCas extends EntityBase {
         $this->connector->AddParameter("?gudang_id", $this->WarehouseId);
         $rs = $this->connector->ExecuteNonQuery();
 
-        /*
         // get transfer masuk
         $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,price,masuk,relasi)";
-        $sqx.= " Select a.npb_date,concat('Pengiriman - ',a.npb_no),concat('inventory.transfer/view/',a.id),0,b.qty,concat('Dari Gudang - ',a.fr_wh_code)";
+        $sqx.= " Select a.npb_date,concat('Pengiriman - ',a.npb_no),concat('tvd.transcas/view/',a.id),0,b.qty,concat('Dari Gudang - ',a.fr_wh_code)";
         $sqx.= " From vw_ic_transfer_master a Join t_ic_transfer_detail b On a.id = b.npb_id";
         $sqx.= " Where b.item_id = ?item_id and Year(a.npb_date) = ?year and a.to_wh_id = ?gudang_id and a.is_deleted = 0 and a.npb_status <> 3";
         $this->connector->CommandText = $sqx;
@@ -219,7 +218,7 @@ class StockCas extends EntityBase {
         $this->connector->AddParameter("?year", $trxYear);
         $this->connector->AddParameter("?gudang_id", $this->WarehouseId);
         $rs = $this->connector->ExecuteNonQuery();
-
+        /*
         // get return ex penjualan
         $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,price,masuk,relasi)";
         $sqx.= " Select a.rj_date,concat('Return - ',a.rj_no),concat('ar.arreturn/view/',a.id),0,b.qty_retur,concat(a.customer_name,' (',a.customer_code,')')";
@@ -241,10 +240,10 @@ class StockCas extends EntityBase {
         $this->connector->AddParameter("?year", $trxYear);
         $this->connector->AddParameter("?gudang_id", $this->WarehouseId);
         $rs = $this->connector->ExecuteNonQuery();
-        /*
+
         // get transfer keluar
         $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,price,keluar,relasi)";
-        $sqx.= " Select a.npb_date,concat('Pengiriman - ',a.npb_no),concat('inventory.transfer/view/',a.id),0,b.qty,concat('Ke Gudang - ',a.to_wh_code)";
+        $sqx.= " Select a.npb_date,concat('Pengiriman - ',a.npb_no),concat('tvd.transcas/view/',a.id),0,b.qty,concat('Ke Gudang - ',a.to_wh_code)";
         $sqx.= " From vw_ic_transfer_master a Join t_ic_transfer_detail b On a.id = b.npb_id";
         $sqx.= " Where b.item_id = ?item_id and Year(a.npb_date) = ?year and a.fr_wh_id = ?gudang_id and a.is_deleted = 0 and a.npb_status <> 3";
         $this->connector->CommandText = $sqx;
@@ -252,7 +251,7 @@ class StockCas extends EntityBase {
         $this->connector->AddParameter("?year", $trxYear);
         $this->connector->AddParameter("?gudang_id", $this->WarehouseId);
         $rs = $this->connector->ExecuteNonQuery();
-
+        /*
         // get return ex pembelian
         $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,price,keluar,relasi)";
         $sqx.= " Select a.rb_date,concat('Return - ',a.rb_no),concat('ap.apreturn/view/',a.id),0,b.qty_retur,concat(a.supplier_name,' (',a.supplier_code,')')";

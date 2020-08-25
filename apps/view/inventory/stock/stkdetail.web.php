@@ -42,7 +42,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                         <?php
                         /** @var $entities ItemEntity[] */
                         foreach ($entities as $eti) {
-                                if ($entityId == $eti->Id) {
+                                if ($etId == $eti->Id) {
                                     printf('<option value="%d" selected="selected"> %s - %s </option>', $eti->Id, $eti->Id, $eti->EntityName);
                                 } else {
                                     printf('<option value="%d"> %s - %s </option>', $eti->Id, $eti->Id, $eti->EntityName);

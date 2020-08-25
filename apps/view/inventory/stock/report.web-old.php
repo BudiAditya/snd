@@ -66,10 +66,19 @@
     <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
         <tr class="left">
             <th colspan="4"><b>REKAPITULASI STOCK BARANG: <?php print($company_name);?></b></th>
+            <th>
+                <select id="ReportType" name="ReportType" required>
+                    <option value="0" <?php print($userReportType == 0 ? 'selected="selected"' : '');?>>Tanpa PO & SO</option>
+                    <option value="1" <?php print($userReportType == 1 ? 'selected="selected"' : '');?>>Termasuk PO saja</option>
+                    <option value="2" <?php print($userReportType == 2 ? 'selected="selected"' : '');?>>Termasuk SO saja</option>
+                    <option value="3" <?php print($userReportType == 3 ? 'selected="selected"' : '');?>>Termasuk PO & SO</option>
+                </select>
+            </th>
         </tr>
         <tr class="center">
             <th>Gudang</th>
             <th>Jenis Produk</th>
+            <th>Type Harga</th>
             <th>Output</th>
             <th>Action</th>
         </tr>
@@ -102,6 +111,13 @@
                         }
                     }
                     ?>
+                </select>
+            </td>
+            <td>
+                <select id="TypeHarga" name="TypeHarga" required>
+                    <option value="0" <?php print($userTypeHarga == 0 ? 'selected="selected"' : '');?>>Tanpa Harga</option>
+                    <option value="1" <?php print($userTypeHarga == 1 ? 'selected="selected"' : '');?>>Harga Beli/HPP</option>
+                    <option value="2" <?php print($userTypeHarga == 2 ? 'selected="selected"' : '');?>>Harga Jual</option>
                 </select>
             </td>
             <td>
@@ -162,7 +178,7 @@
                 print("<tr valign='Top'>");
                 printf("<td>%s</td>",$nmr);
                 printf("<td nowrap='nowrap'>%s</td>",$row["wh_code"]);
-                printf("<td nowrap='nowrap'><a href='%s' target='_blank'>%s</a></td>",$helper->site_url("inventory.stock/card/".$gudangId."|".$row["item_id"]),$row["item_code"]);
+                printf("<td nowrap='nowrap'>%s</td>",$row["item_code"]);
                 printf("<td nowrap='nowrap'>%s</td>",$row["item_name"]);
                 printf("<td nowrap='nowrap'>%s</td>",$row["s_uom_code"]);
                 printf("<td align='right'>%s</td>",decFormat($row["qty_stock"],2));

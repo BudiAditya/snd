@@ -168,7 +168,7 @@ class StockController extends AppController {
         $loader = new ItemEntity();
         $entities = $loader->LoadByCompanyId($this->userCompanyId,"a.id");
         $this->Set("whId",$whId);
-        $this->Set("entityId",$entityId);
+        $this->Set("etId",$entityId);
         $this->Set("cabangId",$cabangId);
         $this->Set("startDate",$startDate);
         $this->Set("endDate",$endDate);

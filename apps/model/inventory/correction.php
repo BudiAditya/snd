@@ -207,7 +207,7 @@ class Correction extends EntityBase {
     public function UpdateAmount() {
         $this->connector->CommandText = 'Update t_ic_stock_correction a Set a.corr_amt = ?price, a.corr_status = 1 Where id = ?id';
         $this->connector->AddParameter("?id", $this->Id);
-        $this->connector->AddParameter("?price", $this->CorrAmt);
+        $this->connector->AddParameter("?price", $this->CorrAmt == null ? 0 : $this->CorrAmt);
         $rs = $this->connector->ExecuteNonQuery();
         return $rs;
     }

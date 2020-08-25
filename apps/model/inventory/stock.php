@@ -101,6 +101,11 @@ class Stock extends EntityBase {
                 $this->DocumentType = "RJ";
                 $this->connector->CommandText = "SELECT a.id, a.rj_no as doc_no, a.rj_date AS doc_date FROM t_ar_return_master AS a WHERE a.id = (SELECT rj_id FROM t_ar_return_detail WHERE id = ?refId)";
                 break;
+            case 5:
+                //koreksi stock (ditambah/bertambah)
+                $this->DocumentType = "CR";
+                $this->connector->CommandText = "SELECT a.id, a.corr_no as doc_no, a.corr_date AS doc_date FROM t_ic_stock_correction AS a WHERE a.id = ?refId";
+                break;
 			case 101:
 			    //penjualan - invoice
 				$this->DocumentType = "IV";
@@ -117,7 +122,7 @@ class Stock extends EntityBase {
                 $this->connector->CommandText = "SELECT a.id, a.rb_no as doc_no, a.rb_date AS doc_date FROM t_ap_return_master AS a WHERE a.id = (SELECT rj_id FROM t_ap_return_detail WHERE id = ?refId)";
                 break;
 			case 104:
-			    //koreksi stock
+			    //koreksi stock (dikurangi)
 				$this->DocumentType = "CR";
 				$this->connector->CommandText = "SELECT a.id, a.corr_no as doc_no, a.corr_date AS doc_date FROM t_ic_stock_correction AS a WHERE a.id = ?refId";
 				break;
@@ -155,6 +160,8 @@ class Stock extends EntityBase {
                 return "inventory.transfer/view/" . $this->DocumentId;
             case 4:
                 return "ar.return/view/" . $this->DocumentId;
+            case 5:
+                return "inventory.correction/view/" . $this->DocumentId;
 			case 101:
 				return "ar.invoice/view/" . $this->DocumentId;
 			case 102:
@@ -756,7 +763,7 @@ WHERE id = ?id";
         if ($entityId > 0){
             $sqx.= " Where c.entity_id = ".$entityId;
         }
-        $sqx.= " Group By c.entity_id,a.item_id, b.item_code, b.item_name, b.s_uom_code, b.s_uom_qty Order By c.entity_id,b.item_code, b.item_name";
+        $sqx.= " Group By c.entity_id,a.item_id, b.item_code, b.item_name, b.s_uom_code, b.s_uom_qty, b.c_uom_code, b.qty_convert Order By c.entity_id,b.item_code, b.item_name";
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteQuery();
         return $rs;
@@ -780,10 +787,7 @@ WHERE id = ?id";
     }
 
     public function Load4Reports($cabangId = 0, $whId = 0, $entityId = 0){
-        $sql = "Select a.*,0 as hrg_beli,0 as hrg_jual,sum(a.qty_stock) as qty_stock,coalesce(sum(b.po_qty),0) as po_qty, coalesce(sum(c.so_qty),0) as so_qty";
-        $sql.= " From vw_ic_stock_list as a Left Join vw_ap_po_outstanding_qty as b On a.item_id = b.item_id";
-        $sql.= " Left Join vw_ar_so_outstanding_qty as c On a.item_id = c.item_id";
-        $sql.= " Where a.item_id > 0";
+        $sql = "Select a.* From vw_ic_stock_list as a Where a.item_id > 0";
         if ($cabangId > 0){
             $sql.= " And a.cabang_id = ".$cabangId;
         }
@@ -793,7 +797,7 @@ WHERE id = ?id";
         if ($entityId != "-"){
             $sql.= " And a.entity_id = '".$entityId."'";
         }
-        $sql.= " Group By a.wh_code,a.item_code,a.item_name,a.l_uom_code";
+        $sql.= " Order By a.wh_code,a.item_code,a.item_name,a.l_uom_code";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs;

@@ -36,6 +36,7 @@ $sheet->setCellValue("F$row","Masuk");
 $sheet->setCellValue("J$row","Keluar");
 $sheet->setCellValue("O$row","Koreksi");
 $sheet->setCellValue("P$row","Saldo");
+$sheet->setCellValue("Q$row","Fifo");
 $str = $row;
 $row++;
 $sheet->setCellValue("F$row","Pembelian");
@@ -55,7 +56,8 @@ $sheet->mergeCells("F$str:I$str");
 $sheet->mergeCells("J$str:N$str");
 $sheet->mergeCells("O$str:O$row");
 $sheet->mergeCells("P$str:P$row");
-$sheet->getStyle("A$str:P$row")->applyFromArray(array_merge($center, $allBorders));
+$sheet->mergeCells("Q$str:Q$row");
+$sheet->getStyle("A$str:Q$row")->applyFromArray(array_merge($center, $allBorders));
 $nmr = 0;
 $str = $row;
 if($mstock != null) {
@@ -78,7 +80,8 @@ if($mstock != null) {
         $sheet->setCellValue("N$row",$rpt["sIssue"]);
         $sheet->setCellValue("O$row",$rpt["sKoreksi"]);
         $sheet->setCellValue("P$row","=((E$row+F$row+G$row+H$row+I$row)-(J$row+K$row+L$row+M$row+N$row))+O$row");
-        $sheet->getStyle("A$row:P$row")->applyFromArray(array_merge($allBorders));
+        $sheet->setCellValue("Q$row","");
+        $sheet->getStyle("A$row:Q$row")->applyFromArray(array_merge($allBorders));
     }
     $edr = $row;
     $row++;

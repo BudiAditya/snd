@@ -38,8 +38,8 @@ class StockCasController extends AppController {
         $settings["columns"][] = array("name" => "a.old_code", "display" => "P I C", "width" => 80);
         $settings["columns"][] = array("name" => "a.s_uom_code", "display" => "Satuan", "width" =>50);
         $settings["columns"][] = array("name" => "format(a.op_qty,0)", "display" => "Awal", "width" => 50, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.in_qty,0)", "display" => "Masuk", "width" => 50, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.ot_qty,0)", "display" => "Keluar", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.in_qty + a.ix_qty,0)", "display" => "Masuk", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.ot_qty + a.ox_qty,0)", "display" => "Keluar", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.aj_qty,0)", "display" => "Koreksi", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.cl_qty,0)", "display" => "Stock", "width" => 50, "align" => "right");
 

@@ -196,10 +196,16 @@ class IssueController extends AppController {
                                         break;
                                     }
                                 } else {
-                                    $errno = 5;
-                                    $flagSuccess = false;
-                                    $errors[] = sprintf("%s -> Item: %s Message: HPP Tidak dihitung (Kosong) ! Message: %s", $issue->IssueNo, $issue->ItemCode, $this->connector->GetErrorMessage());
-                                    break;
+                                    $issue->Price = 0;
+                                    $issue->IsStatus = 1;
+                                    if ($issue->UpdatePrice() > 0) {
+                                        $flagSuccess = true;
+                                    } else {
+                                        $errno = 5;
+                                        $flagSuccess = false;
+                                        $errors[] = sprintf("%s -> Item: %s Message: HPP Tidak dihitung (Kosong) ! Message: %s", $issue->IssueNo, $issue->ItemCode, $this->connector->GetErrorMessage());
+                                        break;
+                                    }
                                 }
                             }
                         }
