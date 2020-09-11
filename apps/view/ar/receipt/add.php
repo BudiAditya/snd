@@ -114,6 +114,10 @@
                 }
             });
 
+            $("#aArType").change(function(e){
+               alert('Test..');
+            });
+
             $('#aInvoiceSearch').combogrid({
                 panelWidth:500,
                 url: "<?php print($helper->site_url('ar.receipt/getoutstandinginvoices_json/'));?>"+cabangId+'/'+debtorId,

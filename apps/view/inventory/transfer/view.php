@@ -28,27 +28,16 @@
 </style>
 <script type="text/javascript">
     $( function() {
-        $("#bEdit").click(function(){
-            if (confirm('Ubah data NPB ini?')){
-                location.href="<?php print($helper->site_url("inventory.transfer/edit/".$transfer->Id)); ?>";
+
+        $("#bApprove").click(function(){
+            if (confirm('Approve NPB ini?')){
+                location.href="<?php print($helper->site_url("inventory.transfer/approve?&id[]=$transfer->Id")); ?>";
             }
         });
 
-        $("#bTambah").click(function(){
-            if (confirm('Buat NPB baru?')){
-                location.href="<?php print($helper->site_url("inventory.transfer/add")); ?>";
-            }
-        });
-
-        $("#bHapus").click(function(){
-            if (confirm('Anda yakin akam menghapus NPB ini?')){
-                location.href="<?php print($helper->site_url("inventory.transfer/delete/").$transfer->Id); ?>";
-            }
-        });
-
-        $("#bCetak").click(function(){
-            if (confirm('Cetak PDF Bukti Transfer ini?')){
-                window.open("<?php print($helper->site_url("inventory.transfer/transfer_print/?&id[]=").$transfer->Id); ?>");
+        $("#bUnapprove").click(function(){
+            if (confirm('Batalkan approval NPB ini?')){
+                location.href="<?php print($helper->site_url("inventory.transfer/unapprove?&id[]=$transfer->Id")); ?>";
             }
         });
 
@@ -143,7 +132,7 @@ $baddnew = base_url('public/images/button/').'create_new.png';
             <td><select class="easyui-combobox" id="NpbStatus" name="NpbStatus" style="width: 100px" disabled>
                     <option value="0" <?php print($transfer->NpbStatus == 0 ? 'selected="selected"' : '');?>>0 - Draft</option>
                     <option value="1" <?php print($transfer->NpbStatus == 1 ? 'selected="selected"' : '');?>>1 - Posted</option>
-                    <option value="2" <?php print($transfer->NpbStatus == 2 ? 'selected="selected"' : '');?>>2 - Closed</option>
+                    <option value="2" <?php print($transfer->NpbStatus == 2 ? 'selected="selected"' : '');?>>2 - Approved</option>
                     <option value="3" <?php print($transfer->NpbStatus == 3 ? 'selected="selected"' : '');?>>3 - Batal</option>
                 </select>
             </td>
@@ -189,7 +178,15 @@ $baddnew = base_url('public/images/button/').'create_new.png';
                     </tr>
                     <tr>
                         <td colspan="5" align="right">
-                            <?php printf('<img src="%s" id="bCetak" alt="Cetak Npb" title="Proses cetak NPB" style="cursor: pointer;"/>',$bcetak);?>
+                            <?php
+                            if ($acl->CheckUserAccess("inventory.transfer", "approve")) {
+                                if ($transfer->NpbStatus == 1) {
+                                    print("<button class='button' id='bApprove'>APPROVAL</button>");
+                                }elseif ($transfer->NpbStatus == 2){
+                                    print("<button class='button' id='bUnapprove'>BATAL APPROVAL</button>");
+                                }
+                            }
+                            ?>
                             &nbsp&nbsp
                             <?php printf('<img src="%s" id="bKembali" alt="Daftar Npb" title="Kembali ke daftar NPB" style="cursor: pointer;"/>',$bkembali);?>
                         </td>

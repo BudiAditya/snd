@@ -6,6 +6,7 @@ class ItemBrand extends EntityBase {
 	public $EntityCode;
 	public $BrandCode;
 	public $BrandName;
+	public $SupplierId;
     public $CreatebyId;
     public $UpdatebyId;
 
@@ -23,6 +24,7 @@ class ItemBrand extends EntityBase {
         $this->EntityCode = $row["entity_code"];
 		$this->BrandCode = $row["brand_code"];
 		$this->BrandName = $row["brand_name"];
+        $this->SupplierId = $row["supplier_id"];
         $this->CreatebyId = $row["createby_id"];
         $this->UpdatebyId = $row["updateby_id"];
 	}
@@ -50,7 +52,7 @@ class ItemBrand extends EntityBase {
 		return $result;
 	}
 
-    public function LoadByCompanyId($companyId,$orderBy = "a.brand_code", $includeDeleted = false) {
+    public function LoadByCompanyId($companyId,$orderBy = "a.brand_name", $includeDeleted = false) {
         if ($includeDeleted) {
             $this->connector->CommandText = "SELECT a.*,b.entity_code FROM m_item_brand AS a JOIN m_item_entity b ON a.entity_id = b.id Where b.company_id = $companyId ORDER BY $orderBy";
         } else {
@@ -107,19 +109,21 @@ class ItemBrand extends EntityBase {
 	}
 
 	public function Insert() {
-		$this->connector->CommandText = 'INSERT INTO m_item_brand(entity_id,brand_code,brand_name,createby_id,create_time) VALUES(?entity_id,?brand_code,?brand_name,?createby_id,now())';
+		$this->connector->CommandText = 'INSERT INTO m_item_brand(entity_id,brand_code,brand_name,supplier_id,createby_id,create_time) VALUES(?entity_id,?brand_code,?brand_name,?supplier_id,?createby_id,now())';
 		$this->connector->AddParameter("?entity_id", $this->EntityId);
-        $this->connector->AddParameter("?brand_code", $this->BrandCode);
+        $this->connector->AddParameter("?brand_code", $this->BrandCode,"varchar");
         $this->connector->AddParameter("?brand_name", $this->BrandName);
+        $this->connector->AddParameter("?supplier_id", $this->SupplierId);
         $this->connector->AddParameter("?createby_id", $this->CreatebyId);
 		return $this->connector->ExecuteNonQuery();
 	}
 
 	public function Update($id) {
-		$this->connector->CommandText = 'UPDATE m_item_brand SET entity_id = ?entity_id, brand_code = ?brand_code, brand_name = ?brand_name, updateby_id = ?updateby_id, update_time = now() WHERE id = ?id';
+		$this->connector->CommandText = 'UPDATE m_item_brand SET entity_id = ?entity_id, brand_code = ?brand_code, brand_name = ?brand_name, supplier_id = ?supplier_id, updateby_id = ?updateby_id, update_time = now() WHERE id = ?id';
         $this->connector->AddParameter("?entity_id", $this->EntityId);
-		$this->connector->AddParameter("?brand_code", $this->BrandCode);
+		$this->connector->AddParameter("?brand_code", $this->BrandCode,"varchar");
         $this->connector->AddParameter("?brand_name", $this->BrandName);
+        $this->connector->AddParameter("?supplier_id", $this->SupplierId);
         $this->connector->AddParameter("?updateby_id", $this->UpdatebyId);
 		$this->connector->AddParameter("?id", $id);
 		return $this->connector->ExecuteNonQuery();

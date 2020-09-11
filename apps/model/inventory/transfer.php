@@ -8,13 +8,14 @@ class Transfer extends EntityBase {
 	public static $NpbStatusCodes = array(
 		0 => "DRAFT",
 		1 => "POSTED",
-        2 => "CLOSED",
+        2 => "APPROVED",
 		3 => "VOID"
 	);
    
 	public $Id;
     public $IsDeleted = false;
     public $CabangId;
+    public $ToCabangId;
     public $CabangCode;
 	public $NpbNo;
 	public $NpbDate;
@@ -47,6 +48,7 @@ class Transfer extends EntityBase {
         $this->Id = $row["id"];
         $this->IsDeleted = $row["is_deleted"] == 1;
         $this->CabangId = $row["cabang_id"];
+        $this->ToCabangId = $row["to_cabang_id"];
         $this->CabangCode = $row["cabang_code"];
         $this->NpbNo = $row["npb_no"];
         $this->NpbDate = strtotime($row["npb_date"]);
@@ -164,22 +166,22 @@ class Transfer extends EntityBase {
 
 	public function Delete($id) {
         //unpost stock dulu
-        $rsx = null;
-        $this->connector->CommandText = "SELECT fc_ic_transfermaster_unpost($id) As valresult;";
-        $rsx = $this->connector->ExecuteQuery();
+        //$rsx = null;
+        //$this->connector->CommandText = "SELECT fc_ic_transfermaster_unpost($id) As valresult;";
+        //$rsx = $this->connector->ExecuteQuery();
         //hapus data npb_
-        $this->connector->CommandText = "Delete From t_ic_transfer_master WHERE id = ?id";
+        $this->connector->CommandText = "Delete From t_ic_transfer_master WHERE id = ?id And npb_status < 2";
 		$this->connector->AddParameter("?id", $id);
 		return $this->connector->ExecuteNonQuery();
 	}
 
     public function Void($id) {
         //unpost stock dulu
-        $rsx = null;
-        $this->connector->CommandText = "SELECT fc_ic_transfermaster_unpost($id) As valresult;";
-        $rsx = $this->connector->ExecuteQuery();
+        //$rsx = null;
+        //$this->connector->CommandText = "SELECT fc_ic_transfermaster_unpost($id) As valresult;";
+        //$rsx = $this->connector->ExecuteQuery();
         //hapus data npb_
-        $this->connector->CommandText = "Update t_ic_transfer_master a Set a.is_deleted = 1, a.npb_status = 3 WHERE a.id = ?id";
+        $this->connector->CommandText = "Update t_ic_transfer_master a Set a.is_deleted = 1, a.npb_status = 3 WHERE a.id = ?id And a.npb_status < 2";
         $this->connector->AddParameter("?id", $id);
         return $this->connector->ExecuteNonQuery();
     }
@@ -217,6 +219,12 @@ class Transfer extends EntityBase {
         }else{
             return false;
         }
+    }
+
+    public function UpdateNpbApproveStatus($npbId,$status = 0){
+        $sql = "Update t_ic_transfer_master a Set a.npb_status = $status Where a.id = $npbId";
+        $this->connector->CommandText = $sql;
+        return $this->connector->ExecuteNonQuery();
     }
 
     public function Load4Reports($cabangId = 0,$gudangId = 0, $startDate = null, $endDate = null) {

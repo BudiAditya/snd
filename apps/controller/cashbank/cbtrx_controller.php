@@ -30,7 +30,7 @@ class CbTrxController extends AppController {
 		$settings["columns"][] = array("name" => "a.trx_descs", "display" => "Keterangan", "width" => 250);
         $settings["columns"][] = array("name" => "a.reff_no", "display" => "Reff No.", "width" => 80);
         $settings["columns"][] = array("name" => "a.relasi_name", "display" => "Atas Nama", "width" => 200);
-        $settings["columns"][] = array("name" => "format(a.trx_amount,0)", "display" => "Jumlah", "width" => 80, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.trx_amount,2)", "display" => "Jumlah", "width" => 80, "align" => "right");
         $settings["columns"][] = array("name" => "a.xstatus", "display" => "Status", "width" => 50);
         $settings["columns"][] = array("name" => "a.user_id", "display" => "Admin", "width" => 50);
         $settings["columns"][] = array("name" => "if(a.create_mode = 1,'Auto','Manual')", "display" => "Source", "width" => 50);

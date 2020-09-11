@@ -41,6 +41,7 @@ class ItemsController extends AppController {
         $settings["filters"][] = array("name" => "a.old_code", "display" => "Item Code");
         $settings["filters"][] = array("name" => "a.subcategory_name", "display" => "Category");
         $settings["filters"][] = array("name" => "a.brand_name", "display" => "Brand");
+        $settings["filters"][] = array("name" => "a.principal_name", "display" => "Principal");
         $settings["filters"][] = array("name" => "if(a.is_aktif = 1,'Aktif','Tidak')", "display" => "Status Aktif");
 
 		if (!$router->IsAjaxRequest) {

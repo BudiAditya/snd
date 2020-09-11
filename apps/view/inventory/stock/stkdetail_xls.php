@@ -23,7 +23,7 @@ $sheet->setShowGridlines(false);
 $row++;
 $sheet->setCellValue("A$row","MUTASI STOCK BARANG");
 $row++;
-$sheet->setCellValue("A$row","Cabang/Gudang: ".$userCabCode);
+$sheet->setCellValue("A$row","Gudang: ".$whName);
 $row++;
 $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $startDate) . " - " . date('d-m-Y', $endDate));
 $row++;

@@ -75,6 +75,8 @@
                 ?>
             </select>
             <button type="submit">Generate</button>
+            &nbsp;
+            <button type="button" id="btDownload">Download Excel</button>
         </form>
     </div>
     <br>
@@ -173,6 +175,7 @@
                         <th>KODE</th>
                         <th>ENTITAS</th>
                         <th>OMSET (Rp)</th>
+                        <th>%</th>
                     </tr>
                     <?php
                     $nmr = 1;
@@ -183,12 +186,14 @@
                         printf("<td>%s</td>",$row["entity_code"]);
                         printf("<td>%s</td>",$row["entity_name"]);
                         printf("<td align='right'>%s</td>",number_format($row["omset"],0));
+                        printf("<td align='right'>%s</td>",number_format(round(($row["omset"]/$totalOmset)*100,2),2)."%");
                         print("</tr>");
                         $tom+= $row["omset"];
                     }
                     print("<tr>");
                     print("<td colspan='3'>T O T A L</td>");
                     printf("<td align='right'>%s</td>",number_format($tom,0));
+                    print("<td>100.00%</td>");
                     print("</tr>");
                     ?>
                 </table>
@@ -210,6 +215,7 @@
                         <th>KODE</th>
                         <th>PRINCIPAL</th>
                         <th>OMSET (Rp)</th>
+                        <th>%</th>
                     </tr>
                     <?php
                     $nmr = 1;
@@ -218,14 +224,20 @@
                         print("<tr>");
                         printf("<td>%s</td>",$nmr++);
                         printf("<td>%s</td>",$row["principal_code"]);
-                        printf("<td>%s</td>",$row["principal_name"]);
+                        if (strlen($row["principal_name"]) > 15) {
+                            printf("<td nowrap='nowrap'>%s</td>", left($row["principal_name"], 15) . "..");
+                        }else{
+                            printf("<td nowrap='nowrap'>%s</td>",$row["principal_name"]);
+                        }
                         printf("<td align='right'>%s</td>",number_format($row["omset"],0));
+                        printf("<td align='right'>%s</td>",number_format(round(($row["omset"]/$totalOmset)*100,2),2)."%");
                         print("</tr>");
                         $tom+= $row["omset"];
                     }
                     print("<tr>");
                     print("<td colspan='3'>T O T A L</td>");
                     printf("<td align='right'>%s</td>",number_format($tom,0));
+                    print("<td>100.00%</td>");
                     print("</tr>");
                     ?>
                 </table>
@@ -241,6 +253,7 @@
                         <th>No.</th>
                         <th>NAMA SALESMAN</th>
                         <th>OMSET (Rp)</th>
+                        <th>%</th>
                     </tr>
                     <?php
                     $nmr = 1;
@@ -250,12 +263,14 @@
                         printf("<td>%s</td>",$nmr++);
                         printf("<td>%s</td>",$row["sales_name"]);
                         printf("<td align='right'>%s</td>",number_format($row["omset"],0));
+                        printf("<td align='right'>%s</td>",number_format(round(($row["omset"]/$totalOmset)*100,2),2)."%");
                         print("</tr>");
                         $tom+= $row["omset"];
                     }
                     print("<tr>");
                     print("<td colspan='2'>T O T A L</td>");
                     printf("<td align='right'>%s</td>",number_format($tom,0));
+                    print("<td>100.00%</td>");
                     print("</tr>");
                     ?>
                 </table>
@@ -277,6 +292,7 @@
                         <th>KODE</th>
                         <th>AREA</th>
                         <th>OMSET (Rp)</th>
+                        <th>%</th>
                     </tr>
                     <?php
                     $nmr = 1;
@@ -285,14 +301,20 @@
                         print("<tr>");
                         printf("<td>%s</td>",$nmr++);
                         printf("<td>%s</td>",$row["area_code"]);
-                        printf("<td>%s</td>",$row["area_name"]);
+                        if (strlen($row["area_name"]) > 15) {
+                            printf("<td nowrap='nowrap'>%s</td>", left($row["area_name"], 15) . "..");
+                        }else{
+                            printf("<td nowrap='nowrap'>%s</td>",$row["area_name"]);
+                        }
                         printf("<td align='right'>%s</td>",number_format($row["omset"],0));
+                        printf("<td align='right'>%s</td>",number_format(round(($row["omset"]/$totalOmset)*100,2),2)."%");
                         print("</tr>");
                         $tom+= $row["omset"];
                     }
                     print("<tr>");
                     print("<td colspan='3'>T O T A L</td>");
                     printf("<td align='right'>%s</td>",number_format($tom,0));
+                    print("<td>100.00%</td>");
                     print("</tr>");
                     ?>
                 </table>
@@ -686,6 +708,16 @@
                     }
                 });
             }
+        });
+
+        $("#btDownload").click(function (e) {
+            var thn = $("#Year").val();
+            var url = "<?php print($helper->site_url("ar.statistic/xlReport/"));?>"+thn;
+            alert('Sorry, Not ready yet!')
+            //if (confirm("Download Excel version?")){
+                //-- lanjut download disini
+            //    window.location.href = url;
+            //}
         });
     });
 </script>

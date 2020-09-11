@@ -94,25 +94,33 @@ if ($JnsLaporan < 3) {
             $sheet->setCellValue("G$row", $rpt["area_code"]);
             $sheet->setCellValue("H$row", $rpt["sales_name"]);
             if ($JnsLaporan == 1) {
-                $sheet->setCellValue("I$row", date('d-m-Y', strtotime($rpt["due_date"])));
-                $sheet->setCellValue("J$row", $rpt["base_amount"] - $rpt["disc_amount"]);
-                $sheet->setCellValue("K$row", $rpt["ppn_amount"]);
-                $sheet->setCellValue("L$row", $rpt["total_amount"]);
-                $sheet->setCellValue("M$row", $rpt["return_amount"]);
-                $sheet->setCellValue("N$row", $rpt["paid_amount"]);
-                $sheet->setCellValue("O$row", $rpt["balance_amount"]);
+                if ($rpt["invoice_status"] < 3) {
+                    $sheet->setCellValue("I$row", $rpt["payment_type"] == 1 ? date('d-m-Y', strtotime($rpt["due_date"])) : "CASH");
+                    $sheet->setCellValue("J$row", $rpt["base_amount"] - $rpt["disc_amount"]);
+                    $sheet->setCellValue("K$row", $rpt["ppn_amount"]);
+                    $sheet->setCellValue("L$row", $rpt["total_amount"]);
+                    $sheet->setCellValue("M$row", $rpt["return_amount"]);
+                    $sheet->setCellValue("N$row", $rpt["paid_amount"]);
+                    $sheet->setCellValue("O$row", $rpt["balance_amount"]);
+                }else{
+                    $sheet->setCellValue("I$row", "* VOID *");
+                }
                 $sheet->getStyle("A$row:O$row")->applyFromArray(array_merge($allBorders));
             }elseif ($JnsLaporan == 2) {
                 $sheet->setCellValue("I$row", $rpt['brand_name']);
                 $sheet->setCellValueExplicit("J$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
                 $sheet->setCellValue("K$row", $rpt['item_name']);
-                $sheet->setCellValue("L$row", $rpt['sales_qty']);
-                $sheet->setCellValue("M$row", $rpt['price']);
-                $sheet->setCellValue("N$row", $rpt['sub_total']);
-                $sheet->setCellValue("O$row", $rpt['disc_amount']);
-                $sheet->setCellValue("P$row", $rpt['sub_total']-$rpt['disc_amount']);
-                $sheet->setCellValue("Q$row", $rpt['ppn_amount']);
-                $sheet->setCellValue("R$row", $rpt['sub_total']-$rpt['disc_amount']+$rpt['ppn_amount']);
+                if ($rpt["invoice_status"] < 3) {
+                    $sheet->setCellValue("L$row", $rpt['sales_qty']);
+                    $sheet->setCellValue("M$row", $rpt['price']);
+                    $sheet->setCellValue("N$row", $rpt['sub_total']);
+                    $sheet->setCellValue("O$row", $rpt['disc_amount']);
+                    $sheet->setCellValue("P$row", $rpt['sub_total'] - $rpt['disc_amount']);
+                    $sheet->setCellValue("Q$row", $rpt['ppn_amount']);
+                    $sheet->setCellValue("R$row", $rpt['sub_total'] - $rpt['disc_amount'] + $rpt['ppn_amount']);
+                }else{
+                    $sheet->setCellValue("L$row", "* VOID *");
+                }
                 $sheet->getStyle("A$row:R$row")->applyFromArray(array_merge($allBorders));
             }
             $ivn = $rpt["invoice_no"];
@@ -229,8 +237,12 @@ if ($JnsLaporan < 3) {
             $sheet->setCellValue("E$row", $rpt['customer_name']);
             $sheet->setCellValue("F$row", $rpt['customer_address']);
             $sheet->setCellValue("G$row", $rpt['sales_name']);
-            $sheet->setCellValue("H$row", $rpt['sum_qty']);
-            $sheet->setCellValue("I$row", $rpt['total_amount']);
+            if ($rpt["invoice_status"] < 3) {
+                $sheet->setCellValue("H$row", $rpt['sum_qty']);
+                $sheet->setCellValue("I$row", $rpt['total_amount']);
+            }else{
+                $sheet->setCellValue("H$row", "* VOID *");
+            }
             $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
         }
         $edr = $row;
@@ -251,40 +263,304 @@ if ($JnsLaporan < 3) {
     $row++;
     $sheet->setCellValue("A$row", "No.");
     $sheet->setCellValue("B$row", "Kode");
-    $sheet->setCellValue("C$row", "Nama Barang");
-    $sheet->setCellValue("D$row", "Satuan");
-    $sheet->setCellValue("E$row", "Q T Y");
-    $sheet->setCellValue("F$row", "Terkirim");
-    $sheet->setCellValue("G$row", "Tidak Terkirim");
-    $sheet->setCellValue("H$row", "Selisih");
-    $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($center, $allBorders));
+    $sheet->setCellValue("C$row", "Brand");
+    $sheet->setCellValue("D$row", "Nama Produk");
+    $sheet->setCellValue("E$row", "L");
+    $sheet->setCellValue("F$row", "S");
+    $sheet->setCellValue("G$row", "Q");
+    $sheet->setCellValue("H$row", "C");
+    $sheet->setCellValue("I$row", "Nilai");
+    $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($center, $allBorders));
     $nmr = 0;
     $str = $row;
     if ($Reports != null) {
         while ($rpt = $Reports->FetchAssoc()) {
             $row++;
             $nmr++;
+            $qqty = $rpt["sum_qty"];
+            if ($qqty >= $rpt["s_uom_qty"] && $rpt["s_uom_qty"] > 0){
+                $aqty = array();
+                $sqty = round($qqty/$rpt["s_uom_qty"],2);
+                $aqty = explode('.',$sqty);
+                $lqty = $aqty[0];
+                $sqty = $qqty - ($lqty * $rpt["s_uom_qty"]);
+            }else {
+                $lqty = 0;
+                $sqty = $qqty;
+            }
+            if ($rpt["entity_id"] == 1) {
+                $cqty = round($qqty * $rpt["qty_convert"], 2);
+            }else{
+                $cqty = 0;
+            }
             $sheet->setCellValue("A$row", $nmr);
             $sheet->setCellValue("B$row", $rpt['item_code']);
-            $sheet->setCellValue("C$row", $rpt['item_descs']);
-            $sheet->setCellValue("D$row", $rpt['satuan']);
-            $sheet->setCellValue("E$row", $rpt['sum_qty']);
-            $sheet->setCellValue("F$row", "");
-            $sheet->setCellValue("G$row", "");
-            $sheet->setCellValue("H$row", "");
-            $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("C$row", $rpt['brand_name']);
+            $sheet->setCellValue("D$row", $rpt['item_name']);
+            $sheet->setCellValue("E$row", $lqty);
+            $sheet->setCellValue("F$row", $lqty);
+            $sheet->setCellValue("G$row", $qqty);
+            $sheet->setCellValue("H$row", $cqty);
+            $sheet->setCellValue("I$row", $rpt["sum_dpp"] + $rpt["sum_ppn"]);
+            $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
         }
         $edr = $row;
         $row++;
         $sheet->setCellValue("A$row", "T O T A L");
         $sheet->mergeCells("A$row:D$row");
         $sheet->getStyle("A$row")->applyFromArray($center);
+        $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+        $sheet->setCellValue("I$row","=SUM(I$str:I$edr)");
+        $sheet->getStyle("D$str:I$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:i$row")->applyFromArray(array_merge($allBorders));
+    }
+}elseif ($JnsLaporan == 6){
+    // omset salesman
+    $sheet->setCellValue("A$row", "REKAPITULASI OMSET PENJUALAN BY SALESMAN - " . $userCabName);
+    $row++;
+    $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
+    $row++;
+    $sheet->setCellValue("A$row", "No.");
+    $sheet->setCellValue("B$row", "Salesman");
+    $sheet->setCellValue("C$row", "DPP");
+    $sheet->setCellValue("D$row", "PPN");
+    $sheet->setCellValue("E$row", "Total");
+    $sheet->setCellValue("F$row", "Retur");
+    $sheet->setCellValue("G$row", "Terbayar");
+    $sheet->setCellValue("H$row", "OutStansding");
+    $sheet->setCellValue("I$row", "Kon (%)");
+    $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($center, $allBorders));
+    $nmr = 0;
+    $str = $row;
+    $tTotal = $Totals;
+    if ($Reports != null) {
+        while ($rpt = $Reports->FetchAssoc()) {
+            $row++;
+            $nmr++;
+            $sheet->setCellValue("A$row", $nmr);
+            $sheet->setCellValue("B$row", $rpt['sales_name']);
+            $sheet->setCellValue("C$row", $rpt['sum_dpp']);
+            $sheet->setCellValue("D$row", $rpt['sum_ppn']);
+            $sheet->setCellValue("E$row", "=C$row+D$row");
+            $sheet->setCellValue("F$row", $rpt['return_amount']);
+            $sheet->setCellValue("G$row", $rpt['paid_amount']);
+            $sheet->setCellValue("H$row", "=E$row-F$row-G$row");
+            $sheet->setCellValue("I$row", "=Round((E$row/$tTotal)*100,2)");
+            $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
+        }
+        $edr = $row;
+        $row++;
+        $sheet->setCellValue("A$row", "T O T A L");
+        $sheet->mergeCells("A$row:B$row");
+        $sheet->getStyle("A$row")->applyFromArray($center);
+        $sheet->setCellValue("C$row","=SUM(C$str:C$edr)");
+        $sheet->setCellValue("D$row","=SUM(D$str:D$edr)");
         $sheet->setCellValue("E$row","=SUM(E$str:E$edr)");
+        $sheet->setCellValue("F$row","=SUM(F$str:F$edr)");
+        $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+        $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
+        $sheet->setCellValue("I$row","=SUM(I$str:I$edr)");
+        $sheet->getStyle("C$str:I$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:i$row")->applyFromArray(array_merge($allBorders));
+    }
+}elseif ($JnsLaporan == 7){
+    // omset salesman
+    $sheet->setCellValue("A$row", "REKAPITULASI OMSET PENJUALAN BY SALESMAN DETAIL - " . $userCabName);
+    $row++;
+    $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
+    $row++;
+    $sheet->setCellValue("A$row", "No.");
+    $sheet->setCellValue("B$row", "Salesman");
+    $sheet->setCellValue("C$row", "Entitas");
+    $sheet->setCellValue("D$row", "QTY");
+    $sheet->setCellValue("E$row", "Liter");
+    $sheet->setCellValue("F$row", "DPP");
+    $sheet->setCellValue("G$row", "PPN");
+    $sheet->setCellValue("H$row", "Total");
+    $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($center, $allBorders));
+    $nmr = 0;
+    $str = $row;
+    $tTotal = $Totals;
+    if ($Reports != null) {
+        $snm = null;
+        while ($rpt = $Reports->FetchAssoc()) {
+            $row++;
+            if ($snm <> $rpt['sales_name']){
+                $nmr++;
+                $sheet->setCellValue("A$row", $nmr);
+                $sheet->setCellValue("B$row", $rpt['sales_name']);
+            }
+            $sheet->setCellValue("C$row", $rpt['entity_name']);
+            $sheet->setCellValue("D$row", $rpt['sum_qty']);
+            if ($rpt["entity_code"] == 'CAS') {
+                $sheet->setCellValue("E$row", $rpt['sum_liter']);
+            }
+            $sheet->setCellValue("F$row", $rpt['sum_ppn']);
+            $sheet->setCellValue("G$row", $rpt['sum_dpp']);
+            $sheet->setCellValue("H$row", "=F$row+G$row");
+            $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($allBorders));
+            $snm = $rpt['sales_name'];
+        }
+        $edr = $row;
+        $row++;
+        $sheet->setCellValue("A$row", "T O T A L");
+        $sheet->mergeCells("A$row:C$row");
+        $sheet->getStyle("A$row")->applyFromArray($center);
+        $sheet->setCellValue("D$row","=SUM(D$str:D$edr)");
+        $sheet->setCellValue("E$row","=SUM(E$str:E$edr)");
+        $sheet->setCellValue("F$row","=SUM(F$str:F$edr)");
+        $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+        $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
         $sheet->getStyle("D$str:H$row")->applyFromArray($idrFormat);
         $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($allBorders));
     }
+}elseif ($JnsLaporan == 8){
+    // omset entitas
+    $sheet->setCellValue("A$row", "REKAPITULASI OMSET PENJUALAN BY ENTITAS - " . $userCabName);
+    $row++;
+    $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
+    $row++;
+    $sheet->setCellValue("A$row", "No.");
+    $sheet->setCellValue("B$row", "Kode");
+    $sheet->setCellValue("C$row", "Entitas");
+    $sheet->setCellValue("D$row", "QTY");
+    $sheet->setCellValue("E$row", "Liter");
+    $sheet->setCellValue("F$row", "DPP");
+    $sheet->setCellValue("G$row", "PPN");
+    $sheet->setCellValue("H$row", "Total");
+    $sheet->setCellValue("I$row", "Kon (%)");
+    $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($center, $allBorders));
+    $nmr = 0;
+    $str = $row;
+    $tTotal = $Totals;
+    if ($Reports != null) {
+        while ($rpt = $Reports->FetchAssoc()) {
+            $row++;
+            $nmr++;
+            $sheet->setCellValue("A$row", $nmr);
+            $sheet->setCellValue("B$row", $rpt['entity_code']);
+            $sheet->setCellValue("C$row", $rpt['entity_name']);
+            $sheet->setCellValue("D$row", $rpt['sum_qty']);
+            $sheet->setCellValue("E$row", $rpt['sum_liter']);
+            $sheet->setCellValue("F$row", $rpt['sum_dpp']);
+            $sheet->setCellValue("G$row", $rpt['sum_ppn']);
+            $sheet->setCellValue("H$row", "=F$row+G$row");
+            $sheet->setCellValue("I$row", "=Round((H$row/$tTotal)*100,2)");
+            $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
+        }
+        $edr = $row;
+        $row++;
+        $sheet->setCellValue("A$row", "T O T A L");
+        $sheet->mergeCells("A$row:C$row");
+        $sheet->getStyle("A$row")->applyFromArray($center);
+        $sheet->setCellValue("D$row","=SUM(D$str:D$edr)");
+        $sheet->setCellValue("E$row","=SUM(E$str:E$edr)");
+        $sheet->setCellValue("F$row","=SUM(F$str:F$edr)");
+        $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+        $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
+        $sheet->setCellValue("I$row","=SUM(I$str:I$edr)");
+        $sheet->getStyle("D$str:I$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:i$row")->applyFromArray(array_merge($allBorders));
+    }
+}elseif ($JnsLaporan == 9){
+    // omset entitas
+    $sheet->setCellValue("A$row", "REKAPITULASI OMSET PENJUALAN BY PRINCIPAL - " . $userCabName);
+    $row++;
+    $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
+    $row++;
+    $sheet->setCellValue("A$row", "No.");
+    $sheet->setCellValue("B$row", "Kode");
+    $sheet->setCellValue("C$row", "Principal");
+    $sheet->setCellValue("D$row", "QTY");
+    $sheet->setCellValue("E$row", "Liter");
+    $sheet->setCellValue("F$row", "DPP");
+    $sheet->setCellValue("G$row", "PPN");
+    $sheet->setCellValue("H$row", "Total");
+    $sheet->setCellValue("I$row", "Kon (%)");
+    $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($center, $allBorders));
+    $nmr = 0;
+    $str = $row;
+    $tTotal = $Totals;
+    if ($Reports != null) {
+        while ($rpt = $Reports->FetchAssoc()) {
+            $row++;
+            $nmr++;
+            $sheet->setCellValue("A$row", $nmr);
+            $sheet->setCellValueExplicit("B$row", $rpt['principal_code'],PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValue("C$row", $rpt['principal_name']);
+            $sheet->setCellValue("D$row", $rpt['sum_qty']);
+            $sheet->setCellValue("E$row", $rpt['sum_liter']);
+            $sheet->setCellValue("F$row", $rpt['sum_dpp']);
+            $sheet->setCellValue("G$row", $rpt['sum_ppn']);
+            $sheet->setCellValue("H$row", "=F$row+G$row");
+            $sheet->setCellValue("I$row", "=Round((H$row/$tTotal)*100,2)");
+            $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
+        }
+        $edr = $row;
+        $row++;
+        $sheet->setCellValue("A$row", "T O T A L");
+        $sheet->mergeCells("A$row:C$row");
+        $sheet->getStyle("A$row")->applyFromArray($center);
+        $sheet->setCellValue("D$row","=SUM(D$str:D$edr)");
+        $sheet->setCellValue("E$row","=SUM(E$str:E$edr)");
+        $sheet->setCellValue("F$row","=SUM(F$str:F$edr)");
+        $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+        $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
+        $sheet->setCellValue("I$row","=SUM(I$str:I$edr)");
+        $sheet->getStyle("D$str:I$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:i$row")->applyFromArray(array_merge($allBorders));
+    }
+}elseif ($JnsLaporan == 10){
+    // omset entitas
+    $sheet->setCellValue("A$row", "REKAPITULASI OMSET PENJUALAN BY BRAND - " . $userCabName);
+    $row++;
+    $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
+    $row++;
+    $sheet->setCellValue("A$row", "No.");
+    $sheet->setCellValue("B$row", "Kode");
+    $sheet->setCellValue("C$row", "Brand");
+    $sheet->setCellValue("D$row", "QTY");
+    $sheet->setCellValue("E$row", "Liter");
+    $sheet->setCellValue("F$row", "DPP");
+    $sheet->setCellValue("G$row", "PPN");
+    $sheet->setCellValue("H$row", "Total");
+    $sheet->setCellValue("I$row", "Kon (%)");
+    $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($center, $allBorders));
+    $nmr = 0;
+    $str = $row;
+    $tTotal = $Totals;
+    if ($Reports != null) {
+        while ($rpt = $Reports->FetchAssoc()) {
+            $row++;
+            $nmr++;
+            $sheet->setCellValue("A$row", $nmr);
+            $sheet->setCellValueExplicit("B$row", $rpt['brand_code'],PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValue("C$row", $rpt['brand_name']);
+            $sheet->setCellValue("D$row", $rpt['sum_qty']);
+            $sheet->setCellValue("E$row", $rpt['sum_liter']);
+            $sheet->setCellValue("F$row", $rpt['sum_dpp']);
+            $sheet->setCellValue("G$row", $rpt['sum_ppn']);
+            $sheet->setCellValue("H$row", "=F$row+G$row");
+            $sheet->setCellValue("I$row", "=Round((H$row/$tTotal)*100,2)");
+            $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
+        }
+        $edr = $row;
+        $row++;
+        $sheet->setCellValue("A$row", "T O T A L");
+        $sheet->mergeCells("A$row:C$row");
+        $sheet->getStyle("A$row")->applyFromArray($center);
+        $sheet->setCellValue("D$row","=SUM(D$str:D$edr)");
+        $sheet->setCellValue("E$row","=SUM(E$str:E$edr)");
+        $sheet->setCellValue("F$row","=SUM(F$str:F$edr)");
+        $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+        $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
+        $sheet->setCellValue("I$row","=SUM(I$str:I$edr)");
+        $sheet->getStyle("D$str:I$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:i$row")->applyFromArray(array_merge($allBorders));
+    }
 }
 // Flush to client
+
 foreach ($headers as $header) {
     header($header);
 }

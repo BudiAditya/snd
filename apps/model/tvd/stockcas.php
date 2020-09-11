@@ -496,11 +496,11 @@ class StockCas extends EntityBase {
     }
 
     public function Load4Reports($trxYear, $whId = 0){
-        $sql = "Select a.* From vw_cas_item_stock as a Where a.trx_year = $trxYear";
-        if ($whId > 0){
-            $sql.= " And a.warehouse_id = ".$whId;
+        if ($whId > 0) {
+            $sql = "Select a.* From vw_cas_item_stock as a Where a.trx_year = $trxYear And a.warehouse_id = $whId Order By a.item_code,a.item_name";
+        }else{
+            $sql = "Select a.* From vw_cas_item_stock_all_whs as a Where a.trx_year = $trxYear Order By a.item_code,a.item_name";
         }
-        $sql.= " Order By a.wh_code,a.item_code,a.item_name";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs;

@@ -13,6 +13,8 @@ class TransferDetail extends EntityBase {
     public $IsiSatKecil = 0;
     public $SatKecil;
     public $Hpp = 0;
+    public $QtyTransfer = 0;
+    public $IsPosted = 0;
 
 	// Helper Variable;
 	public $MarkedForDeletion = false;
@@ -29,6 +31,8 @@ class TransferDetail extends EntityBase {
         $this->SatBesar = $row["l_uom_code"];
         $this->SatKecil = $row["s_uom_code"];
         $this->IsiSatKecil = $row["s_uom_qty"];
+        $this->QtyTransfer = $row["qty_transfer"];
+        $this->IsPosted = $row["is_posted"];
 	}
 
 	public function LoadById($id) {
@@ -63,11 +67,13 @@ class TransferDetail extends EntityBase {
 	}
 
 	public function Insert() {
-		$this->connector->CommandText = "INSERT INTO t_ic_transfer_detail(npb_id, item_id, qty, hpp) VALUES(?npb_id, ?item_id, ?qty, ?hpp)";
+		$this->connector->CommandText = "INSERT INTO t_ic_transfer_detail(npb_id, item_id, qty, hpp, qty_transfer, is_posted) VALUES(?npb_id, ?item_id, ?qty, ?hpp, ?qty_transfer, ?is_posted)";
 		$this->connector->AddParameter("?npb_id", $this->NpbId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
 		$this->connector->AddParameter("?qty", $this->Qty);
         $this->connector->AddParameter("?hpp", $this->Hpp);
+        $this->connector->AddParameter("?qty_transfer", $this->QtyTransfer);
+        $this->connector->AddParameter("?is_posted", $this->IsPosted);
 		$rs = $this->connector->ExecuteNonQuery();
         $rsx = null;
         $did = 0;
@@ -89,11 +95,13 @@ class TransferDetail extends EntityBase {
         $rsx = null;
         //$this->connector->CommandText = "SELECT fc_ic_transferdetail_unpost($id) As valresult;";
         //$rsx = $this->connector->ExecuteQuery();
-        $this->connector->CommandText = "UPDATE t_ic_transfer_detail SET npb_id = ?npb_id, qty = ?qty, item_id = ?item_id, hpp = ?hpp WHERE id = ?id";
+        $this->connector->CommandText = "UPDATE t_ic_transfer_detail SET npb_id = ?npb_id, qty = ?qty, item_id = ?item_id, hpp = ?hpp, qty_transfer = ?qty_transfer, is_posted = ?is_posted WHERE id = ?id";
         $this->connector->AddParameter("?npb_id", $this->NpbId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
         $this->connector->AddParameter("?qty", $this->Qty);
         $this->connector->AddParameter("?hpp", $this->Hpp);
+        $this->connector->AddParameter("?qty_transfer", $this->QtyTransfer);
+        $this->connector->AddParameter("?is_posted", $this->IsPosted);
         $this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteNonQuery();
         if ($rs == 1) {

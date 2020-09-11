@@ -107,7 +107,9 @@
     <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
         <tr>
             <th>No.</th>
+            <?php if ($gudangId > 0){ ?>
             <th>Gudang</th>
+            <?php } ?>
             <th>Kode</th>
             <th>Nama Produk</th>
             <th>Satuan</th>
@@ -122,7 +124,9 @@
             while ($row = $reports->FetchAssoc()) {
                 print("<tr valign='Top'>");
                 printf("<td>%s</td>",$nmr);
-                printf("<td nowrap='nowrap'>%s</td>",$row["wh_code"]);
+                if ($gudangId > 0) {
+                    printf("<td nowrap='nowrap'>%s</td>", $row["wh_code"]);
+                }
                 printf("<td nowrap='nowrap'>%s</td>",$row["item_code"]);
                 printf("<td nowrap='nowrap'>%s</td>",$row["item_name"]);
                 printf("<td nowrap='nowrap'>%s</td>",$row["s_uom_code"]);

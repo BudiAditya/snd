@@ -25,8 +25,8 @@ class JournalController extends AppController {
         $settings["columns"][] = array("name" => "a.journal_date", "display" => "Tanggal", "width" => 70);
         $settings["columns"][] = array("name" => "a.journal_descs", "display" => "Keterangan", "width" => 300);
         $settings["columns"][] = array("name" => "a.reff_no", "display" => "No. Refferensi", "width" => 100);
-        $settings["columns"][] = array("name" => "format(a.dbAmount,0)", "display" => "Debit", "width" => 100, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.crAmount,0)", "display" => "Credit", "width" => 100, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.dbAmount,2)", "display" => "Debit", "width" => 100, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.crAmount,2)", "display" => "Credit", "width" => 100, "align" => "right");
         $settings["columns"][] = array("name" => "if(a.journal_status = 0,'Draft',if(a.journal_status = 1, 'Verified','Approved'))", "display" => "Status", "width" => 50);
         $settings["columns"][] = array("name" => "if(a.input_mode = 0,'Manual','Auto')", "display" => "Mode", "width" => 50);
         $settings["columns"][] = array("name" => "a.source_code", "display" => "Sumber", "width" => 50);

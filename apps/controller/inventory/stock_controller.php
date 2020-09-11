@@ -33,16 +33,20 @@ class StockController extends AppController {
 
         $settings["columns"][] = array("name" => "concat(a.warehouse_id,'|',a.item_id)", "display" => "ID", "width" => 50);
         $settings["columns"][] = array("name" => "a.wh_code", "display" => "Gudang", "width" => 50);
+        $settings["columns"][] = array("name" => "a.brand_name", "display" => "Brand", "width" => 80);
         $settings["columns"][] = array("name" => "a.item_code", "display" => "Kode", "width" => 80);
-        $settings["columns"][] = array("name" => "a.item_name", "display" => "Nama Produk", "width" =>250);
+        $settings["columns"][] = array("name" => "a.item_name", "display" => "Nama Produk", "width" =>300);
         $settings["columns"][] = array("name" => "a.uom_code", "display" => "Satuan", "width" =>50);
-        $settings["columns"][] = array("name" => "format(a.qty_op,0)", "display" => "+Awal", "width" => 50, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.qty_in,0)", "display" => "+Masuk", "width" => 50, "align" => "right");
-        $settings["columns"][] = array("name" => "format(a.qty_ot,0)", "display" => "-Keluar", "width" => 50, "align" => "right");
+        //$settings["columns"][] = array("name" => "format(a.qty_op,0)", "display" => "+Awal", "width" => 50, "align" => "right");
+        //$settings["columns"][] = array("name" => "format(a.qty_in,0)", "display" => "+Masuk", "width" => 50, "align" => "right");
+        //$settings["columns"][] = array("name" => "format(a.qty_ot,0)", "display" => "-Keluar", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.qst_riil,0)", "display" => "Real", "width" => 50, "align" => "right");
+        $settings["columns"][] = array("name" => "format(a.qty_hold,0)", "display" => "Hold", "width" => 50, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.qty_stock,0)", "display" => "Stock", "width" => 50, "align" => "right");
 
         $settings["filters"][] = array("name" => "a.item_code", "display" => "Item Code");
         $settings["filters"][] = array("name" => "a.item_name", "display" => "Item Name");
+        $settings["filters"][] = array("name" => "a.brand_name", "display" => "Brand");
         $settings["filters"][] = array("name" => "a.wh_code", "display" => "Gudang");
 
         if (!$router->IsAjaxRequest) {
@@ -58,7 +62,7 @@ class StockController extends AppController {
             }
 
             $settings["def_filter"] = 1;
-            $settings["def_order"] = 2;
+            $settings["def_order"] = 4;
             $settings["singleSelect"] = true;
         } else {
             $settings["from"] = "vw_ic_stock_list AS a";
@@ -182,19 +186,13 @@ class StockController extends AppController {
         $this->Set("entities",$entities);
         $this->Set("mstock",$mstock);
         $this->Set("company_name", $company->CompanyName);
-    }
-    
-    public function getitemstock_plain($whId,$itemCode){
-        $ret = 'ER|0';
-        if($itemCode != null || $itemCode != ''){
-            /** @var $stock Stock */
-            $stock = new Stock();
-            $stock = $stock->FindByKodeGudang($this->userAccYear,$whId,$itemCode);
-            if ($stock != null){
-                $ret = "OK|".$stock->ItemId.'|'.$stock->ItemName.'|'.$stock->SuomCode.'|'.$stock->QtyStock;
-            }
+        if ($whId > 0){
+            $whs = new Warehouse($whId);
+            $whname = $whs->WhName;
+        }else{
+            $whname = "MDO + GTO";
         }
-        print $ret;
+        $this->Set("whName",$whname);
     }
 
     public function getitemstock_json($whId = 0,$order="a.item_code"){
@@ -253,7 +251,7 @@ class StockController extends AppController {
         $cabName = null;
         $scabCode = null;
         $gudang = new Warehouse();
-        $gudangs = $gudang->LoadByCabangId($sCabangId);
+        $gudangs = $gudang->LoadByAllowedCabangId($this->userCabIds);
 
         $jenis = new ItemEntity();
         $jenis = $jenis->LoadByCompanyId($this->userCompanyId);
@@ -268,6 +266,13 @@ class StockController extends AppController {
         $this->Set("userReportType",$sReportType);
         $this->Set("userLevel",$this->userLevel);
         $this->Set("gudangId",$sGudangId);
+        if ($sGudangId > 0){
+            $whs = new Warehouse($sGudangId);
+            $whname = $whs->WhName;
+        }else{
+            $whname = "MDO + GTO";
+        }
+        $this->Set("whName",$whname);
     }
 
 

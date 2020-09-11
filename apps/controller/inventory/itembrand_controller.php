@@ -19,14 +19,17 @@ class ItemBrandController extends AppController {
 		$settings["columns"][] = array("name" => "a.id", "display" => "ID", "width" => 0);
 		$settings["columns"][] = array("name" => "b.entity_code", "display" => "Entitas", "width" => 50);
         $settings["columns"][] = array("name" => "a.brand_code", "display" => "Kode", "width" => 50);
-		$settings["columns"][] = array("name" => "a.brand_name", "display" => "Nama Divisi", "width" => 250);
+		$settings["columns"][] = array("name" => "a.brand_name", "display" => "Brand", "width" => 200);
+        $settings["columns"][] = array("name" => "c.sup_name", "display" => "Principal", "width" => 300);
 
 		$settings["filters"][] = array("name" => "a.brand_code", "display" => "Kode");
-		$settings["filters"][] = array("name" => "a.brand_name", "display" => "Nama Divisi");
+		$settings["filters"][] = array("name" => "a.brand_name", "display" => "Brand");
+        $settings["filters"][] = array("name" => "c.sup_name", "display" => "Principal");
+        $settings["filters"][] = array("name" => "b.entity_code", "display" => "Entitas");
 
 		if (!$router->IsAjaxRequest) {
 			$acl = AclManager::GetInstance();
-			$settings["title"] = "Merk Barang";
+			$settings["title"] = "Brand Barang";
 
 			if ($acl->CheckUserAccess("inventory.itembrand", "add")) {
 				$settings["actions"][] = array("Text" => "Add", "Url" => "inventory.itembrand/add", "Class" => "bt_add", "ReqId" => 0);
@@ -47,7 +50,7 @@ class ItemBrandController extends AppController {
 			$settings["singleSelect"] = true;
 
 		} else {
-			$settings["from"] = "m_item_brand AS a Left Join m_item_entity b ON a.entity_id = b.id";
+			$settings["from"] = "m_item_brand AS a Left Join m_item_entity b ON a.entity_id = b.id Left Join m_supplier c ON a.supplier_id = c.id";
             $settings["where"] = "a.is_deleted = 0 And b.company_id = ".$this->userCompanyId;
 		}
 
@@ -62,12 +65,14 @@ class ItemBrandController extends AppController {
 
 	public function add() {
 	    require_once (MODEL . "inventory/itementity.php");
+        require_once (MODEL . "ap/supplier.php");
         $itembrand = new ItemBrand();
         $log = new UserAdmin();
         if (count($this->postData) > 0) {
             $itembrand->EntityId = $this->GetPostValue("EntityId");
             $itembrand->BrandCode = $this->GetPostValue("BrandCode");
             $itembrand->BrandName = $this->GetPostValue("BrandName");
+            $itembrand->SupplierId = $this->GetPostValue("SupplierId");
             if ($this->ValidateData($itembrand)) {
                 $itembrand->CreatebyId = $this->userUid;
                 $rs = $itembrand->Insert();
@@ -85,6 +90,9 @@ class ItemBrandController extends AppController {
         $entities = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("itembrand", $itembrand);
         $this->Set("entities", $entities);
+        $loader = new Supplier();
+        $principals = $loader->LoadPrincipal();
+        $this->Set("principals", $principals);
 	}
 
 	public function edit($id = null) {
@@ -93,6 +101,7 @@ class ItemBrandController extends AppController {
             redirect_url("inventory.itembrand");
         }
         require_once (MODEL . "inventory/itementity.php");
+        require_once (MODEL . "ap/supplier.php");
         $log = new UserAdmin();
         $itembrand = new ItemBrand();
         if (count($this->postData) > 0) {
@@ -100,6 +109,7 @@ class ItemBrandController extends AppController {
             $itembrand->EntityId = $this->GetPostValue("EntityId");
             $itembrand->BrandCode = $this->GetPostValue("BrandCode");
             $itembrand->BrandName = $this->GetPostValue("BrandName");
+            $itembrand->SupplierId = $this->GetPostValue("SupplierId");
             if ($this->ValidateData($itembrand)) {
                 $itembrand->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
                 $rs = $itembrand->Update($id);
@@ -123,6 +133,9 @@ class ItemBrandController extends AppController {
         $entities = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("itembrand", $itembrand);
         $this->Set("entities", $entities);
+        $loader = new Supplier();
+        $principals = $loader->LoadPrincipal();
+        $this->Set("principals", $principals);
 	}
 
 	public function delete($id = null) {

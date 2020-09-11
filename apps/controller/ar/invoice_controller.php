@@ -1290,7 +1290,7 @@ class InvoiceController extends AppController {
         require_once(MODEL . "master/salesman.php");
         require_once(MODEL . "inventory/itementity.php");
         require_once(MODEL . "inventory/itembrand.php");
-        require_once(MODEL . "inventory/itemprincipal.php");
+        require_once(MODEL . "ap/supplier.php");
         require_once(MODEL . "master/salesarea.php");
         // Intelligent time detection...
         //$month = (int)date("n");
@@ -1298,6 +1298,7 @@ class InvoiceController extends AppController {
         $month = $this->trxMonth;
         $year = $this->trxYear;
         $loader = null;
+        $tOtal = 0;
         if (count($this->postData) > 0) {
             // proses rekap disini
             $sCabangId = $this->GetPostValue("CabangId");
@@ -1307,6 +1308,7 @@ class InvoiceController extends AppController {
             $sSalesId = $this->GetPostValue("SalesId");
             $sStatus = $this->GetPostValue("Status");
             $sPaymentStatus = $this->GetPostValue("PaymentStatus");
+            $sPaymentType = $this->GetPostValue("PaymentType");
             $sStartDate = strtotime($this->GetPostValue("StartDate"));
             $sEndDate = strtotime($this->GetPostValue("EndDate"));
             $sJnsLaporan = $this->GetPostValue("JnsLaporan");
@@ -1317,23 +1319,29 @@ class InvoiceController extends AppController {
             $sPropId = $this->GetPostValue("PropId");
             $invoice = new Invoice();
             if ($sJnsLaporan == 1){
-                $reports = $invoice->Load4Reports($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->Load4Reports($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }elseif ($sJnsLaporan == 2) {
-                $reports = $invoice->Load4ReportsDetail($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId, $sSalesId, $sStatus, $sPaymentStatus, $sStartDate, $sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->Load4ReportsDetail($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId, $sSalesId, $sStatus, $sPaymentStatus, $sStartDate, $sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }elseif ($sJnsLaporan == 3) {
-                $reports = $invoice->Load4ReportsRekapItem($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->Load4ReportsRekapItem($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }elseif ($sJnsLaporan == 4){
-                $reports = $invoice->Load4Reports($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->Load4Reports($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }elseif ($sJnsLaporan == 5){
-                $reports = $invoice->Load4ReportsRekapItem1($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->Load4ReportsRekapItem1($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }elseif ($sJnsLaporan == 6){
-                $reports = $invoice->LoadSalesOmsetReports($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
-            }elseif ($sJnsLaporan == 7){
-                $reports = $invoice->LoadOmsetByEntityReports($this->userCompanyId,$sCabangId,$sGudangId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->LoadSalesOmsetReports($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
+                $tOtal = $invoice->LoadSalesOmsetTotal($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }elseif ($sJnsLaporan == 8){
-                $reports = $invoice->LoadOmsetBySalesDetailReports($this->userCompanyId,$sCabangId,$sGudangId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->LoadOmsetByEntityReports($this->userCompanyId,$sCabangId,$sGudangId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
+                $tOtal = $invoice->LoadSalesOmsetTotal($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
+            }elseif ($sJnsLaporan == 7){
+                $reports = $invoice->LoadOmsetBySalesDetailReports($this->userCompanyId,$sCabangId,$sGudangId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }elseif ($sJnsLaporan == 9){
-                $reports = $invoice->LoadOmsetByPrincipleReports($this->userCompanyId,$sCabangId,$sGudangId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds);
+                $reports = $invoice->LoadOmsetByPrincipleReports($this->userCompanyId,$sCabangId,$sGudangId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
+                $tOtal = $invoice->LoadSalesOmsetTotal($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
+            }elseif ($sJnsLaporan == 10){
+                $reports = $invoice->LoadOmsetByBrandReports($this->userCompanyId,$sCabangId,$sGudangId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate, $sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
+                $tOtal = $invoice->LoadSalesOmsetTotal($this->userCompanyId,$sCabangId,$sGudangId,$sContactsId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate,$sEntityId,$sPrincipalId,$sPropId,$sSalesAreaId,$sBrandId,$this->userCabIds,$sPaymentType);
             }
         }else{
             $sCabangId = 0;
@@ -1343,6 +1351,7 @@ class InvoiceController extends AppController {
             $sSalesId = 0;
             $sStatus = -1;
             $sPaymentStatus = -1;
+            $sPaymentType = -1;
             $sOutput = 0;
             $sBrandId = 0;
             $sPrincipalId = 0;
@@ -1388,6 +1397,7 @@ class InvoiceController extends AppController {
         $this->Set("EndDate",$sEndDate);
         $this->Set("Status",$sStatus);
         $this->Set("PaymentStatus",$sPaymentStatus);
+        $this->Set("PaymentType",$sPaymentType);
         $this->Set("Output",$sOutput);
         $this->Set("JnsLaporan",$sJnsLaporan);
         $this->Set("Reports",$reports);
@@ -1404,14 +1414,16 @@ class InvoiceController extends AppController {
         $brands = $loader->LoadByCompanyId($this->userCompanyId,"a.brand_name");
         $this->Set("brandList",$brands);
         //get principal
-        $loader = new ItemPrincipal();
-        $principals = $loader->LoadByCompanyId($this->userCompanyId,"a.principal_name");
+        $loader = new Supplier();
+        $principals = $loader->LoadPrincipal($this->userCompanyId,"a.sup_name");
         $this->Set("principaList",$principals);
         //send to view
         $this->Set("BrandId",$sBrandId);
         $this->Set("PrincipalId",$sPrincipalId);
         $this->Set("SalesAreaId",$sSalesAreaId);
         $this->Set("PropId",$sPropId);
+        //new
+        $this->Set("Totals",$tOtal);
     }
 
     public function approve($token) {

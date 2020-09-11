@@ -18,10 +18,10 @@
             //BatchFocusRegister(elements);
             $("#TrxDate").customDatePicker({ showOn: "focus" });
             // autoNumeric
-            $(".num").autoNumeric({mDec: '0'});
+            $(".num").autoNumeric({mDec: '2'});
             $("#frm").submit(function(e) {
                 $(".num").each(function(idx, ele){
-                    this.value  = $(ele).autoNumericGet({mDec: '0'});
+                    this.value  = $(ele).autoNumericGet({mDec: '2'});
                 });
             });
             // when xTrxTypeId change
@@ -141,7 +141,7 @@
             </tr>
             <tr>
                 <td>Jumlah Uang</td>
-                <td colspan="2"><b>Rp. <input type="text" class="text2" id="TrxAmount" name="TrxAmount" size="20" maxlength="20" value="<?php print($cbtrx->TrxAmount == null ? 0 : $cbtrx->TrxAmount); ?>" style="text-align: right" required/></b></td>
+                <td colspan="2"><b>Rp. <input type="text" class="bold num" id="TrxAmount" name="TrxAmount" size="20" maxlength="20" value="<?php print($cbtrx->TrxAmount == null ? 0 : $cbtrx->TrxAmount); ?>" style="text-align: right" required/></b></td>
             </tr>
 			<tr>
                 <td>&nbsp;</td>

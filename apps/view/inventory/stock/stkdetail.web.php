@@ -54,6 +54,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <td>
                     Gudang:
                     <select name="whId" class="text2" id="whId" required>
+                        <option value="0">GABUNGAN (MDO + GTO)</option>
                         <?php
                         foreach ($gudangs as $cab) {
                             if ($cab->Id == $whId) {
@@ -139,7 +140,11 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     $nmr++;
                     print('<tr>');
                     printf('<td class="center">%d</td>',$nmr);
-                    printf('<td><a href="%s" target="_blank">%s</a></td>',$helper->site_url("inventory.stock/card/".$whId."|".$row["item_id"]),$row["item_code"]);
+                    if ($whId > 0) {
+                        printf('<td><a href="%s" target="_blank">%s</a></td>', $helper->site_url("inventory.stock/card/" . $whId . "|" . $row["item_id"]), $row["item_code"]);
+                    }else{
+                        printf('<td>%s</td>', $row["item_code"]);
+                    }
                     printf('<td>%s</td>',$row["item_name"]);
                     printf('<td>%s</td>',$row["satuan"]);
                     printf('<td class="right">%s</td>',decFormat($row["sAwal"],0));

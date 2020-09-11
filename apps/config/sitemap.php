@@ -63,7 +63,7 @@ $menu = $root->AddNode("INVENTORY", null, "menu");
             $subMenu->AddNode("Divisi Barang", "inventory.itemdivision");
             $subMenu->AddNode("Kategori Barang", "inventory.itemcategory");
             $subMenu->AddNode("Sub-Kategori Barang", "inventory.itemsubcategory");
-            $subMenu->AddNode("Merk Barang", "inventory.itembrand");
+            $subMenu->AddNode("Brand Barang", "inventory.itembrand");
             $subMenu->AddNode("Satuan Barang", "inventory.itemuom");
         $menu->AddNode("Daftar Harga", "inventory.itemprices");
         $menu->AddNode("Data Principal", "inventory.itemprincipal");

@@ -336,4 +336,9 @@ WHERE id = ?bid';
         }
         return $itemCode;
     }
+
+    public function getItemsData(){
+        $this->connector->CommandText = "Select a.item_code,a.item_name,a.old_code,a.brand_name,a.principal_name,a.s_uom_qty From vw_ic_items a Order By a.item_code";
+        return $this->connector->ExecuteQuery();
+    }
 }

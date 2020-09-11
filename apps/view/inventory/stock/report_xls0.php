@@ -16,7 +16,7 @@ $right = array("alignment" => array("horizontal" => PHPExcel_Style_Alignment::HO
 $allBorders = array("borders" => array("allborders" => array("style" => PHPExcel_Style_Border::BORDER_THIN)));
 $idrFormat = array("numberformat" => array("code" => '_([$-421]* #,##0_);_([$-421]* (#,##0);_([$-421]* "-"??_);_(@_)'));
 $row = 1;
-$ket = null;
+$ket = "Gudang : ".$whName;
 $sheet->setCellValue("A$row",$company_name);
 // Hmm Reset Pointer
 $sheet->getStyle("A1");
@@ -27,15 +27,14 @@ $row++;
 $sheet->setCellValue("A$row",$ket);
 $row++;
 $sheet->setCellValue("A$row","No.");
-$sheet->setCellValue("B$row","Gudang");
-$sheet->setCellValue("C$row","Kode");
-$sheet->setCellValue("D$row","Nama Barang");
-$sheet->setCellValue("E$row","Satuan");
-$sheet->setCellValue("F$row","Q");
-$sheet->setCellValue("G$row","L");
-$sheet->setCellValue("H$row","S");
-$sheet->setCellValue("I$row","C");
-$sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($center, $allBorders));
+$sheet->setCellValue("B$row","Kode");
+$sheet->setCellValue("C$row","Nama Barang");
+$sheet->setCellValue("D$row","Satuan");
+$sheet->setCellValue("E$row","Q");
+$sheet->setCellValue("F$row","L");
+$sheet->setCellValue("G$row","S");
+$sheet->setCellValue("H$row","C");
+$sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($center, $allBorders));
 $nmr = 0;
 $str = $row;
 if ($reports != null){
@@ -44,11 +43,10 @@ if ($reports != null){
         $nmr++;
         $sheet->setCellValue("A$row",$nmr);
         $sheet->getStyle("A$row")->applyFromArray($center);
-        $sheet->setCellValueExplicit("B$row",$rpt["wh_code"],PHPExcel_Cell_DataType::TYPE_STRING);
-        $sheet->setCellValueExplicit("C$row",$rpt["item_code"],PHPExcel_Cell_DataType::TYPE_STRING);
-        $sheet->setCellValue("D$row",$rpt["item_name"]);
-        $sheet->setCellValue("E$row",$rpt["s_uom_code"]);
-        $sheet->setCellValue("F$row",$rpt["qty_stock"]);
+        $sheet->setCellValueExplicit("B$row",$rpt["item_code"],PHPExcel_Cell_DataType::TYPE_STRING);
+        $sheet->setCellValue("C$row",$rpt["item_name"]);
+        $sheet->setCellValue("D$row",$rpt["s_uom_code"]);
+        $sheet->setCellValue("E$row",$rpt["qty_stock"]);
         $sld = $rpt["qty_stock"];
         if ($sld >= $rpt["s_uom_qty"] && $rpt["s_uom_qty"] > 0){
             $aqty = array();
@@ -65,11 +63,11 @@ if ($reports != null){
         }else{
             $cqty = 0;
         }
-        $sheet->setCellValue("G$row",$lqty);
-        $sheet->setCellValue("H$row",$sqty);
-        $sheet->setCellValue("I$row",$cqty);
-        $sheet->getStyle("F$row:I$row")->applyFromArray($idrFormat);
-        $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
+        $sheet->setCellValue("F$row",$lqty);
+        $sheet->setCellValue("G$row",$sqty);
+        $sheet->setCellValue("H$row",$cqty);
+        $sheet->getStyle("F$row:H$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($allBorders));
     }
 }
 // Flush to client

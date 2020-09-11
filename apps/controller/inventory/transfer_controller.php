@@ -29,7 +29,7 @@ class TransferController extends AppController {
         $settings["columns"][] = array("name" => "a.fr_wh_code", "display" => "Dari Gudang", "width" => 100);
         $settings["columns"][] = array("name" => "a.to_wh_code", "display" => "Ke Cabang", "width" => 100);
         $settings["columns"][] = array("name" => "a.npb_descs", "display" => "Keterangan", "width" => 300);
-        $settings["columns"][] = array("name" => "if(a.npb_status = 0,'Draft','Posted')", "display" => "Status", "width" => 40);
+        $settings["columns"][] = array("name" => "if(a.npb_status = 0,'Draft',if(a.npb_status = 1,'Posted',if(a.npb_status = 2,'Approved','Void')))", "display" => "Status", "width" => 50);
 
         $settings["filters"][] = array("name" => "a.npb_no", "display" => "No. NPB");
         $settings["filters"][] = array("name" => "a.npb_descs", "display" => "Keterangan");
@@ -61,20 +61,25 @@ class TransferController extends AppController {
                     "Error" => "Maaf anda harus memilih Data Transfer terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data rekonsil","Confirm" => "");
             }
             $settings["actions"][] = array("Text" => "separator", "Url" => null);
-            if ($acl->CheckUserAccess("inventory.transfer", "print")) {
-                $settings["actions"][] = array("Text" => "Print Bukti", "Url" => "inventory.transfer/transfer_print","Class" => "bt_pdf", "ReqId" => 2, "Confirm" => "Cetak Bukti Transfer Stok yang dipilih?");
-            }
-            $settings["actions"][] = array("Text" => "separator", "Url" => null);
             if ($acl->CheckUserAccess("inventory.transfer", "view")) {
                 $settings["actions"][] = array("Text" => "Laporan", "Url" => "inventory.transfer/report", "Class" => "bt_report", "ReqId" => 0);
+            }
+            if ($acl->CheckUserAccess("inventory.transfer", "approve")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Approval", "Url" => "inventory.transfer/approve", "Class" => "bt_approve", "ReqId" => 2,
+                    "Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses approval.\nPERHATIAN: Mohon memilih tepat satu data.",
+                    "Confirm" => "Apakah anda menyetujui data transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                $settings["actions"][] = array("Text" => "Batal Approval", "Url" => "inventory.transfer/unapprove", "Class" => "bt_reject", "ReqId" => 2,
+                    "Error" => "Mohon memilih Data Transaksi terlebih dahulu sebelum proses pembatalan.\nPERHATIAN: Mohon memilih tepat satu data.",
+                    "Confirm" => "Apakah anda mau membatalkan approval data transaksi yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
             }
         } else {
             $settings["from"] = "vw_ic_transfer_master AS a";
             if ($_GET["query"] == "") {
                 $_GET["query"] = null;
-                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.npb_date) = ".$this->trxYear." And month(a.npb_date) = ".$this->trxMonth;
+                $settings["where"] = "a.is_deleted = 0 And year(a.npb_date) = ".$this->trxYear." And month(a.npb_date) = ".$this->trxMonth." And (a.cabang_id = " . $this->userCabangId . " or a.to_cabang_id = ". $this->userCabangId . ")";
             } else {
-                $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId;
+                $settings["where"] = "a.is_deleted = 0 And (a.cabang_id = " . $this->userCabangId . " or a.to_cabang_id = ". $this->userCabangId . ")";
             }
         }
 
@@ -200,11 +205,15 @@ class TransferController extends AppController {
         }else{
             $transfer = $transfer->LoadById($transferId);
             if($transfer == null){
-               $this->persistence->SaveState("error", "Maaf Data Transfer dimaksud tidak ada pada database. Mungkin sudah dihapus!");
+               $this->persistence->SaveState("error", "Maaf, Data Stock Transfer dimaksud tidak ada pada database. Mungkin sudah dihapus!");
                redirect_url("inventory.transfer");
             }
             if($transfer->NpbStatus == 2){
-                $this->persistence->SaveState("error", sprintf("Maaf Data Transfer No. %s sudah berstatus -CLOSED-",$transfer->NpbNo));
+                $this->persistence->SaveState("error", sprintf("Maaf, Data Stock Transfer No. %s sudah berstatus -APPROVED-",$transfer->NpbNo));
+                redirect_url("inventory.transfer");
+            }
+            if($transfer->CabangId != $this->userCabangId){
+                $this->persistence->SaveState("error", sprintf("Data Stock Transfer No. %s tidak boleh diedit oleh user ini!",$transfer->NpbNo));
                 redirect_url("inventory.transfer");
             }
         }
@@ -218,7 +227,7 @@ class TransferController extends AppController {
         $this->Set("transfer", $transfer);
         //load data gudang asal
         $loader = new Warehouse();
-        $whfrom = $loader->LoadByCabangId($this->userCabangId);
+        $whfrom = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("whfrom", $whfrom);
         //load data gudang tujuan
         $loader = new Warehouse();
@@ -233,7 +242,7 @@ class TransferController extends AppController {
         $transfer = new Transfer();
         $transfer = $transfer->LoadById($transferId);
         if($transfer == null){
-            $this->persistence->SaveState("error", "Maaf Data Transfer dimaksud tidak ada pada database. Mungkin sudah dihapus!");
+            $this->persistence->SaveState("error", "Maaf, Data Stock Transfer dimaksud tidak ada pada database. Mungkin sudah dihapus!");
             redirect_url("inventory.transfer");
         }
         // load details
@@ -252,6 +261,8 @@ class TransferController extends AppController {
         $loader = new Warehouse();
         $whdest = $loader->LoadByCompanyId($this->userCompanyId);
         $this->Set("whdest", $whdest);
+        $acl = AclManager::GetInstance();
+        $this->Set("acl", $acl);
 	}
 
     public function delete($transferId) {
@@ -260,13 +271,17 @@ class TransferController extends AppController {
         $transfer = new Transfer();
         $transfer = $transfer->FindById($transferId);
         if($transfer == null){
-            $this->Set("error", "Maaf Data Transfer dimaksud tidak ada pada database. Mungkin sudah dihapus!");
+            $this->Set("error", "Maaf, Data Stock Transfer dimaksud tidak ada pada database. Mungkin sudah dihapus!");
+            redirect_url("inventory.transfer");
+        }
+        if($transfer->CabangId != $this->userCabangId){
+            $this->persistence->SaveState("error", sprintf("Data Stock Transfer No. %s tidak boleh dihapus oleh user ini!",$transfer->NpbNo));
             redirect_url("inventory.transfer");
         }
         // periksa status po
         if($transfer->NpbStatus < 2){
             $transfer->UpdatebyId = AclManager::GetInstance()->GetCurrentUser()->Id;
-            if ($transfer->Delete($transferId) == 1) {
+            if ($transfer->Void($transferId) == 1) {
                 $log = $log->UserActivityWriter($this->userCabangId,'inventory.transfer','Delete Stock Transfer',$transfer->NpbNo,'Success');
                 $this->persistence->SaveState("info", sprintf("Data Transfer No: %s sudah berhasil dihapus", $transfer->NpbNo));
             }else{
@@ -274,14 +289,12 @@ class TransferController extends AppController {
                 $this->persistence->SaveState("error", sprintf("Maaf, Data Transfer No: %s gagal dihapus", $transfer->NpbNo));
             }
         }else{
-            $this->persistence->SaveState("error", sprintf("Maaf, Data Transfer No: %s sudah berstatus -CLOSED-", $transfer->NpbNo));
+            $this->persistence->SaveState("error", sprintf("Maaf, Data Transfer No: %s sudah berstatus -APPROVED-", $transfer->NpbNo));
         }
         redirect_url("inventory.transfer");
     }
 
 	public function add_detail($transferId = null) {
-        require_once(MODEL . "inventory/items.php");
-        require_once(MODEL . "inventory/stock.php");
         $log = new UserAdmin();
         $transfer = new Transfer($transferId);
         $transferdetail = new TransferDetail();
@@ -290,125 +303,14 @@ class TransferController extends AppController {
         if (count($this->postData) > 0) {
             $transferdetail->ItemId = $this->GetPostValue("aItemId");
             $transferdetail->Qty = $this->GetPostValue("aQty");
-            $items = new Items($transferdetail->ItemId);
-            if ($items != null){
-                // insert ke table
-                $flagSuccess = false;
-                $this->connector->BeginTransaction();
-                $rs = $transferdetail->Insert()== 1;
-                if ($rs > 0) {
-                    $transfer->UpdateNpbStatus($transferId);
-                    $stock = new Stock();
-                    $stocks = $stock->LoadStocksFifo($this->trxYear,$transferdetail->ItemId,$items->SuomCode,$transfer->FrWhId);
-                    // Set variable-variable pendukung
-                    $remainingQty = $transferdetail->Qty;
-                    $transferdetail->Hpp = 0;
-                    /** @var $stocks Stock[] */
-                    foreach ($stocks as $stock) {
-                        // Buat object stock keluarnya
-                        $issue = new Stock();
-                        $issue->TrxYear = $this->trxYear;
-                        $issue->CreatedById = $this->userUid;
-                        $issue->StockTypeCode = 102;				// Item Issue dari IS
-                        $issue->ReffId = $transferdetail->Id;
-                        $issue->TrxDate = $transfer->NpbDate;
-                        $issue->WarehouseId = $transfer->FrWhId;	// Gudang asal!
-                        $issue->ItemId = $transferdetail->ItemId;
-                        //$issue->Qty = $stock->QtyBalance;			// Depend on case...
-                        $issue->UomCode = $items->SuomCode;
-                        $issue->Price = $stock->Price;				// Ya pastilah pake angka ini...
-                        $issue->UseStockId = $stock->Id;			// Kasi tau kalau issue ini based on stock id mana
-                        $issue->QtyBalance = null;					// Klo issue harus NULL
-
-                        $stock->UpdatedById = $this->userUid;
-
-                        if ($remainingQty > $stock->QtyBalance) {
-                            // Waduh stock pertama ga cukup... gpp kita coba habiskan dulu...
-                            $issue->Qty = $stock->QtyBalance;			// Berhubung barang yang dikeluarkan tidak cukup ambil dari sisanya
-                            $remainingQty -= $stock->QtyBalance;		// Kita masih perlu...
-                            $stock->QtyBalance = 0;						// Habis...
-                        } else {
-                            // Barang di gudang mencukupi atau PAS
-                            $issue->Qty = $remainingQty;
-                            $stock->QtyBalance -= $remainingQty;
-                            $remainingQty = 0;
-                        }
-                        // Apapun yang terjadi masukkan data issue stock
-                        if ($issue->Insert() > 0) {
-                            $flagSuccess = true;
-                        }else{
-                            $flagSuccess = false;
-                            $errors[] = sprintf("%s -> Item: [%s] %s Message: Stock tidak cukup!", $transfer->NpbNo, $items->ItemCode, $items->ItemName);
-                            break;		// Break loop stocks
-                        }
-                        // Update Qty Balance
-                        if ($stock->Update($stock->Id) > 0) {
-                            $flagSuccess = true;
-                        }else{
-                            $flagSuccess = false;
-                            $errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update data stock ! Message: %s", $transfer->NpbNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                            break;		// Break loop stocks
-                        }
-                        // OK jangan lupa update data cost
-                        $transferdetail->Hpp += $issue->Qty * $issue->Price;
-                        if ($remainingQty <= 0) {
-                            $flagSuccess = true;
-                            // Barang yang di issue sudah mencukupi... (TIDAK ERROR !)
-                            break;
-                        }
-                    }	// End Loop: foreach ($stocks as $stock) {
-
-                    if ($flagSuccess) {
-                        // Kalau tidak ada error isi stock masuknya !
-                        // Buat object stock keluarnya
-                        $instock = new Stock();
-                        $instock->TrxYear = $this->trxYear;
-                        $instock->CreatedById = $this->userUid;
-                        $instock->StockTypeCode = 3;				// Stock masuk transfer
-                        $instock->ReffId = $transferdetail->Id;
-                        $instock->TrxDate = $transfer->NpbDate;
-                        $instock->WarehouseId = $transfer->ToWhId;	// Gudang tujuan !
-                        $instock->ItemId = $transferdetail->ItemId;
-                        $instock->Qty = $transferdetail->Qty;			// Depend on case...
-                        $instock->UomCode = $items->SuomCode;
-                        $instock->Price = round($transferdetail->Hpp/$transferdetail->Qty,2);				// Ya pastilah pake angka ini...
-                        $instock->UseStockId = null;			        // Kasi tau kalau issue ini based on stock id mana
-                        $instock->QtyBalance = $transferdetail->Qty;	/// Klo issue harus NULL
-                        /// // Apapun yang terjadi masukkan data issue stock
-                        if ($instock->Insert() > 0) {
-                            $flagSuccess = true;
-                        }else{
-                            $flagSuccess = false;
-                            $errors[] = sprintf("%s -> Item: [%s] %s Message: Stock tidak cukup!", $transfer->NpbNo, $items->ItemCode, $items->ItemName);
-                        }
-                    }
-                    // Nah sekarang saatnya checking barang cukup atau tidak
-                    if ($remainingQty > 0) {
-                        // WTF... barang tidak cukup !!!
-                        $flagSuccess = false;
-                    }
-                    // Update total cost
-                    /*
-                    if ($flagSuccess) {
-                        $transferdetail->Hpp = $instock->Price;
-                        $rs = $transferdetail->Update($transferdetail->Id);
-                        if ($rs == 0){
-                            $flagSuccess = false;
-                        }
-                    }
-                    */
-                }
-                if ($flagSuccess){
-                    $this->connector->CommitTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId,'inventory.transfer','Add Stock Transfer detail -> Item Code: '.$transferdetail->ItemCode.' = '.$transferdetail->Qty,$transfer->NpbNo,'Success');
-                    echo json_encode(array());
-                }else{
-                    $this->connector->RollbackTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId,'inventory.transfer','Add Stock Transfer detail -> Item Code: '.$transferdetail->ItemCode.' = '.$transferdetail->Qty,$transfer->NpbNo,'Failed');
-                    echo json_encode(array('errorMsg'=>'Some errors occured.'));
-                }
+            $rs = $transferdetail->Insert() == 1;
+            if ($rs > 0) {
+                $transfer->UpdateNpbStatus($transferId);
+                $log = $log->UserActivityWriter($this->userCabangId,'inventory.transfer','Add Stock Transfer detail -> Item Code: '.$transferdetail->ItemCode.' = '.$transferdetail->Qty,$transfer->NpbNo,'Success');
+                echo json_encode(array());
             }else{
-                echo json_encode(array('errorMsg'=>'Data barang tidak ditemukan!'));
+                $log = $log->UserActivityWriter($this->userCabangId,'inventory.transfer','Add Stock Transfer detail -> Item Code: '.$transferdetail->ItemCode.' = '.$transferdetail->Qty,$transfer->NpbNo,'Failed');
+                echo json_encode(array('errorMsg'=>'Some errors occured.'));
             }
         }
 	}
@@ -424,44 +326,12 @@ class TransferController extends AppController {
         }else{
             $npbId = $transferdetail->NpbId;
         }
-        $flagSuccess = true;
-        $this->connector->BeginTransaction();
         if ($transferdetail->Delete($id) == 1) {
             $trxmaster = new Transfer();
             $trxmaster->UpdateNpbStatus($npbId);
-            require_once(MODEL . "inventory/stock.php");
-            $stock = new  Stock();
-            $stock = $stock->FindByTypeReffId($this->trxYear,102,$id);
-            if ($stock == null){
-                $flagSuccess = false;
-            }else {
-                /** @var $stock Stock[]*/
-                foreach ($stock as $dstock){
-                    $cstock = new Stock($dstock->UseStockId);
-                    if ($cstock == null){
-                        $flagSuccess = false;
-                    }else{
-                        $cstock->QtyBalance += $dstock->Qty;
-                        $rs = $cstock->Update($dstock->UseStockId);
-                        if (!$rs){
-                            $flagSuccess = false;
-                        }
-                    }
-                }
-                if ($flagSuccess) {
-                    $stock = new Stock();
-                    $stock->UpdatedById = $this->userUid;
-                    $stock->VoidByTypeReffId($this->trxYear,3, $id);
-                    $stock->VoidByTypeReffId($this->trxYear,102, $id);
-                }
-            }
-        }
-        if ($flagSuccess){
-            $this->connector->CommitTransaction();
             $log = $log->UserActivityWriter($this->userCabangId,'inventory.transfer','Delete Stock Transfer detail -> Item Code: '.$transferdetail->ItemCode.' = '.$transferdetail->Qty,$transferdetail->Id,'Success');
             printf("Data Detail Transfer ID: %d berhasil dihapus!",$id);
         }else{
-            $this->connector->RollbackTransaction();
             $log = $log->UserActivityWriter($this->userCabangId,'inventory.transfer','Delete Stock Transfer detail -> Item Code: '.$transferdetail->ItemCode.' = '.$transferdetail->Qty,$transferdetail->Id,'Failed');
             printf("Maaf, Data Detail Transfer ID: %d gagal dihapus!",$id);
         }
@@ -492,6 +362,8 @@ class TransferController extends AppController {
             redirect_url("inventory.transfer");
             return;
         }
+        require_once(MODEL . "inventory/items.php");
+        require_once(MODEL . "inventory/stock.php");
         $uid = AclManager::GetInstance()->GetCurrentUser()->Id;
         $infos = array();
         $errors = array();
@@ -499,16 +371,214 @@ class TransferController extends AppController {
             $transfer = new Transfer();
             $transfer = $transfer->FindById($id);
             /** @var $transfer Transfer */
-            // process po
-            if($transfer->NpbStatus == 0){
-                $rs = $transfer->Approve($transfer->Id,$uid);
-                if ($rs) {
-                    $infos[] = sprintf("Data Transfer No.: '%s' (%s) telah berhasil di-approve.", $transfer->NpbNo, $transfer->NpbDescs);
+            // process npb
+            if ($transfer->ToCabangId == $this->userCabangId) {
+                if ($transfer->NpbStatus == 1) {
+                    $txdetail = $transfer->LoadDetails();
+                    if ($txdetail == null) {
+                        continue;
+                    }
+                    /** @var $txdetail TransferDetail[] */
+                    $flagSuccess = false;
+                    $this->connector->BeginTransaction();
+                    foreach ($txdetail as $detail) {
+                        $items = new Items($detail->ItemId);
+                        $stock = new Stock();
+                        $stocks = $stock->LoadStocksFifo($this->trxYear, $detail->ItemId, $items->SuomCode, $transfer->FrWhId);
+                        // Set variable-variable pendukung
+                        $remainingQty = $detail->Qty;
+                        $detail->Hpp = 0;
+                        /** @var $stocks Stock[] */
+                        foreach ($stocks as $stock) {
+                            // Buat object stock keluarnya
+                            $issue = new Stock();
+                            $issue->TrxYear = $this->trxYear;
+                            $issue->CreatedById = $this->userUid;
+                            $issue->StockTypeCode = 102;                // Item Issue dari IS
+                            $issue->ReffId = $detail->Id;
+                            $issue->TrxDate = $transfer->NpbDate;
+                            $issue->WarehouseId = $transfer->FrWhId;    // Gudang asal!
+                            $issue->ItemId = $detail->ItemId;
+                            //$issue->Qty = $stock->QtyBalance;			// Depend on case...
+                            $issue->UomCode = $items->SuomCode;
+                            $issue->Price = $stock->Price;                // Ya pastilah pake angka ini...
+                            $issue->UseStockId = $stock->Id;            // Kasi tau kalau issue ini based on stock id mana
+                            $issue->QtyBalance = null;                    // Klo issue harus NULL
+
+                            $stock->UpdatedById = $this->userUid;
+
+                            if ($remainingQty > $stock->QtyBalance) {
+                                // Waduh stock pertama ga cukup... gpp kita coba habiskan dulu...
+                                $issue->Qty = $stock->QtyBalance;            // Berhubung barang yang dikeluarkan tidak cukup ambil dari sisanya
+                                $remainingQty -= $stock->QtyBalance;        // Kita masih perlu...
+                                $stock->QtyBalance = 0;                        // Habis...
+                            } else {
+                                // Barang di gudang mencukupi atau PAS
+                                $issue->Qty = $remainingQty;
+                                $stock->QtyBalance -= $remainingQty;
+                                $remainingQty = 0;
+                            }
+                            // Apapun yang terjadi masukkan data issue stock
+                            if ($issue->Insert() > 0) {
+                                $flagSuccess = true;
+                            } else {
+                                $flagSuccess = false;
+                                $errors[] = sprintf("%s -> Item: [%s] %s Message: Stock tidak cukup!", $transfer->NpbNo, $items->ItemCode, $items->ItemName);
+                                break;        // Break loop stocks
+                            }
+                            // Update Qty Balance
+                            if ($stock->Update($stock->Id) > 0) {
+                                $flagSuccess = true;
+                            } else {
+                                $flagSuccess = false;
+                                $errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update data stock ! Message: %s", $transfer->NpbNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                break;        // Break loop stocks
+                            }
+                            // OK jangan lupa update data cost
+                            $detail->Hpp += $issue->Qty * $issue->Price;
+                            if ($remainingQty <= 0) {
+                                $flagSuccess = true;
+                                // Barang yang di issue sudah mencukupi... (TIDAK ERROR !)
+                                break;
+                            }
+                        }
+
+                        if ($flagSuccess) {
+                            // Kalau tidak ada error isi stock masuknya !
+                            // Buat object stock keluarnya
+                            $instock = new Stock();
+                            $instock->TrxYear = $this->trxYear;
+                            $instock->CreatedById = $this->userUid;
+                            $instock->StockTypeCode = 3;                // Stock masuk transfer
+                            $instock->ReffId = $detail->Id;
+                            $instock->TrxDate = $transfer->NpbDate;
+                            $instock->WarehouseId = $transfer->ToWhId;    // Gudang tujuan !
+                            $instock->ItemId = $detail->ItemId;
+                            $instock->Qty = $detail->Qty;            // Depend on case...
+                            $instock->UomCode = $items->SuomCode;
+                            $instock->Price = round($detail->Hpp / $detail->Qty, 2);                // Ya pastilah pake angka ini...
+                            $instock->UseStockId = null;                    // Kasi tau kalau issue ini based on stock id mana
+                            $instock->QtyBalance = $detail->Qty;    /// Klo issue harus NULL
+                            /// // Apapun yang terjadi masukkan data issue stock
+                            if ($instock->Insert() > 0) {
+                                $flagSuccess = true;
+                            } else {
+                                $flagSuccess = false;
+                                $errors[] = sprintf("%s -> Item: [%s] %s Message: Stock tidak cukup!", $transfer->NpbNo, $items->ItemCode, $items->ItemName);
+                            }
+                        }
+                        // Nah sekarang saatnya checking barang cukup atau tidak
+                        if ($remainingQty > 0) {
+                            // WTF... barang tidak cukup !!!
+                            $flagSuccess = false;
+                        }
+                    }
+                    if ($flagSuccess) {
+                        $transfer->UpdateNpbApproveStatus($id, 2);
+                        $this->connector->CommitTransaction();
+                        $infos[] = sprintf("Data Transfer No.: '%s' (%s) telah berhasil di-approve.", $transfer->NpbNo, $transfer->NpbDescs);
+                    } else {
+                        $this->connector->RollbackTransaction();
+                        $errors[] = sprintf("Maaf, Gagal proses approve Data Transfer: '%s'. Message: %s", $transfer->NpbNo, $this->connector->GetErrorMessage());
+                    }
                 } else {
-                    $errors[] = sprintf("Maaf, Gagal proses approve Data Transfer: '%s'. Message: %s", $transfer->NpbNo, $this->connector->GetErrorMessage());
+                    if ($transfer->NpbStatus == 0) {
+                        $errors[] = sprintf("Data Transfer No.%s masih berstatus -Draft- !", $transfer->NpbNo);
+                    } elseif ($transfer->NpbStatus == 2) {
+                        $errors[] = sprintf("Data Transfer No.%s sudah berstatus -Approved- !", $transfer->NpbNo);
+                    } else {
+                        $errors[] = sprintf("Data Transfer No.%s berstatus -Void- !", $transfer->NpbNo);
+                    }
                 }
             }else{
-                $errors[] = sprintf("Data Transfer No.%s sudah berstatus -Posted- !",$transfer->NpbNo);
+                $errors[] = sprintf("NPB No. %s, User tidak berhak melakukan proses approval!", $transfer->NpbNo);
+            }
+        }
+        if (count($infos) > 0) {
+            $this->persistence->SaveState("info", "<ul><li>" . implode("</li><li>", $infos) . "</li></ul>");
+        }
+        if (count($errors) > 0) {
+            $this->persistence->SaveState("error", "<ul><li>" . implode("</li><li>", $errors) . "</li></ul>");
+        }
+        redirect_url("inventory.transfer");
+    }
+
+    public function unapprove() {
+        $ids = $this->GetGetValue("id", array());
+        if (count($ids) == 0) {
+            $this->persistence->SaveState("error", "Maaf anda belum memilih data yang akan di batalkan !");
+            redirect_url("inventory.transfer");
+            return;
+        }
+        require_once(MODEL . "inventory/stock.php");
+        $uid = AclManager::GetInstance()->GetCurrentUser()->Id;
+        $infos = array();
+        $errors = array();
+        foreach ($ids as $id) {
+            $transfer = new Transfer();
+            $transfer = $transfer->FindById($id);
+            /** @var $transfer Transfer */
+            // process npb
+            if ($transfer->ToCabangId == $this->userCabangId) {
+                if ($transfer->NpbStatus == 2) {
+                    $txdetail = $transfer->LoadDetails();
+                    if ($txdetail == null) {
+                        continue;
+                    }
+                    /** @var $txdetail TransferDetail[] */
+                    $flagSuccess = true;
+                    $erno = 0;
+                    $this->connector->BeginTransaction();
+                    foreach ($txdetail as $detail) {
+                        $did = $detail->Id;
+                        $stock = new Stock();
+                        $stock = $stock->FindByTypeReffId($this->trxYear, 102, $did);
+                        if ($stock == null) {
+                            $erno = 1;
+                            $flagSuccess = false;
+                        } else {
+                            /** @var $stock Stock[] */
+                            foreach ($stock as $dstock) {
+                                $cstock = new Stock($dstock->UseStockId);
+                                if ($cstock == null) {
+                                    $erno = 2;
+                                    $flagSuccess = false;
+                                } else {
+                                    $cstock->QtyBalance += $dstock->Qty;
+                                    $rs = $cstock->Update($dstock->UseStockId);
+                                    if (!$rs) {
+                                        $erno = 3;
+                                        $flagSuccess = false;
+                                    }
+                                }
+                            }
+                            if ($flagSuccess) {
+                                $stock = new Stock();
+                                $stock->UpdatedById = $this->userUid;
+                                $stock->VoidByTypeReffId($this->trxYear, 3, $did);
+                                $stock->VoidByTypeReffId($this->trxYear, 102, $did);
+                            }
+                        }
+                    }
+                    if ($flagSuccess) {
+                        $transfer->UpdateNpbApproveStatus($id, 1);
+                        $this->connector->CommitTransaction();
+                        $infos[] = sprintf("Data Transfer No.: '%s' (%s) telah berhasil di-batalkan.", $transfer->NpbNo, $transfer->NpbDescs);
+                    } else {
+                        $this->connector->RollbackTransaction();
+                        $errors[] = sprintf("[ER-%d] Maaf, Gagal proses unapprove Data Transfer: '%s'. Message: %s", $erno, $transfer->NpbNo, $this->connector->GetErrorMessage());
+                    }
+                } else {
+                    if ($transfer->NpbStatus == 0) {
+                        $errors[] = sprintf("Data Transfer No.%s masih berstatus -Draft- !", $transfer->NpbNo);
+                    } elseif ($transfer->NpbStatus == 1) {
+                        $errors[] = sprintf("Data Transfer No.%s masih berstatus -Posted- !", $transfer->NpbNo);
+                    } else {
+                        $errors[] = sprintf("Data Transfer No.%s berstatus -Void- !", $transfer->NpbNo);
+                    }
+                }
+            }else{
+                $errors[] = sprintf("NPB No. %s, User tidak berhak melakukan proses pembatalan approval!", $transfer->NpbNo);
             }
         }
         if (count($infos) > 0) {

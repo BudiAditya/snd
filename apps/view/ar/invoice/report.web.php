@@ -30,8 +30,22 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
     <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
         <tr class="left">
             <th colspan="6">
-                Sales Area :
-                <select name="SalesAreaId" id="SalesAreaId" style="width: 130px">
+                Cabang :
+                <select name="CabangId" class="text2" id="CabangId" style="width: 100px" required>
+                    <option value="0">-- Semua --</option>
+                    <?php
+                    /** @var $cabangs Cabang[] */
+                    foreach ($cabangs as $cab) {
+                        if ($cab->Id == $CabangId) {
+                            printf('<option value="%d" selected="selected">%s</option>', $cab->Id, $cab->Cabang);
+                        } else {
+                            printf('<option value="%d">%s</option>', $cab->Id, $cab->Cabang);
+                        }
+                    }
+                    ?>
+                </select>
+                Area :
+                <select name="SalesAreaId" id="SalesAreaId" style="width: 100px">
                     <option value="0">-- Semua --</option>
                     <?php
                     /** @var $areaList SalesArea[] **/
@@ -45,7 +59,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     ?>
                 </select>
                 Entitas :
-                <select name="EntityId" id="EntityId">
+                <select name="EntityId" id="EntityId" style="width: 100px">
                     <option value="0">-- Semua --</option>
                     <?php
                     /** @var $entities ItemEntity[] **/
@@ -59,21 +73,21 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     ?>
                 </select>
                 Principal :
-                <select name="PrincipalId" id="PrincipalId" style="width: 200px">
+                <select name="PrincipalId" id="PrincipalId" style="width: 100px">
                     <option value="0">-- Semua --</option>
                     <?php
-                    /** @var $principaList ItemPrincipal[] **/
+                    /** @var $principaList Supplier[] **/
                     foreach ($principaList as $eti){
                         if ($eti->Id == $PrincipalId){
-                            printf('<option value="%d" selected="selected">%s</option>',$eti->Id,$eti->PrincipalName);
+                            printf('<option value="%d" selected="selected">%s</option>',$eti->Id,$eti->SupName);
                         }else {
-                            printf('<option value="%d">%s</option>', $eti->Id, $eti->PrincipalName);
+                            printf('<option value="%d">%s</option>', $eti->Id, $eti->SupName);
                         }
                     }
                     ?>
                 </select>
                 Brand :
-                <select name="BrandId" id="BrandId" style="width: 130px">
+                <select name="BrandId" id="BrandId" style="width: 100px">
                     <option value="0">-- Semua --</option>
                     <?php
                     /** @var $brandList ItemBrand[] **/
@@ -95,39 +109,25 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     <option value="4" <?php print($JnsLaporan == 4 ? 'selected="selected"' : '');?>>4 - Rekap Per Outlet</option>
                     <option value="5" <?php print($JnsLaporan == 5 ? 'selected="selected"' : '');?>>5 - Rekap Per Produk</option>
                     <option value="6" <?php print($JnsLaporan == 6 ? 'selected="selected"' : '');?>>6 - Rekap Omset Salesman</option>
-                    <option value="7" <?php print($JnsLaporan == 7 ? 'selected="selected"' : '');?>>7 - Rekap Omset Per Entitas</option>
-                    <option value="8" <?php print($JnsLaporan == 8 ? 'selected="selected"' : '');?>>8 - Omset Salesman Detail</option>
+                    <option value="7" <?php print($JnsLaporan == 7 ? 'selected="selected"' : '');?>>7 - Omset Salesman Detail</option>
+                    <option value="8" <?php print($JnsLaporan == 8 ? 'selected="selected"' : '');?>>8 - Rekap Omset Per Entitas</option>
                     <option value="9" <?php print($JnsLaporan == 9 ? 'selected="selected"' : '');?>>9 - Rekap Omset Per Principal</option>
+                    <option value="10" <?php print($JnsLaporan == 10 ? 'selected="selected"' : '');?>>10- Rekap Omset Per Brand</option>
                 </select>
             </th>
         </tr>
         <tr class="center">
-            <th>Cabang</th>
             <th>Customer</th>
             <th>Salesman</th>
             <th>Status Invoice</th>
             <th>Status Lunas</th>
+            <th>Cara Bayar</th>
             <th>Dari Tanggal</th>
             <th>Sampai Tanggal</th>
             <th>Output</th>
             <th>Action</th>
         </tr>
         <tr>
-            <td>
-                <select name="CabangId" class="text2" id="CabangId" style="width: 100px" required>
-                <option value="0">- Semua Cabang -</option>
-                <?php
-                /** @var $cabangs Cabang[] */
-                foreach ($cabangs as $cab) {
-                    if ($cab->Id == $CabangId) {
-                        printf('<option value="%d" selected="selected">%s</option>', $cab->Id, $cab->Cabang);
-                    } else {
-                        printf('<option value="%d">%s</option>', $cab->Id, $cab->Cabang);
-                    }
-                }
-                ?>
-                </select>
-            </td>
             <td>
                 <select id="ContactsId" name="ContactsId" style="width: 150px" required>
                     <option value="0">- Semua Customer -</option>
@@ -158,7 +158,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             </td>
             <td>
                 <select id="Status" name="Status" required>
-                    <option value="-1" <?php print($Status == -1 ? 'selected="selected"' : '');?>> - Semua Status -</option>
+                    <option value="-1" <?php print($Status == -1 ? 'selected="selected"' : '');?>> - Semua -</option>
                     <option value="0" <?php print($Status == 0 ? 'selected="selected"' : '');?>>0 - Draft</option>
                     <option value="1" <?php print($Status == 1 ? 'selected="selected"' : '');?>>1 - Posted</option>
                     <option value="2" <?php print($Status == 2 ? 'selected="selected"' : '');?>>2 - Approved</option>
@@ -167,9 +167,16 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             </td>
             <td>
                 <select id="PaymentStatus" name="PaymentStatus" required>
-                    <option value="-1" <?php print($PaymentStatus == -1 ? 'selected="selected"' : '');?>> - Semua Status -</option>
+                    <option value="-1" <?php print($PaymentStatus == -1 ? 'selected="selected"' : '');?>> - Semua -</option>
                     <option value="0" <?php print($PaymentStatus == 0 ? 'selected="selected"' : '');?>>0 - Belum Lunas</option>
                     <option value="1" <?php print($PaymentStatus == 1 ? 'selected="selected"' : '');?>>1 - Lunas</option>
+                </select>
+            </td>
+            <td>
+                <select id="PaymentType" name="PaymentType" required>
+                    <option value="-1" <?php print($PaymentType == -1 ? 'selected="selected"' : '');?>> - Semua -</option>
+                    <option value="0" <?php print($PaymentType == 0 ? 'selected="selected"' : '');?>>0 - Cash</option>
+                    <option value="1" <?php print($PaymentType == 1 ? 'selected="selected"' : '');?>>1 - Kredit</option>
                 </select>
             </td>
             <td><input type="text" class="text2" maxlength="10" size="10" id="StartDate" name="StartDate" value="<?php printf(date('d-m-Y',$StartDate));?>"/></td>
@@ -253,36 +260,46 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     printf("<td nowrap='nowrap'>%s</td>", $row["area_code"]);
                     printf("<td nowrap='nowrap'>%s</td>", $row["sales_name"]);
                     if ($JnsLaporan == 1){
-                        printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["due_date"])));
-                        printf("<td align='right'>%s</td>", number_format($row["base_amount"] - $row["disc_amount"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["ppn_amount"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["total_amount"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["return_amount"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["paid_amount"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["balance_amount"], 0));
-                        print("</tr>");
-                        $tDpp+= $row["base_amount"] - $row["disc_amount"];
-                        $tPpn+= $row["ppn_amount"];
-                        $tOtal+= $row["total_amount"];
-                        $tReturn+= $row["return_amount"];
-                        $tTerbayar+= $row["paid_amount"];
-                        $tSisa+= $row["balance_amount"];
+                        if ($row["invoice_status"] < 3) {
+                            printf("<td nowrap='nowrap'>%s</td>",$row["payment_type"] == 1 ? date('d-m-Y', strtotime($row["due_date"])) : "CASH");
+                            printf("<td align='right'>%s</td>", number_format($row["base_amount"] - $row["disc_amount"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["ppn_amount"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["total_amount"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["return_amount"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["paid_amount"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["balance_amount"], 0));
+                            print("</tr>");
+                            $tDpp += $row["base_amount"] - $row["disc_amount"];
+                            $tPpn += $row["ppn_amount"];
+                            $tOtal += $row["total_amount"];
+                            $tReturn += $row["return_amount"];
+                            $tTerbayar += $row["paid_amount"];
+                            $tSisa += $row["balance_amount"];
+                        }else{
+                            print("<td colspan='7' align='center'><b>* V O I D *</b></td>");
+                            print("</tr>");
+                        }
                     }elseif ($JnsLaporan == 2){
                         printf("<td nowrap='nowrap'>%s</td>", $row['brand_name']);
                         printf("<td nowrap='nowrap'>%s</td>", $row['item_code']);
                         printf("<td nowrap='nowrap'>%s</td>", $row['item_name']);
-                        printf("<td align='right'>%s</td>", number_format($row['sales_qty'], 0));
-                        printf("<td align='right' >%s</td>", number_format($row['price'], 0));
-                        printf("<td align='right'>%s</td>", number_format($row['sub_total'], 0));
-                        printf("<td align='right'>%s</td>", number_format($row['disc_amount'], 0));
-                        printf("<td align='right'>%s</td>", number_format($row['sub_total']-$row['disc_amount'],0));
-                        printf("<td align='right'>%s</td>", number_format($row['ppn_amount'], 0));
-                        printf("<td align='right'>%s</td>", number_format(($row['sub_total']-$row['disc_amount']) + $row['ppn_amount'], 0));
-                        print("</tr>");
-                        $subTotal+= $row['sub_total'];
-                        $tDsc+= $row['disc_amount'];
-                        $tDpp+= $row['sub_total']-$row['disc_amount'];
-                        $tPpn+= $row['ppn_amount'];
+                        if ($row["invoice_status"] < 3) {
+                            printf("<td align='right'>%s</td>", number_format($row['sales_qty'], 0));
+                            printf("<td align='right' >%s</td>", number_format($row['price'], 0));
+                            printf("<td align='right'>%s</td>", number_format($row['sub_total'], 0));
+                            printf("<td align='right'>%s</td>", number_format($row['disc_amount'], 0));
+                            printf("<td align='right'>%s</td>", number_format($row['sub_total'] - $row['disc_amount'], 0));
+                            printf("<td align='right'>%s</td>", number_format($row['ppn_amount'], 0));
+                            printf("<td align='right'>%s</td>", number_format(($row['sub_total'] - $row['disc_amount']) + $row['ppn_amount'], 0));
+                            print("</tr>");
+                            $subTotal += $row['sub_total'];
+                            $tDsc += $row['disc_amount'];
+                            $tDpp += $row['sub_total'] - $row['disc_amount'];
+                            $tPpn += $row['ppn_amount'];
+                        }else{
+                            print("<td colspan='7' align='center'><b>* V O I D *</b></td>");
+                            print("</tr>");
+                        }
                     }
                     $ivn = $row["invoice_no"];
                 }
@@ -414,15 +431,20 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf("<td nowrap='nowrap'>%s</td>", $row["customer_name"]);
                 printf("<td nowrap='nowrap'>%s</td>", $row["customer_address"]);
                 printf("<td nowrap='nowrap'>%s</td>", $row["sales_name"]);
-                printf("<td align='right'>%s</td>", number_format($row["sum_qty"], 0));
-                printf("<td align='right'>%s</td>", number_format($row["total_amount"], 0));
-                print("</tr>");
-                $tDpp+= $row["base_amount"];
-                $tPpn+= $row["ppn_amount"];
-                $tOtal+= $row["total_amount"];
-                $tTerbayar+= $row["paid_amount"];
-                $tSisa+= $row["balance_amount"];
-                $tQty+= $row["sum_qty"];
+                if ($row["invoice_status"] < 3) {
+                    printf("<td align='right'>%s</td>", number_format($row["sum_qty"], 0));
+                    printf("<td align='right'>%s</td>", number_format($row["total_amount"], 0));
+                    print("</tr>");
+                    $tDpp += $row["base_amount"];
+                    $tPpn += $row["ppn_amount"];
+                    $tOtal += $row["total_amount"];
+                    $tTerbayar += $row["paid_amount"];
+                    $tSisa += $row["balance_amount"];
+                    $tQty += $row["sum_qty"];
+                }else{
+                    print("<td colspan='2' align='center'><b>* V O I D *</b></td>");
+                    print("</tr>");
+                }
                 $nmr++;
             }
             print("<tr class='bold'>");
@@ -445,6 +467,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <th>S</th>
                 <th>Q</th>
                 <th>C</th>
+                <th>Nilai</th>
             </tr>
             <?php
             $lqty = 0;
@@ -455,6 +478,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             $tlqty = 0;
             $tsqty = 0;
             $tcqty = 0;
+            $tOtal = 0;
             $nmr = 0;
             while ($row = $Reports->FetchAssoc()) {
                 $nmr++;
@@ -484,17 +508,19 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     $cqty = 0;
                     print("<td>&nbsp;</td>");
                 }
-
+                printf("<td align='right'>%s</td>",number_format($row["sum_dpp"] + $row["sum_ppn"],0));
                 print("</tr>");
                 $tlqty+= $lqty;
                 $tsqty+= $sqty;
                 $tcqty+= $cqty;
                 $tqqty+= $qqty;
+                $tOtal+= $row["sum_dpp"] + $row["sum_ppn"];
             }
             print("<tr class='bold'>");
             print("<td colspan='6' align='right'>Total.....</td>");
             printf("<td align='right'>%s</td>",number_format($tqqty,0));
             printf("<td align='right'>%s</td>",number_format($tcqty,2));
+            printf("<td align='right'>%s</td>",number_format($tOtal,2));
             print("</tr>");
             ?>
         </table>
@@ -511,6 +537,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <th>RETUR</th>
                 <th>TERBAYAR</th>
                 <th>OUTSTANDING</th>
+                <th>KON (%)</th>
             </tr>
             <?php
             $nmr = 0;
@@ -518,6 +545,9 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             $sppn = 0;
             $sram = 0;
             $spam = 0;
+            $tOtal= $Totals;
+            $tKon = 0;
+            //hitung total dulu
             while ($row = $Reports->FetchAssoc()) {
                 $nmr++;
                 print("<tr valign='Top'>");
@@ -529,11 +559,14 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf("<td align='right'>%s</td>",number_format($row['return_amount'],0));
                 printf("<td align='right'>%s</td>",number_format($row['paid_amount'],0));
                 printf("<td align='right'>%s</td>",number_format(($row['sum_dpp']+$row['sum_ppn']) - ($row['paid_amount']+$row['return_amount']),0));
+                $kon = round((($row['sum_dpp']+$row['sum_ppn'])/$tOtal) * 100,2);
+                printf("<td align='right'>%s</td>",number_format($kon,2));
                 print("</tr>");
                 $sdpp+= $row['sum_dpp'];
                 $sppn+= $row['sum_ppn'];
                 $sram+= $row['return_amount'];
                 $spam+= $row['paid_amount'];
+                $tKon+= $kon;
             }
             print("<tr class='bold'>");
             print("<td colspan='2' align='right'>T O T A L .....</td>");
@@ -543,10 +576,11 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             printf("<td align='right'>%s</td>",number_format($sram,0));
             printf("<td align='right'>%s</td>",number_format($spam,0));
             printf("<td align='right'>%s</td>",number_format(($sdpp+$sppn)-($sram+$spam),0));
+            printf("<td align='right'>%s</td>",number_format($tKon,2));
             print("</tr>");
             ?>
         </table>
-    <?php }elseif ($JnsLaporan == 7){ ?>
+    <?php }elseif ($JnsLaporan == 8){ ?>
         <h3>REKAPITULASI OMSET PENJUALAN PER ENTITAS - <?php print($userCabName);?></h3>
         <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
         <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
@@ -559,6 +593,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <th>DPP</th>
                 <th>PPN</th>
                 <th>TOTAL</th>
+                <th>KON (%)</th>
             </tr>
             <?php
             $nmr = 0;
@@ -566,6 +601,8 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             $sppn = 0;
             $sqty = 0;
             $sltr = 0;
+            $tOtal= $Totals;
+            $tKon = 0;
             while ($row = $Reports->FetchAssoc()) {
                 $nmr++;
                 print("<tr valign='Top'>");
@@ -582,6 +619,9 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_ppn'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp']+$row['sum_ppn'],0));
+                $kon = round((($row['sum_dpp']+$row['sum_ppn'])/$tOtal) * 100,2);
+                printf("<td align='right'>%s</td>",number_format($kon,2));
+                $tKon+= $kon;
                 print("</tr>");
                 $sdpp+= $row['sum_dpp'];
                 $sppn+= $row['sum_ppn'];
@@ -594,10 +634,11 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             printf("<td align='right'>%s</td>",number_format($sdpp,0));
             printf("<td align='right'>%s</td>",number_format($sppn,0));
             printf("<td align='right'>%s</td>",number_format($sdpp+$sppn,0));
+            printf("<td align='right'>%s</td>",number_format($tKon,2));
             print("</tr>");
             ?>
         </table>
-    <?php }elseif ($JnsLaporan == 8){ ?>
+    <?php }elseif ($JnsLaporan == 7){ ?>
         <h3>REKAPITULASI OMSET PENJUALAN PER SALES DETAIL - <?php print($userCabName);?></h3>
         <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
         <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
@@ -667,6 +708,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 <th>DPP</th>
                 <th>PPN</th>
                 <th>TOTAL</th>
+                <th>KON (%)</th>
             </tr>
             <?php
             $nmr = 0;
@@ -674,6 +716,8 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             $sppn = 0;
             $sqty = 0;
             $sltr = 0;
+            $tOtal= $Totals;
+            $tKon = 0;
             while ($row = $Reports->FetchAssoc()) {
                 $nmr++;
                 print("<tr valign='Top'>");
@@ -681,7 +725,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf("<td>%s</td>",$row['principal_code']);
                 printf("<td>%s</td>",$row['principal_name']);
                 printf("<td align='right'>%s</td>",number_format($row['sum_qty'],0));
-                if ($row["principal_code"] == '001') {
+                if ($row["principal_code"] == 'CAS1') {
                     printf("<td align='right'>%s</td>", number_format($row['sum_liter'], 2));
                     $sltr+= $row['sum_liter'];
                 }else{
@@ -690,6 +734,9 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_ppn'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp']+$row['sum_ppn'],0));
+                $kon = round((($row['sum_dpp']+$row['sum_ppn'])/$tOtal) * 100,2);
+                printf("<td align='right'>%s</td>",number_format($kon,2));
+                $tKon+= $kon;
                 print("</tr>");
                 $sdpp+= $row['sum_dpp'];
                 $sppn+= $row['sum_ppn'];
@@ -702,6 +749,65 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             printf("<td align='right'>%s</td>",number_format($sdpp,0));
             printf("<td align='right'>%s</td>",number_format($sppn,0));
             printf("<td align='right'>%s</td>",number_format($sdpp+$sppn,0));
+            printf("<td align='right'>%s</td>",number_format($tKon,2));
+            print("</tr>");
+            ?>
+        </table>
+    <?php }elseif ($JnsLaporan == 10){ ?>
+        <h3>REKAPITULASI OMSET PENJUALAN PER BRAND - <?php print($userCabName);?></h3>
+        <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
+        <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
+            <tr>
+                <th>No.</th>
+                <th>KODE</th>
+                <th>BRAND</th>
+                <th>QTY</th>
+                <th>LITER</th>
+                <th>DPP</th>
+                <th>PPN</th>
+                <th>TOTAL</th>
+                <th>KON (%)</th>
+            </tr>
+            <?php
+            $nmr = 0;
+            $sdpp = 0;
+            $sppn = 0;
+            $sqty = 0;
+            $sltr = 0;
+            $tOtal= $Totals;
+            $tKon = 0;
+            while ($row = $Reports->FetchAssoc()) {
+                $nmr++;
+                print("<tr valign='Top'>");
+                printf("<td>%s</td>", $nmr);
+                printf("<td>%s</td>",$row['brand_code']);
+                printf("<td>%s</td>",$row['brand_name']);
+                printf("<td align='right'>%s</td>",number_format($row['sum_qty'],0));
+                if ($row["brand_code"] == '001') {
+                    printf("<td align='right'>%s</td>", number_format($row['sum_liter'], 2));
+                    $sltr+= $row['sum_liter'];
+                }else{
+                    print("<td>&nbsp;</td>");
+                }
+                printf("<td align='right'>%s</td>",number_format($row['sum_dpp'],0));
+                printf("<td align='right'>%s</td>",number_format($row['sum_ppn'],0));
+                printf("<td align='right'>%s</td>",number_format($row['sum_dpp']+$row['sum_ppn'],0));
+                $kon = round((($row['sum_dpp']+$row['sum_ppn'])/$tOtal) * 100,2);
+                printf("<td align='right'>%s</td>",number_format($kon,2));
+                $tKon+= $kon;
+                print("</tr>");
+                $sdpp+= $row['sum_dpp'];
+                $sppn+= $row['sum_ppn'];
+                $sqty+= $row['sum_qty'];
+            }
+            print("<tr class='bold'>");
+            print("<td colspan='3' align='right'>T O T A L .....</td>");
+            printf("<td align='right'>%s</td>",number_format($sqty,0));
+            printf("<td align='right'>%s</td>",number_format($sltr,2));
+            printf("<td align='right'>%s</td>",number_format($sdpp,0));
+            printf("<td align='right'>%s</td>",number_format($sppn,0));
+            printf("<td align='right'>%s</td>",number_format($sdpp+$sppn,0));
+            printf("<td align='right'>%s</td>",number_format($tKon,2));
             print("</tr>");
             ?>
         </table>

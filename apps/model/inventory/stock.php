@@ -577,7 +577,13 @@ WHERE id = ?id";
         $rs = $this->connector->ExecuteNonQuery();
         // get saldo awal
         $sqx = "Insert Into `tmp_prev` (item_id,awal) Select a.item_id,sum(a.op_qty) From t_ic_saldoawal as a";
-        $sqx.= " Where year(a.op_date) = ?year And a.op_date <= ?startDate and a.warehouse_id = ?whId Group By a.item_id";
+        $sqx.= " Where year(a.op_date) = ?year And a.op_date <= ?startDate";
+        if ($whId > 0){
+           $sqx.= " and a.warehouse_id = ?whId";
+        }else{
+           $sqx.= " and (a.warehouse_id = 1 Or a.warehouse_id = 2)";
+        }
+        $sqx.= " Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -587,7 +593,13 @@ WHERE id = ?id";
         // get pembelian lalu
         $sqx = "Insert Into `tmp_prev` (item_id,beli) Select a.item_id,sum(a.purchase_qty) From t_ap_purchase_detail as a";
         $sqx.= " Join t_ap_purchase_master as b On a.grn_id = b.id";
-        $sqx.= " Where Year(b.grn_date) = ?year And b.grn_status <> 3 And b.grn_date < ?startDate and b.gudang_id = ?whId Group By a.item_id";
+        $sqx.= " Where Year(b.grn_date) = ?year And b.grn_status <> 3 And b.grn_date < ?startDate";
+        if ($whId > 0) {
+            $sqx .= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -597,7 +609,13 @@ WHERE id = ?id";
         // get transfer masuk lalu
         $sqx = "Insert Into `tmp_prev` (item_id,xin) Select a.item_id,sum(a.qty) From t_ic_transfer_detail as a";
         $sqx.= " Join t_ic_transfer_master as b On a.npb_id = b.id";
-        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_status <> 3 and b.npb_date < ?startDate and b.to_wh_id = ?whId Group By a.item_id";
+        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_status <> 3 and b.npb_date < ?startDate";
+        if ($whId > 0){
+            $sqx.= " and b.to_wh_id = ?whId";
+        }else{
+            $sqx.= " and (b.to_wh_id = 1 Or b.to_wh_id = 2)";
+        }
+        $sqx.= " Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -607,7 +625,13 @@ WHERE id = ?id";
         // get return ex penjualan lalu
         $sqx = "Insert Into `tmp_prev` (item_id,rjual) Select a.item_id,sum(a.qty_retur) From t_ar_return_detail as a";
         $sqx.= " Join t_ar_return_master as b On a.rj_id = b.id";
-        $sqx.= " Where Year(b.rj_date) = ?year And b.rj_status <> 3 and b.rj_date < ?startDate and b.gudang_id = ?whId And b.is_deleted = 0 Group By a.item_id";
+        $sqx.= " Where Year(b.rj_date) = ?year And b.rj_status <> 3 and b.rj_date < ?startDate";
+        if ($whId > 0){
+            $sqx.= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " And b.is_deleted = 0 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -617,7 +641,13 @@ WHERE id = ?id";
         // get penjualan lalu
         $sqx = "Insert Into `tmp_prev` (item_id,jual) Select a.item_id,sum(a.sales_qty) From t_ar_invoice_detail as a";
         $sqx.= " Join t_ar_invoice_master as b On a.invoice_id = b.id";
-        $sqx.= " Where Year(b.invoice_date) = ?year And b.invoice_date < ?startDate and b.gudang_id = ?whId And b.is_deleted = 0 and b.invoice_status <>3 Group By a.item_id";
+        $sqx.= " Where Year(b.invoice_date) = ?year And b.invoice_date < ?startDate";
+        if ($whId > 0){
+            $sqx.= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " And b.is_deleted = 0 and b.invoice_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -627,7 +657,13 @@ WHERE id = ?id";
         // get transfer keluar lalu
         $sqx = "Insert Into `tmp_prev` (item_id,xout) Select a.item_id,sum(a.qty) From t_ic_transfer_detail as a";
         $sqx.= " Join t_ic_transfer_master as b On a.npb_id = b.id";
-        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_date < ?startDate and b.fr_wh_id = ?whId and b.npb_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_date < ?startDate";
+        if ($whId > 0){
+            $sqx.= " and b.fr_wh_id = ?whId";
+        }else{
+            $sqx.= " and (b.fr_wh_id = 1 Or b.fr_wh_id = 2)";
+        }
+        $sqx.= " and b.npb_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -637,7 +673,13 @@ WHERE id = ?id";
         // get return ex pembelian lalu
         $sqx = "Insert Into `tmp_prev` (item_id,rbeli) Select a.item_id,sum(a.qty_retur) From t_ap_return_detail as a";
         $sqx.= " Join t_ap_return_master as b On a.rb_id = b.id";
-        $sqx.= " Where Year(b.rb_date) = ?year And b.rb_date < ?startDate and b.gudang_id = ?whId And b.is_deleted = 0 and b.rb_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.rb_date) = ?year And b.rb_date < ?startDate";
+        if ($whId > 0){
+            $sqx.= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " And b.is_deleted = 0 and b.rb_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -647,7 +689,13 @@ WHERE id = ?id";
         // get issue lalu
         $sqx = "Insert Into `tmp_prev` (item_id,issue)";
         $sqx.= " Select a.item_id,sum(a.qty) From t_ic_issue as a";
-        $sqx.= " Where Year(a.issue_date) = ?year And a.issue_date < ?startDate and a.warehouse_id = ?whId and a.is_status = 1 Group By a.item_id";
+        $sqx.= " Where Year(a.issue_date) = ?year And a.issue_date < ?startDate";
+        if ($whId > 0){
+            $sqx.= " and a.warehouse_id = ?whId";
+        }else{
+            $sqx.= " and (a.warehouse_id = 1 Or a.warehouse_id = 2)";
+        }
+        $sqx.= " and a.is_status = 1 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -657,7 +705,13 @@ WHERE id = ?id";
         // get koreksi lalu
         $sqx = "Insert Into `tmp_prev` (item_id,koreksi)";
         $sqx.= " Select a.item_id,sum(a.corr_qty) From t_ic_stock_correction as a";
-        $sqx.= " Where Year(a.corr_date) = ?year And a.corr_date < ?startDate and a.warehouse_id = ?whId and a.corr_status = 1 Group By a.item_id";
+        $sqx.= " Where Year(a.corr_date) = ?year And a.corr_date < ?startDate";
+        if ($whId > 0){
+            $sqx.= " and a.warehouse_id = ?whId";
+        }else{
+            $sqx.= " and (a.warehouse_id = 1 Or a.warehouse_id = 2)";
+        }
+        $sqx.= " and a.corr_status = 1 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?year", $trxYear);
@@ -672,7 +726,13 @@ WHERE id = ?id";
         // get pembelian
         $sqx = "Insert Into `tmp_mutasi` (item_id,beli) Select a.item_id,sum(a.purchase_qty) From t_ap_purchase_detail as a";
         $sqx.= " Join t_ap_purchase_master as b On a.grn_id = b.id";
-        $sqx.= " Where Year(b.grn_date) = ?year And b.grn_date BETWEEN ?startDate and ?endDate and b.gudang_id = ?whId and b.grn_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.grn_date) = ?year And b.grn_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " and b.grn_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -683,7 +743,13 @@ WHERE id = ?id";
         // get transfer masuk
         $sqx = "Insert Into `tmp_mutasi` (item_id,xin) Select a.item_id,sum(a.qty) From t_ic_transfer_detail as a";
         $sqx.= " Join t_ic_transfer_master as b On a.npb_id = b.id";
-        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_date BETWEEN ?startDate and ?endDate and b.to_wh_id = ?whId and b.npb_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and b.to_wh_id = ?whId";
+        }else{
+            $sqx.= " and (b.to_wh_id = 1 Or b.to_wh_id = 2)";
+        }
+        $sqx.= " and b.npb_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -694,7 +760,13 @@ WHERE id = ?id";
         // get return ex penjualan
         $sqx = "Insert Into `tmp_mutasi` (item_id,rjual) Select a.item_id,sum(a.qty_retur) From t_ar_return_detail as a";
         $sqx.= " Join t_ar_return_master as b On a.rj_id = b.id";
-        $sqx.= " Where Year(b.rj_date) = ?year And b.rj_date BETWEEN ?startDate and ?endDate and b.gudang_id = ?whId And b.is_deleted = 0 And b.rj_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.rj_date) = ?year And b.rj_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " And b.is_deleted = 0 And b.rj_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -705,7 +777,13 @@ WHERE id = ?id";
         // get penjualan
         $sqx = "Insert Into `tmp_mutasi` (item_id,jual) Select a.item_id,sum(a.sales_qty) From t_ar_invoice_detail as a";
         $sqx.= " Join t_ar_invoice_master as b On a.invoice_id = b.id";
-        $sqx.= " Where Year(b.invoice_date) = ?year And b.invoice_date BETWEEN ?startDate and ?endDate and b.gudang_id = ?whId And b.is_deleted = 0 And b.invoice_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.invoice_date) = ?year And b.invoice_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " And b.is_deleted = 0 And b.invoice_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -716,7 +794,13 @@ WHERE id = ?id";
         // get transfer keluar
         $sqx = "Insert Into `tmp_mutasi` (item_id,xout) Select a.item_id,sum(a.qty) From t_ic_transfer_detail as a";
         $sqx.= " Join t_ic_transfer_master as b On a.npb_id = b.id";
-        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_date BETWEEN ?startDate and ?endDate and b.fr_wh_id = ?whId and b.npb_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.npb_date) = ?year And b.npb_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and b.fr_wh_id = ?whId";
+        }else{
+            $sqx.= " and (b.fr_wh_id = 1 Or b.fr_wh_id = 2)";
+        }
+        $sqx.= " and b.npb_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -727,7 +811,13 @@ WHERE id = ?id";
         // get return ex pembelian
         $sqx = "Insert Into `tmp_mutasi` (item_id,rbeli) Select a.item_id,sum(a.qty_retur) From t_ap_return_detail as a";
         $sqx.= " Join t_ap_return_master as b On a.rb_id = b.id";
-        $sqx.= " Where Year(b.rb_date) = ?year And b.rb_date BETWEEN ?startDate and ?endDate and b.gudang_id = ?whId And b.is_deleted = 0 And b.rb_status <> 3 Group By a.item_id";
+        $sqx.= " Where Year(b.rb_date) = ?year And b.rb_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and b.gudang_id = ?whId";
+        }else{
+            $sqx.= " and (b.gudang_id = 1 Or b.gudang_id = 2)";
+        }
+        $sqx.= " And b.is_deleted = 0 And b.rb_status <> 3 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -738,7 +828,13 @@ WHERE id = ?id";
         // get issue
         $sqx = "Insert Into `tmp_mutasi` (item_id,issue)";
         $sqx.= " Select a.item_id,sum(a.qty) From t_ic_issue as a";
-        $sqx.= " Where Year(a.issue_date) = ?year And a.issue_date BETWEEN ?startDate and ?endDate and a.warehouse_id = ?whId and a.is_status = 1 Group By a.item_id";
+        $sqx.= " Where Year(a.issue_date) = ?year And a.issue_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and a.warehouse_id = ?whId";
+        }else{
+            $sqx.= " and (a.warehouse_id = 1 Or a.warehouse_id = 2)";
+        }
+        $sqx.= " and a.is_status = 1 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -749,7 +845,13 @@ WHERE id = ?id";
         // get koreksi
         $sqx = "Insert Into `tmp_mutasi` (item_id,koreksi)";
         $sqx.= " Select a.item_id,sum(a.corr_qty) From t_ic_stock_correction as a";
-        $sqx.= " Where Year(a.corr_date) = ?year And a.corr_date BETWEEN ?startDate and ?endDate and a.warehouse_id = ?whId and a.corr_status = 1 Group By a.item_id";
+        $sqx.= " Where Year(a.corr_date) = ?year And a.corr_date BETWEEN ?startDate and ?endDate";
+        if ($whId > 0){
+            $sqx.= " and a.warehouse_id = ?whId";
+        }else{
+            $sqx.= " and (a.warehouse_id = 1 Or a.warehouse_id = 2)";
+        }
+        $sqx.= " and a.corr_status = 1 Group By a.item_id";
         $this->connector->CommandText = $sqx;
         $this->connector->AddParameter("?startDate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?endDate", date('Y-m-d', $endDate));
@@ -787,17 +889,16 @@ WHERE id = ?id";
     }
 
     public function Load4Reports($cabangId = 0, $whId = 0, $entityId = 0){
-        $sql = "Select a.* From vw_ic_stock_list as a Where a.item_id > 0";
-        if ($cabangId > 0){
-            $sql.= " And a.cabang_id = ".$cabangId;
-        }
+        $sql = "Select a.entity_id,a.item_id,a.item_code,a.item_name,a.s_uom_code,a.s_uom_qty,a.qty_convert,sum(a.qty_stock) as qty_stock From vw_ic_stock_list as a Where a.item_id > 0";
         if ($whId > 0){
-            $sql.= " And a.warehouse_id = ".$whId;
+            $sql.= " And a.warehouse_id = $whId";
+        }else{
+            $sql.= " And (a.warehouse_id = 1 Or a.warehouse_id = 2)";
         }
         if ($entityId != "-"){
             $sql.= " And a.entity_id = '".$entityId."'";
         }
-        $sql.= " Order By a.wh_code,a.item_code,a.item_name,a.l_uom_code";
+        $sql.= " Group By a.entity_id,a.item_id,a.item_code,a.item_name,a.s_uom_code,a.s_uom_qty,a.qty_convert";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs;

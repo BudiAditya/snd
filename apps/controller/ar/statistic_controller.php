@@ -69,6 +69,8 @@ class StatisticController extends AppController {
             $speriod = 'TAHUN '.$year;
         }
         $this->Set("statPeriod",$speriod);
+        $totalOmset = $invoice->LoadOmsetTotal($type,$year,$month);
+        $this->Set("totalOmset",$totalOmset);
     }
 
     public function salesByEntityData($type,$year,$month){
@@ -111,6 +113,14 @@ class StatisticController extends AppController {
         $data = new Invoice();
         $data = $data->GetJSonTop10Item($type,$year,$month);
         echo json_encode($data);
+    }
+
+    public function xlReport($tahun){
+        require_once (MODEL . "inventory/items.php");
+        $items = new Items();
+        $dItems = $items->getItemsData();
+        $this->Set("year",$tahun);
+        $this->Set("dItems",$dItems);
     }
 }
 

@@ -40,6 +40,23 @@
                     </select>
                 </td>
             </tr>
+            <tr>
+                <td class="bold right"><label for="SupplierId">Principal :</label></td>
+                <td><select id="SupplierId" name="SupplierId" required>
+                        <option value="0">--Pilih Principal--</option>
+                        <?php
+                        /** @var $principals Supplier[] */
+                        foreach ($principals as $principal) {
+                            if ($principal->Id == $itembrand->SupplierId) {
+                                printf('<option value="%d" selected="selected">%s - %s</option>', $principal->Id, $principal->SupCode,$principal->SupName);
+                            } else {
+                                printf('<option value="%d">%s - %s</option>', $principal->Id, $principal->SupCode,$principal->SupName);
+                            }
+                        }
+                        ?>
+                    </select>
+                </td>
+            </tr>
 			<tr>
 				<td class="bold right"><label for="BrandCode">Kode Brand :</label></td>
 				<td><input type="text" id="BrandCode" name="BrandCode" value="<?php print($itembrand->BrandCode); ?>" size="30" required/></td>

@@ -83,35 +83,6 @@
                 newItem();
             });
 
-            $("#aItemCode").change(function(e){
-                //$ret = "OK|".$stock->ItemId.'|'.$stock->ItemName.'|'.$stock->SatBesar.'|'.$stock->QtyStock;
-                var itc = $("#aItemCode").val();
-                var url = '<?php print($helper->site_url("inventory.stock/getitemstock_plain/".$transfer->FrWhId."/"));?>'+itc;
-                if (itc != ''){
-                    $.get(url, function(data, status){
-                        //alert("Data: " + data + "\nStatus: " + status);
-                        if (status == 'success'){
-                            var dtx = data.split('|');
-                            if (dtx[0] == 'OK'){
-                                $('#aItemId').val(dtx[1]);
-                                $('#aItemDescs').val(dtx[2]);
-                                $('#aSatuan').val(dtx[3]);
-                                if (Number(dtx[4])>0){
-                                    $('#aQtyStock').val(dtx[4]);
-                                    $('#aQty').val(1);
-                                }else{
-                                    alert('Maaf, Stock barang ini kosong!');
-                                    $('#aQty').val(0);
-                                }
-                                $('#aQty').focus();
-                            }
-                        }else{
-                            alert('Maaf, Stock Harga Barang ini tidak ditemukan!');
-                        }
-                    });
-                }
-            });
-
             $("#aQty").change(function(e){
                 var stk = Number($('#aQtyStock').val());
                 var qty = $('#aQty').val();
@@ -187,7 +158,7 @@
             $('#dlg').dialog('open').dialog('setTitle','Tambah Detail Barang yang dikirim');
             $('#fm').form('clear');
             url = "<?php print($helper->site_url("inventory.transfer/add_detail/".$transfer->Id));?>";
-            $('#aItemCode').focus();
+            $('#aItemSearch').focus();
         }
 
         function saveDetail(){
@@ -310,7 +281,7 @@ $baddnew = base_url('public/images/button/').'create_new.png';
                 <td><select class="easyui-combobox" id="NpbStatus" name="NpbStatus" style="width: 100px">
                         <option value="0" <?php print($transfer->NpbStatus == 0 ? 'selected="selected"' : '');?>>0 - Draft</option>
                         <option value="1" <?php print($transfer->NpbStatus == 1 ? 'selected="selected"' : '');?>>1 - Posted</option>
-                        <option value="2" <?php print($transfer->NpbStatus == 2 ? 'selected="selected"' : '');?>>2 - Closed</option>
+                        <option value="2" <?php print($transfer->NpbStatus == 2 ? 'selected="selected"' : '');?>>2 - Approved</option>
                         <option value="3" <?php print($transfer->NpbStatus == 3 ? 'selected="selected"' : '');?>>3 - Batal</option>
                     </select>
                 </td>
@@ -401,7 +372,7 @@ $baddnew = base_url('public/images/button/').'create_new.png';
             </tr>
             <tr>
                 <td>
-                    <input type="text" id="aItemCode" name="aItemCode" size="15" value="" required/>
+                    <input type="text" id="aItemCode" name="aItemCode" size="15" value="" readonly/>
                     <input type="hidden" id="aItemId" name="aItemId" value="0"/>
                     <input type="hidden" id="aId" name="aId" value="0"/>
                     <input type="hidden" id="aQtyStock" name="aQtyStock" value="0"/>

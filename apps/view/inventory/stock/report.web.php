@@ -76,7 +76,7 @@
         <tr>
             <td>
                 <select name="GudangId" class="text2" id="GudangId" required>
-                    <option value="0">-All Gudang-</option>
+                    <option value="0">GABUNGAN (MDO + GTO)</option>
                     <?php
                     /** @var $gudangs Warehouse[] */
                     foreach ($gudangs as $gudang) {
@@ -126,105 +126,51 @@
     <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
         <tr>
             <th>No.</th>
-            <th>Gudang</th>
             <th>Kode</th>
             <th>Nama Produk</th>
             <th>Satuan</th>
             <th>Stock</th>
-            <?php
-            if($userTypeHarga == 1){
-                print('<th>Harga Beli</th>');
-                print('<th>Nilai Stock</th>');
-            }elseif($userTypeHarga == 2){
-                print('<th>Harga Jual</th>');
-                print('<th>Nilai Stock</th>');
-            }
-            if($userReportType == 1){
-                print('<th>PO QTY</th>');
-                print('<th>Stock + PO</th>');
-            }elseif ($userReportType == 2){
-                print('<th>SO QTY</th>');
-                print('<th>Stock - SO</th>');
-            }elseif ($userReportType == 3) {
-                print('<th>PO QTY</th>');
-                print('<th>SO QTY</th>');
-                print('<th>Stock + PO - SO</th>');
-            }
-            ?>
             <th>L</th>
             <th>S</th>
             <th>C</th>
         </tr>
         <?php
-            $nmr = 1;
-            $tOtal = 0;
-            while ($row = $reports->FetchAssoc()) {
-                print("<tr valign='Top'>");
-                printf("<td>%s</td>",$nmr);
-                printf("<td nowrap='nowrap'>%s</td>",$row["wh_code"]);
-                printf("<td nowrap='nowrap'><a href='%s' target='_blank'>%s</a></td>",$helper->site_url("inventory.stock/card/".$gudangId."|".$row["item_id"]),$row["item_code"]);
-                printf("<td nowrap='nowrap'>%s</td>",$row["item_name"]);
-                printf("<td nowrap='nowrap'>%s</td>",$row["s_uom_code"]);
-                printf("<td align='right'>%s</td>",decFormat($row["qty_stock"],2));
-                $sld = $row["qty_stock"];
-                if ($userTypeHarga == 1) {
-                    printf("<td align='right'>%s</td>", decFormat($row["hrg_beli"], 0));
-                    printf("<td align='right'>%s</td>", decFormat(round($row["qty_stock"] * $row["hrg_beli"], 0), 0));
-                    $tOtal+= round($row["qty_stock"] * $row["hrg_beli"],0);
-                }elseif($userTypeHarga == 2){
-                    printf("<td align='right'>%s</td>", decFormat($row["hrg_jual"], 0));
-                    printf("<td align='right'>%s</td>", decFormat(round($row["qty_stock"] * $row["hrg_jual"], 0), 0));
-                    $tOtal+= round($row["qty_stock"] * $row["hrg_jual"],0);
-                }
-                if($userReportType == 1){
-                    printf("<td align='right'>%s</td>",decFormat($row["po_qty"],2));
-                    printf("<td align='right'>%s</td>",decFormat($row["qty_stock"] + $row["po_qty"],2));
-                    $sld = $row["qty_stock"] + $row["po_qty"];
-                }elseif ($userReportType == 2){
-                    printf("<td align='right'>%s</td>",decFormat($row["so_qty"],2));
-                    printf("<td align='right'>%s</td>",decFormat($row["qty_stock"] - $row["so_qty"],2));
-                    $sld = $row["qty_stock"] - $row["so_qty"];
-                }elseif ($userReportType == 3) {
-                    printf("<td align='right'>%s</td>",decFormat($row["po_qty"],2));
-                    printf("<td align='right'>%s</td>",decFormat($row["so_qty"],2));
-                    printf("<td align='right'>%s</td>",decFormat($row["qty_stock"] + $row["po_qty"] - $row["so_qty"],2));
-                    $sld = $row["qty_stock"] + $row["po_qty"] - $row["so_qty"];
-                }
-                if ($sld >= $row["s_uom_qty"] && $row["s_uom_qty"] > 0){
-                    $aqty = array();
-                    $sqty = round($sld/$row["s_uom_qty"],2);
-                    $aqty = explode('.',$sqty);
-                    $lqty = $aqty[0];
-                    $sqty = $sld - ($lqty * $row["s_uom_qty"]);
-                }else {
-                    $lqty = 0;
-                    $sqty = $sld;
-                }
-                printf('<td class="right">%s</td>',decFormat($lqty));
-                printf('<td class="right">%s</td>',decFormat($sqty));
-                if ($row["entity_id"] == 1){
-                    $cqty = round($sld * $row["qty_convert"],2);
-                    printf("<td align='right'>%s</td>",number_format($cqty,2));
-                }else{
-                    $cqty = 0;
-                    print("<td>&nbsp;</td>");
-                }
-                print("</tr>");
-                $nmr++;
+        $nmr = 1;
+        $tOtal = 0;
+        while ($row = $reports->FetchAssoc()) {
+            print("<tr valign='Top'>");
+            printf("<td>%s</td>",$nmr);
+            if ($gudangId > 0) {
+                printf("<td nowrap='nowrap'><a href='%s' target='_blank'>%s</a></td>", $helper->site_url("inventory.stock/card/" . $gudangId . "|" . $row["item_id"]), $row["item_code"]);
+            }else{
+                printf("<td nowrap='nowrap'>%s</td>", $row["item_code"]);
             }
-        print("<tr>");
-        if ($userTypeHarga > 0) {
-            print("<td colspan='7' align='right'>Total Nilai Stock&nbsp;</td>");
-            printf("<td align='right'>%s</td>", decFormat($tOtal, 0));
-            if ($userReportType == 1) {
-                print('<td colspan="2">&nbsp;</td>');
-            } elseif ($userReportType == 2) {
-                print('<td colspan="2">&nbsp;</td>');
-            } elseif ($userReportType == 3) {
-                print('<td colspan="3">&nbsp;</td>');
+            printf("<td nowrap='nowrap'>%s</td>",$row["item_name"]);
+            printf("<td nowrap='nowrap'>%s</td>",$row["s_uom_code"]);
+            printf("<td align='right'>%s</td>",decFormat($row["qty_stock"],2));
+            $sld = $row["qty_stock"];
+            if ($sld >= $row["s_uom_qty"] && $row["s_uom_qty"] > 0){
+                $aqty = array();
+                $sqty = round($sld/$row["s_uom_qty"],2);
+                $aqty = explode('.',$sqty);
+                $lqty = $aqty[0];
+                $sqty = $sld - ($lqty * $row["s_uom_qty"]);
+            }else {
+                $lqty = 0;
+                $sqty = $sld;
             }
+            printf('<td class="right">%s</td>',decFormat($lqty));
+            printf('<td class="right">%s</td>',decFormat($sqty));
+            if ($row["entity_id"] == 1){
+                $cqty = round($sld * $row["qty_convert"],2);
+                printf("<td align='right'>%s</td>",number_format($cqty,2));
+            }else{
+                $cqty = 0;
+                print("<td>&nbsp;</td>");
+            }
+            print("</tr>");
+            $nmr++;
         }
-        print("</tr>");
         ?>
     </table>
 <!-- end web report -->

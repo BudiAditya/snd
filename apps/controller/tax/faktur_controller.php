@@ -194,9 +194,9 @@ class FakturController extends AppController {
         if ($rs != null){
             //config
             $namefile = "clu-fpk-".$thn.$bln.".csv";
-            $header = '"FK,""KD_JENIS_TRANSAKSI"",""FG_PENGGANTI"",""NOMOR_FAKTUR"",""MASA_PAJAK"",""TAHUN_PAJAK"",""TANGGAL_FAKTUR"",""NPWP"",""NAMA"",""ALAMAT_LENGKAP"",""JUMLAH_DPP"",""JUMLAH_PPN"",""JUMLAH_PPNBM"",""ID_KETERANGAN_TAMBAHAN"",""FG_UANG_MUKA"",""UANG_MUKA_DPP"",""UANG_MUKA_PPN"",""UANG_MUKA_PPNBM"",""REFERENSI"""' . PHP_EOL;
-            $header .= '"LT,""NPWP"",""NAMA"",""JALAN"",""BLOK"",""NOMOR"",""RT"",""RW"",""KECAMATAN"",""KELURAHAN"",""KABUPATEN"",""PROPINSI"",""KODE_POS"",""NOMOR_TELEPON"""' . PHP_EOL;
-            $header .= '"OF,""KODE_OBJEK"",""NAMA"",""HARGA_SATUAN"",""JUMLAH_BARANG"",""HARGA_TOTAL"",""DISKON"",""DPP"",""PPN"",""TARIF_PPNBM"",""PPNBM"""' . PHP_EOL;
+            $header = '"FK","KD_JENIS_TRANSAKSI","FG_PENGGANTI","NOMOR_FAKTUR","MASA_PAJAK","TAHUN_PAJAK","TANGGAL_FAKTUR","NPWP","NAMA","ALAMAT_LENGKAP","JUMLAH_DPP","JUMLAH_PPN","JUMLAH_PPNBM","ID_KETERANGAN_TAMBAHAN","FG_UANG_MUKA","UANG_MUKA_DPP","UANG_MUKA_PPN","UANG_MUKA_PPNBM","REFERENSI"' . PHP_EOL;
+            $header .= '"LT","NPWP","NAMA","JALAN","BLOK","NOMOR","RT","RW","KECAMATAN","KELURAHAN","KABUPATEN","PROPINSI","KODE_POS","NOMOR_TELEPON"' . PHP_EOL;
+            $header .= '"OF","KODE_OBJEK","NAMA","HARGA_SATUAN","JUMLAH_BARANG","HARGA_TOTAL","DISKON","DPP","PPN","TARIF_PPNBM","PPNBM"' . PHP_EOL;
             $content = $header;
             $detail = null;
             $invid = 0;
@@ -213,9 +213,9 @@ class FakturController extends AppController {
                     }else{
                         $alamat = $row['alamat_lengkap'];
                     }
-                    $detail.= '"' . $row['kode'] .',""'. $row['kd_jenis_pajak'] .'"",""'. $row['fg_pengganti'] .'"",""'. $row['nomor_faktur'] .'"",""'. $row['masa_pajak'] .'"",""'. $row['tahun_pajak'] .'"",""'. date('d/m/Y',strtotime($row['tanggal_faktur'])) .'"",""'. $npwp.'"",""'. $row['nama'] .'"",""'. $alamat .'"",""'. $row['jumlah_dpp'] .'"",""'. $row['jumlah_ppn'] .'"",""'. $row['jumlah_ppnbm'] .'"",""'. $row['id_keterangan_tambahan'] .'"",""'. $row['fg_uang_muka'] .'"",""'. $row['uang_muka_dpp'] .'"",""'. $row['uang_muka_ppn'] .'"",""'. $row['uang_muka_ppnbm'] .'"",""'. $row['referensi'] . '"""'. PHP_EOL;
+                    $detail.= '"' . $row['kode'] .'","'. $row['kd_jenis_pajak'] .'","'. $row['fg_pengganti'] .'","'. $row['nomor_faktur'] .'","'. $row['masa_pajak'] .'","'. $row['tahun_pajak'] .'","'. date('d/m/Y',strtotime($row['tanggal_faktur'])) .'","'. $npwp.'","'. $row['nama'] .'","'. $alamat .'","'. $row['jumlah_dpp'] .'","'. $row['jumlah_ppn'] .'","'. $row['jumlah_ppnbm'] .'","'. $row['id_keterangan_tambahan'] .'","'. $row['fg_uang_muka'] .'","'. $row['uang_muka_dpp'] .'","'. $row['uang_muka_ppn'] .'","'. $row['uang_muka_ppnbm'] .'","'. $row['referensi'] . '"'. PHP_EOL;
                 }
-                $detail.= '"' . $row['of_kode'] .',""'. $row['kode_objek'] .'"",""'. $row['nm_barang'] .'"",""'. $row['harga_satuan'] .'"",""'. $row['jumlah_barang'] .'"",""'. $row['harga_total'] .'"",""'. $row['diskon'] .'"",""'. $row['dpp'] .'"",""'. $row['ppn'] .'"",""'. $row['tarif_ppnbm'] .'"",""'. $row['ppnbm'] .'"""'. PHP_EOL;
+                $detail.= '"' . $row['of_kode'] .'","'. $row['kode_objek'] .'","'. $row['nm_barang'] .'","'. $row['harga_satuan'] .'","'. $row['jumlah_barang'] .'","'. $row['harga_total'] .'","'. $row['diskon'] .'","'. $row['dpp'] .'","'. $row['ppn'] .'","'. $row['tarif_ppnbm'] .'","'. $row['ppnbm'] .'"'. PHP_EOL;
                 $invid = $row['invoice_id'];
             }
             //save file

@@ -100,7 +100,7 @@ if ($trxs != null) {
             <th>Kas/Bank</th>
             <th>Keterangan</th>
             <th>Reff No</th>
-            <th>Atas Nama</th>
+            <!--<th>Atas Nama</th>-->
             <th>Jumlah</th>
             <th>Status</th>
             <th>Pilih <input type="checkbox" id="cbAll" checked="checked"></th>
@@ -120,8 +120,8 @@ if ($trxs != null) {
             printf('<td nowrap="nowrap">%s</td>', $data["bank_name"]);
             printf('<td nowrap="nowrap">%s</td>', $data["trx_descs"]);
             printf('<td nowrap="nowrap">%s</td>', $data["reff_no"]);
-            printf('<td nowrap="nowrap">%s</td>', $data["relasi_name"]);
-            printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["trx_amount"],0));
+            //printf('<td nowrap="nowrap">%s</td>', $data["relasi_name"]);
+            printf('<td nowrap="nowrap" align="right">%s</td>',number_format($data["trx_amount"],2));
             if ($data["trx_status"] == 0) {
                 print('<td>DRAFT</td>');
             }elseif ($data["trx_status"] == 1){
@@ -139,11 +139,11 @@ if ($trxs != null) {
         }
         printf('
         <tr class="bold">
-            <td colspan="8" align="right">Total..</td>
+            <td colspan="7" align="right">Total..</td>
             <td align="right">%s</td>
             <td colspan="2">&nbsp;</td>
         </tr>
-        ',number_format($tjum,0));
+        ',number_format($tjum,2));
         ?>
     </table>
 </form>

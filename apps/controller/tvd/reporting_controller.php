@@ -155,7 +155,10 @@ class ReportingController extends AppController {
                     $stock = new StockCas();
                     $stock = $stock->Load4Reports($this->trxYear);
                     if ($stock != null){
-
+                        $textcon .= "800|".$company->CasDistCode."|0|0|LUB|".date("d/m/Y")."|0|P|0|0|I|". PHP_EOL;
+                        while ($rs = $stock->FetchAssoc()){
+                            $textcon .= "800|".$company->CasDistCode."|".$rs["item_code"]."|0|LUB|".date("d/m/Y")."|".$rs["cl_qty"]."|P|0|".$rs["cl_qty"]."|I|". PHP_EOL;
+                        }
                     }
                 }
                 //save file

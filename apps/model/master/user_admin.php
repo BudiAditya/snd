@@ -149,7 +149,7 @@ VALUES(?is_aktif, ?user_id, ?company_id, ?cabang_id, ?user_pwd, ?user_lvl, ?user
 		$this->connector->AddParameter("?cabang_id", $this->CabangId);
 		$this->connector->AddParameter("?user_pwd", md5($this->UserPwd1));
 		$this->connector->AddParameter("?user_lvl", $this->UserLvl);
-		$this->connector->AddParameter("?user_name", $this->UserName);
+		$this->connector->AddParameter("?user_name", $this->UserName == null ? $this->UserId : $this->UserName);
 		$this->connector->AddParameter("?user_email", $this->UserEmail);
 		$this->connector->AddParameter("?allow_multiple_login", $this->AllowMultipleLogin);
 		$this->connector->AddParameter("?force_accounting_period", $this->IsForceAccountingPeriod);
@@ -197,7 +197,7 @@ WHERE user_uid = ?id';
 		$this->connector->AddParameter("?company_id", $this->CompanyId);
 		$this->connector->AddParameter("?cabang_id", $this->CabangId);
 		$this->connector->AddParameter("?user_lvl", $this->UserLvl);
-		$this->connector->AddParameter("?user_name", $this->UserName);
+        $this->connector->AddParameter("?user_name", $this->UserName == null ? $this->UserId : $this->UserName);
 		$this->connector->AddParameter("?user_email", $this->UserEmail);
 		$this->connector->AddParameter("?allow_multiple_login", $this->AllowMultipleLogin);
 		$this->connector->AddParameter("?force_accounting_period", $this->IsForceAccountingPeriod);

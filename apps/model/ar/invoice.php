@@ -419,7 +419,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4Reports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4Reports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 1 & 4
         $sql = "SELECT a.* FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
@@ -435,13 +435,14 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         }
         if ($invoiceStatus > -1){
             $sql.= " and a.invoice_status = ".$invoiceStatus;
-        }else{
-            $sql.= " and a.invoice_status <> 3 ";
         }
         if ($paymentStatus == 0){
             $sql.= " and (a.balance_amount) > 0";
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
         }
         if ($customerId > 0){
             $sql.= " and a.customer_id = ".$customerId;
@@ -463,7 +464,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4ReportsDetail($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4ReportsDetail($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 2
         $sql = "SELECT a.*,c.item_code,d.brand_name,c.item_name,b.sales_qty,b.price,b.disc_formula,b.disc_amount,b.sub_total,b.ppn_amount FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail b On a.id = b.invoice_id JOIN m_items c ON b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
         $sql.= " WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
@@ -480,13 +481,14 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         }
         if ($invoiceStatus > -1){
             $sql.= " and a.invoice_status = ".$invoiceStatus;
-        }else{
-            $sql.= " and a.invoice_status <> 3 ";
         }
         if ($paymentStatus == 0){
             $sql.= " and (a.balance_amount) > 0";
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
         }
         if ($customerId > 0){
             $sql.= " and a.customer_id = ".$customerId;
@@ -517,7 +519,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4ReportsRekapItem($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4ReportsRekapItem($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null,$entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 3
         $sql = "SELECT d.entity_id,d.brand_name,c.item_code,c.item_name,c.s_uom_qty,c.qty_convert, coalesce(sum(b.l_qty),0) as sum_lqty, coalesce(sum(b.s_qty),0) as sum_sqty, coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
@@ -542,6 +544,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
             $sql.= " and (a.balance_amount) > 0";
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
         }
         if ($customerId > 0){
             $sql.= " and a.customer_id = ".$customerId;
@@ -572,9 +577,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function Load4ReportsRekapItem1($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function Load4ReportsRekapItem1($companyId, $cabangId = 0, $gudangId = 0,$customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 5
-        $sql = "SELECT d.entity_id,d.brand_name,c.item_code, c.item_name, c.s_uom_code as satuan, c.s_uom_qty, c.qty_convert, coalesce(sum(b.sales_qty),0) as sum_qty";
+        $sql = "SELECT d.entity_id,d.brand_name,c.item_code, c.item_name, c.s_uom_code as satuan, c.s_uom_qty, c.qty_convert, coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id";
         $sql.= " WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
@@ -597,6 +602,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
             $sql.= " and (a.balance_amount) > 0";
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
         }
         if ($customerId > 0){
             $sql.= " and a.customer_id = ".$customerId;
@@ -835,7 +843,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $data;
     }
 
-    public function LoadSalesOmsetReports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadSalesOmsetReports($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 6
         $sql = "Select a.sales_id,a.sales_name,coalesce(sum(a.base_amount-a.disc_amount),0) as sum_dpp,coalesce(sum(a.ppn_amount),0) as sum_ppn,coalesce(sum(a.paid_amount),0) as paid_amount,coalesce(sum(a.return_amount),0) as return_amount";
         $sql.= " FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
@@ -860,6 +868,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
         }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
+        }
         if ($customerId > 0){
             $sql.= " and a.customer_id = ".$customerId;
         }
@@ -880,7 +891,54 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function LoadOmsetByEntityReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadSalesOmsetTotal($companyId, $cabangId = 0, $gudangId = 0, $customerId = 0, $salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
+        //laptype = 6a
+        $sql = "Select coalesce(sum(a.base_amount-a.disc_amount+a.ppn_amount),0) as sum_total FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_date BETWEEN ?startdate and ?enddate";
+        if ($cabangId > 0){
+            $sql.= " and a.cabang_id = ".$cabangId;
+        }else{
+            $sql.= " and a.cabang_id IN (".$cabIds.")";
+        }
+        if ($companyId > 0){
+            $sql.= " and a.company_id = ".$companyId;
+        }
+        if ($gudangId > 0){
+            $sql.= " and a.gudang_id = ".$gudangId;
+        }
+        if ($invoiceStatus > -1){
+            $sql.= " and a.invoice_status = ".$invoiceStatus;
+        }else{
+            $sql.= " and a.invoice_status <> 3 ";
+        }
+        if ($paymentStatus == 0){
+            $sql.= " and (a.balance_amount) > 0";
+        }elseif ($paymentStatus == 1){
+            $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
+        }
+        if ($customerId > 0){
+            $sql.= " and a.customer_id = ".$customerId;
+        }
+        if ($salesId > 0){
+            $sql.= " and a.sales_id = ".$salesId;
+        }
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
+        }
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
+        $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
+        $rs = $this->connector->ExecuteQuery();
+        $row = $rs->FetchAssoc();
+        return strval($row["sum_total"]);
+    }
+
+    public function LoadOmsetByEntityReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 7
         $sql = "SELECT d.entity_id,e.entity_code,e.entity_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
@@ -905,6 +963,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
             $sql.= " and (a.balance_amount) > 0";
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
         }
         if ($salesId > 0){
             $sql.= " and a.sales_id = ".$salesId;
@@ -932,7 +993,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function LoadOmsetBySalesDetailReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadOmsetBySalesDetailReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 8
         $sql = "SELECT a.sales_id,a.sales_name,d.entity_id,e.entity_code,e.entity_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join m_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
@@ -957,6 +1018,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
             $sql.= " and (a.balance_amount) > 0";
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
         }
         if ($salesId > 0){
             $sql.= " and a.sales_id = ".$salesId;
@@ -984,7 +1048,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
-    public function LoadOmsetByPrincipleReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null) {
+    public function LoadOmsetByPrincipleReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
         //laptype = 9
         $sql = "SELECT c.principal_id,c.principal_code,c.principal_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
         $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join vw_ic_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
@@ -1010,6 +1074,9 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         }elseif ($paymentStatus == 1){
             $sql.= " and (a.balance_amount) = 0";
         }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
+        }
         if ($salesId > 0){
             $sql.= " and a.sales_id = ".$salesId;
         }
@@ -1029,6 +1096,61 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
             $sql.= " and c.brand_id = ".$brandId;
         }
         $sql.= " Group By c.principal_id,c.principal_code,c.principal_name Order By c.principal_name";
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
+        $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function LoadOmsetByBrandReports($companyId, $cabangId = 0, $gudangId = 0,$salesId = 0, $invoiceStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null, $entityId = 0,$principalId = 0,$propId = 0,$salesAreaId = 0,$brandId = 0,$cabIds = null,$payType = -1) {
+        //laptype = 10
+        $sql = "SELECT c.brand_id,c.brand_code,c.brand_name,coalesce(sum(b.sales_qty),0) as sum_qty,coalesce(sum(b.sales_qty * c.qty_convert),0) as sum_liter,coalesce(sum(b.sub_total-b.disc_amount),0) as sum_dpp, sum(b.ppn_amount) as sum_ppn";
+        $sql.= " FROM vw_ar_invoice_master AS a Join t_ar_invoice_detail AS b On a.id = b.invoice_id Join vw_ic_items AS c On b.item_id = c.id LEFT JOIN m_item_brand d ON c.brand_id = d.id LEFT JOIN m_item_entity e ON d.entity_id = e.id";
+        $sql.= " WHERE a.is_deleted = 0 And a.invoice_date BETWEEN ?startdate and ?enddate";
+        if ($cabangId > 0){
+            $sql.= " and a.cabang_id = ".$cabangId;
+        }else{
+            $sql.= " and a.cabang_id IN (".$cabIds.")";
+        }
+        if ($companyId > 0){
+            $sql.= " and a.company_id = ".$companyId;
+        }
+        if ($gudangId > 0){
+            $sql.= " and a.gudang_id = ".$gudangId;
+        }
+        if ($invoiceStatus > -1){
+            $sql.= " and a.invoice_status = ".$invoiceStatus;
+        }else{
+            $sql.= " and a.invoice_status <> 3 ";
+        }
+        if ($paymentStatus == 0){
+            $sql.= " and (a.balance_amount) > 0";
+        }elseif ($paymentStatus == 1){
+            $sql.= " and (a.balance_amount) = 0";
+        }
+        if ($payType > -1){
+            $sql.= " and a.payment_type = $payType";
+        }
+        if ($salesId > 0){
+            $sql.= " and a.sales_id = ".$salesId;
+        }
+        if ($entityId > 0){
+            $sql.= " and d.entity_id = ".$entityId;
+        }
+        if ($salesAreaId > 0){
+            $sql.= " and a.area_id = ".$salesAreaId;
+        }
+        if ($propId > 0){
+            $sql.= " and a.prop_id = ".$propId;
+        }
+        if ($principalId > 0){
+            $sql.= " and c.principal_id = ".$principalId;
+        }
+        if ($brandId > 0){
+            $sql.= " and c.brand_id = ".$brandId;
+        }
+        $sql.= " Group By c.brand_id,c.brand_code,c.brand_name Order By c.brand_name";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
@@ -1125,6 +1247,20 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         return $rs;
     }
 
+    public function LoadOmsetTotal($type,$year,$month) {
+        if ($type == 1) {
+            $sql = "Select coalesce(sum(a.base_amount-a.disc_amount+a.ppn_amount),0) as sum_total FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_status <> 3 And Year(a.invoice_date) = $year";
+        }elseif ($type == 2){
+            $sql = "Select coalesce(sum(a.base_amount-a.disc_amount+a.ppn_amount),0) as sum_total FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_status <> 3 And Year(a.invoice_date) = $year And Month(a.invoice_date) = $month";
+        }else{
+            $sql = "Select coalesce(sum(a.base_amount-a.disc_amount+a.ppn_amount),0) as sum_total FROM vw_ar_invoice_master AS a WHERE a.is_deleted = 0 and a.invoice_status <> 3 And Year(a.invoice_date) = $year And Month(a.invoice_date) <= $month";
+        }
+        $this->connector->CommandText = $sql;
+        $rs = $this->connector->ExecuteQuery();
+        $row = $rs->FetchAssoc();
+        return strval($row["sum_total"]);
+    }
+
     public function LoadPrincipalOmset($type,$year,$month) {
         if ($type == 1) {
             $sql = "Select a.principal_code, a.principal_name,a.sumPenjualan as omset FROM vw_ar_invoice_sum_by_principle_by_year AS a WHERE a.tahun = $year Order By a.sumPenjualan";
@@ -1150,6 +1286,8 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
         $rs = $this->connector->ExecuteQuery();
         return $rs;
     }
+
+
 
     public function LoadAreaOmset($type,$year,$month) {
         if ($type == 1) {
