@@ -164,7 +164,7 @@
                         if (qst > 0) {
                             $('#lQty').prop('disabled',false);
                             $('#sQty').prop('disabled',false);
-                            fillSalePrice(areaId, bid);
+                            fillSalePrice(custId, bid);
                             hitDetail();
                         }else{
                             $('#lQty').prop('disabled',true);
@@ -233,7 +233,7 @@
                         if (qst > 0) {
                             $('#lQty').prop('disabled',false);
                             $('#sQty').prop('disabled',false);
-                            fillSalePrice(areaId, bid);
+                            fillSalePrice(custId, bid);
                             hitDetail();
                         }else{
                             $('#lQty').prop('disabled',true);

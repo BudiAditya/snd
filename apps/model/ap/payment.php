@@ -369,7 +369,7 @@ WHERE id = ?id";
         return $rs;
     }
 
-    public function GetJSonUnpaidGrns($cabangId = 0,$supplierId = 0 ,$sort = 'a.grn_no',$order = 'ASC') {
+    public function GetJSonUnpaidGrnsByCabang($cabangId = 0,$supplierId = 0 ,$sort = 'a.grn_no',$order = 'ASC') {
         $sql = "SELECT a.id,a.grn_no,a.grn_date,a.due_date,a.balance_amount,a.sup_inv_no FROM vw_ap_purchase_master AS a";
         $sql.= " Where a.grn_status > 0 and a.is_deleted = 0 and a.balance_amount > 0";
         if ($cabangId > 0){
@@ -380,6 +380,30 @@ WHERE id = ?id";
         }
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?cabangId", $cabangId);
+        $this->connector->AddParameter("?supplierId", $supplierId);
+        $data['count'] = $this->connector->ExecuteQuery()->GetNumRows();
+        $sql.= " Order By $sort $order";
+        $this->connector->CommandText = $sql;
+        $rows = array();
+        $rs = $this->connector->ExecuteQuery();
+        while ($row = $rs->FetchAssoc()){
+            $rows[] = $row;
+        }
+        $result = array('total'=>$data['count'],'rows'=>$rows);
+        return $result;
+    }
+
+    public function GetJSonUnpaidGrnsByCompany($companyId = 0,$supplierId = 0 ,$sort = 'a.grn_no',$order = 'ASC') {
+        $sql = "SELECT a.id,a.grn_no,a.grn_date,a.due_date,a.balance_amount,a.sup_inv_no FROM vw_ap_purchase_master AS a";
+        $sql.= " Where a.grn_status > 0 and a.is_deleted = 0 and a.balance_amount > 0";
+        if ($companyId > 0){
+            $sql.= " And a.company_id = ?companyId";
+        }
+        if ($supplierId > 0){
+            $sql.= " And a.supplier_id = ?supplierId";
+        }
+        $this->connector->CommandText = $sql;
+        $this->connector->AddParameter("?companyId", $companyId);
         $this->connector->AddParameter("?supplierId", $supplierId);
         $data['count'] = $this->connector->ExecuteQuery()->GetNumRows();
         $sql.= " Order By $sort $order";

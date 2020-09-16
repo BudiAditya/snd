@@ -587,7 +587,7 @@ class PaymentController extends AppController {
     public function getoutstandinggrns_json($cabangId = 0,$supplierId = 0){
         //$filter = isset($_POST['q']) ? strval($_POST['q']) : '';
         $payment = new Payment();
-        $itemlists = $payment->GetJSonUnpaidGrns($cabangId,$supplierId);
+        $itemlists = $payment->GetJSonUnpaidGrnsByCompany($this->userCompanyId,$supplierId);
         echo json_encode($itemlists);
     }
 

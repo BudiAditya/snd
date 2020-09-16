@@ -78,6 +78,18 @@
                 }
             });
 
+            $("#bApprove").click(function(){
+                if (confirm('Approve Invoice ini?')){
+                    location.href="<?php print($helper->site_url("ar.invoice/approve/1?&id[]=$invoice->Id")); ?>";
+                }
+            });
+
+            $("#bUnapprove").click(function(){
+                if (confirm('Batalkan Approval Invoice ini?')){
+                    location.href="<?php print($helper->site_url("ar.invoice/approve/0?&id[]=$invoice->Id")); ?>";
+                }
+            });
+
             $("#bKembali").click(function(){
                 location.href="<?php print($helper->site_url("ar.invoice")); ?>";
             });
@@ -285,6 +297,13 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                     </tr>
                     <tr>
                         <td colspan="13" class="right"><?php
+                            if ($acl->CheckUserAccess("ar.invoice", "approve") && $isApproval == 1) {
+                                if ($invoice->InvoiceStatus == 1) {
+                                    print("<button class='button' id='bApprove'><b>APPROVAL</b></button>&nbsp;&nbsp;&nbsp;");
+                                }elseif ($invoice->InvoiceStatus == 2){
+                                    print("<button class='button' id='bUnapprove'><b>BATALKAN APPROVAL</b></button>&nbsp;&nbsp;&nbsp;");
+                                }
+                            }
                             if ($acl->CheckUserAccess("ar.invoice", "add")) {
                                 printf('<img src="%s" alt="Invoice Baru" title="Buat invoice baru" id="bTambah" style="cursor: pointer;"/>', $baddnew);
                             }

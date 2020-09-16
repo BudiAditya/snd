@@ -58,7 +58,8 @@ class Invoice extends EntityBase {
     public $DbAccId = 0;
     public $Npwp;
     public $Jbaris = 0;
-
+    public $ApprovebyId;
+    public $ApproveTime;
     //helper
     public $ErrorMsg;
 
@@ -118,6 +119,9 @@ class Invoice extends EntityBase {
         $this->AreaId = $row["area_id"];
         $this->DbAccId = $row["db_acc_id"];
         $this->Jbaris = $row["baris"];
+        //new 2020-09-16
+        $this->ApprovebyId = $row["approveby_id"];
+        $this->ApproveTime = $row["approve_time"];
 	}
 
 	public function FormatInvoiceDate($format = HUMAN_DATE) {
@@ -675,7 +679,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function Approve($id = null, $uid = null){
-	    $sql = "Update t_ar_invoice_master a Set a.invoice_status = 2, a.update_time = now(), a.updateby_id = ?uid Where a.id = ?id";
+	    $sql = "Update t_ar_invoice_master a Set a.invoice_status = 2, a.approve_time = now(), a.approveby_id = ?uid, a.approve_status = 1 Where a.id = ?id";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?id", $id);
         $this->connector->AddParameter("?uid", $uid);
@@ -683,7 +687,7 @@ On a.id = b.invoice_id Set a.base_amount = b.subTotal, a.disc_amount = b.sumDisc
     }
 
     public function Unapprove($id = null, $uid = null){
-        $sql = "Update t_ar_invoice_master a Set a.invoice_status = 1, a.update_time = now(), a.updateby_id = ?uid Where a.id = ?id";
+        $sql = "Update t_ar_invoice_master a Set a.invoice_status = 1, a.approve_time = null, a.approveby_id = 0, a.approve_status = 0 Where a.id = ?id";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?id", $id);
         $this->connector->AddParameter("?uid", $uid);

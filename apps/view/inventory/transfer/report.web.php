@@ -27,7 +27,7 @@
 <form id="frm" name="frmReport" method="post">
     <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
         <tr class="center">
-            <th colspan="2"><b>Rekapitulasi Transfer Stock Barang</b></th>
+            <th colspan="3"><b>Rekapitulasi Transfer Stock Barang</b></th>
             <th>Jenis Laporan:</th>
             <th colspan="2"><select name="JnsLaporan" id="JnsLaporan">
                     <option value="1" <?php print($JnsLaporan == 1 ? 'selected="selected"' : '');?>>1 - Laporan Transfer</option>
@@ -37,6 +37,7 @@
         </tr>
         <tr class="center">
             <th>Dari Gudang</th>
+            <th>Status</th>
             <th>Dari Tanggal</th>
             <th>Sampai Tanggal</th>
             <th>Output</th>
@@ -56,6 +57,16 @@
                         }
                     }
                     ?>
+                </select>
+            </td>
+            <td>
+                <select name="NpbStatus" class="text2" id="NpbStatus" required>
+                    <option value="-1" <?php print($NpbStatus == -1 ? 'selected="selected"' : '');?>>- Semua -</option>
+                    <option value="0" <?php print($NpbStatus == 0 ? 'selected="selected"' : '');?>>0 - Draft</option>
+                    <option value="1" <?php print($NpbStatus == 1 ? 'selected="selected"' : '');?>>1 - Posted</option>
+                    <option value="2" <?php print($NpbStatus == 2 ? 'selected="selected"' : '');?>>2 - Approved</option>
+                    <option value="3" <?php print($NpbStatus == 3 ? 'selected="selected"' : '');?>>3 - Vois</option>
+
                 </select>
             </td>
             <td><input type="text" class="text2" maxlength="10" size="10" id="StartDate" name="StartDate" value="<?php printf(date('d-m-Y',$StartDate));?>"/></td>
@@ -83,7 +94,7 @@
             <th>Ke Gudang</th>
             <th>Tanggal</th>
             <th>No.Transfer</th>
-            <th>Keterangan</th>
+            <th>Status</th>
             <th>Kode Barang</th>
             <th>Nama Barang</th>
             <th>Satuan</th>
@@ -103,7 +114,15 @@
                 printf("<td>%s</td>", $row["to_wh_code"]);
                 printf("<td>%s</td>", date('d-m-Y', strtotime($row["npb_date"])));
                 printf("<td><a href= '%s' target='_blank'>%s</a></td>", $url, $row["npb_no"]);
-                printf("<td nowrap='nowrap'>%s</td>", $row["npb_descs"]);
+                if ($row["npb_status"] == 0) {
+                    print("<td nowrap='nowrap'>Draft</td>");
+                }elseif ($row["npb_status"] == 1) {
+                    print("<td nowrap='nowrap'>Posted</td>");
+                }elseif ($row["npb_status"] == 2) {
+                    print("<td nowrap='nowrap'>Approved</td>");
+                }else{
+                    print("<td nowrap='nowrap'>Void</td>");
+                }
             }else{
                 print("<td>&nbsp;</td>");
                 print("<td>&nbsp;</td>");

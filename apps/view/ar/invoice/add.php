@@ -164,7 +164,7 @@
                         if (qst > 0) {
                             $('#lQty').prop('disabled',false);
                             $('#sQty').prop('disabled',false);
-                            fillSalePrice(areaId, bid);
+                            fillSalePrice(custId, bid);
                             hitDetail();
                         }else{
                             $('#lQty').prop('disabled',true);
@@ -233,7 +233,7 @@
                         if (qst > 0) {
                             $('#lQty').prop('disabled',false);
                             $('#sQty').prop('disabled',false);
-                            fillSalePrice(areaId, bid);
+                            fillSalePrice(custId, bid);
                             hitDetail();
                         }else{
                             $('#lQty').prop('disabled',true);
@@ -283,6 +283,7 @@
             $('#aPrice').numberbox({
                 onChange: function(rvalue){
                     hitDetail();
+                    $('#aPriceMode').val(1);
                 }
             });
 
@@ -703,6 +704,7 @@
                     $.messager.alert('Warning',data+' Harga Produk ini belum disetting!');
                 }else{
                     $('#aPrice').numberbox('setValue',dta[1]);
+                    $('#aPriceMode').val(0);
                     $('#pUom').text('/'+dta[0]);
                     hitDetail();
                 }
@@ -1006,6 +1008,7 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                     <input type="text" class="easyui-textbox" id="aItemDescs" name="aItemDescs" style="width:300px" value="" readonly/>
                     <input type="hidden" name="aPphPct" id="aPphPct" value="0"/>
                     <input type="hidden" name="aPphAmount" id="aPphAmount" value="0"/>
+                    <input type="hidden" name="aPriceMode" id="aPriceMode" value="0"/>
                     &nbsp;
                     <b>Stock :</b>
                     &nbsp;

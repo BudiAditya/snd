@@ -227,7 +227,7 @@ class Transfer extends EntityBase {
         return $this->connector->ExecuteNonQuery();
     }
 
-    public function Load4Reports($cabangId = 0,$gudangId = 0, $startDate = null, $endDate = null) {
+    public function Load4Reports($cabangId = 0,$gudangId = 0, $startDate = null, $endDate = null, $npbStatus = -1) {
         $sql = "SELECT a.*,c.item_code,c.item_name,c.s_uom_code as satuan,b.qty";
         $sql.= " FROM vw_ic_transfer_master AS a Join t_ic_transfer_detail AS b On a.id = b.npb_id Left Join m_items AS c On b.item_id = c.id";
         $sql.= " WHERE a.is_deleted = 0 and a.npb_status <> 3 and a.npb_date BETWEEN ?startdate and ?enddate";
@@ -237,6 +237,9 @@ class Transfer extends EntityBase {
         if ($gudangId > 0){
             $sql.= " and a.fr_wh_id = ".$gudangId;
         }
+        if ($npbStatus > -1){
+            $sql.= " and a.npb_status = ".$npbStatus;
+        }
         $sql.= " Order By a.npb_date,a.npb_no,c.item_name,a.id";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
@@ -245,7 +248,7 @@ class Transfer extends EntityBase {
         return $rs;
     }
 
-    public function LoadRekap4Reports($cabangId = 0,$gudangId = 0,$startDate = null, $endDate = null) {
+    public function LoadRekap4Reports($cabangId = 0,$gudangId = 0,$startDate = null, $endDate = null, $npbStatus = -1) {
         $sql = "SELECT a.cabang_code,a.to_wh_code,a.fr_wh_code,c.item_code,c.item_name,c.s_uom_code as satuan,sum(b.qty) as sum_qty";
         $sql.= " FROM vw_ic_transfer_master AS a Join t_ic_transfer_detail AS b On a.id = b.npb_id Join m_items AS c On b.item_id = c.id";
         $sql.= " WHERE a.is_deleted = 0 and a.npb_status <> 3 and a.npb_date BETWEEN ?startdate and ?enddate";
@@ -254,6 +257,9 @@ class Transfer extends EntityBase {
         }
         if ($gudangId > 0){
             $sql.= " and a.fr_wh_id = ".$gudangId;
+        }
+        if ($npbStatus > -1){
+            $sql.= " and a.npb_status = ".$npbStatus;
         }
         $sql.= " Group By a.fr_wh_code,a.to_wh_code,c.item_code,c.item_name,c.s_uom_code Order By a.cabang_code,c.item_name";
         $this->connector->CommandText = $sql;

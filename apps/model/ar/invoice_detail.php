@@ -32,7 +32,7 @@ class InvoiceDetail extends EntityBase {
     public $IsiSatKecil = 0;
     public $ItemHpp = 0;
     public $IsPost = 0;
-
+    public $PriceMode = 0;
 	// Helper Variable;
 	public $MarkedForDeletion = false;
 
@@ -66,6 +66,7 @@ class InvoiceDetail extends EntityBase {
         $this->ByAngkut = $row["by_angkut"];
         $this->IsiSatKecil = $row["bisisatkecil"];
         $this->IsPost = $row["is_post"];
+        $this->PriceMode = $row["price_mode"];
 	}
 
     public function FormatExpDate($format = HUMAN_DATE) {
@@ -126,8 +127,8 @@ class InvoiceDetail extends EntityBase {
 
 	public function Insert() {
 		$this->connector->CommandText =
-"INSERT INTO t_ar_invoice_detail(l_qty,m_qty,s_qty,is_post,ex_so_id,by_angkut,is_free,invoice_id, item_id, item_descs, sales_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, exp_date, item_hpp)
-VALUES(?l_qty,?m_qty,?s_qty,?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, ?item_id, ?item_descs, ?sales_qty, ?return_qty, ?price, ?disc_formula, ?disc_amount, ?sub_total, ?pph_pct, ?pph_amount, ?ppn_pct, ?ppn_amount, ?exp_date, ?item_hpp)";
+"INSERT INTO t_ar_invoice_detail(price_mode,l_qty,m_qty,s_qty,is_post,ex_so_id,by_angkut,is_free,invoice_id, item_id, item_descs, sales_qty, return_qty, price, disc_formula, disc_amount, sub_total, pph_pct, pph_amount, ppn_pct, ppn_amount, exp_date, item_hpp)
+VALUES(?price_mode,?l_qty,?m_qty,?s_qty,?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, ?item_id, ?item_descs, ?sales_qty, ?return_qty, ?price, ?disc_formula, ?disc_amount, ?sub_total, ?pph_pct, ?pph_amount, ?ppn_pct, ?ppn_amount, ?exp_date, ?item_hpp)";
 		$this->connector->AddParameter("?invoice_id", $this->InvoiceId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
         $this->connector->AddParameter("?item_descs", $this->ItemDescs == null ? '-' : $this->ItemDescs);
@@ -150,6 +151,7 @@ VALUES(?l_qty,?m_qty,?s_qty,?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, 
         $this->connector->AddParameter("?exp_date", null);
         $this->connector->AddParameter("?by_angkut", $this->ByAngkut);
         $this->connector->AddParameter("?is_post", $this->IsPost);
+        $this->connector->AddParameter("?price_mode", $this->PriceMode);
 		$rs = $this->connector->ExecuteNonQuery();
         $rsx = null;
         $did = 0;
@@ -198,6 +200,7 @@ VALUES(?l_qty,?m_qty,?s_qty,?is_post,?ex_so_id,?by_angkut,?is_free,?invoice_id, 
     , l_qty = ?l_qty
     , m_qty = ?m_qty
     , s_qty = ?s_qty
+    , price_mode = ?price_mode
 WHERE id = ?id";
         $this->connector->AddParameter("?invoice_id", $this->InvoiceId);
         $this->connector->AddParameter("?item_id", $this->ItemId);
@@ -221,6 +224,7 @@ WHERE id = ?id";
         $this->connector->AddParameter("?exp_date", null);
         $this->connector->AddParameter("?by_angkut", $this->ByAngkut);
         $this->connector->AddParameter("?is_post", $this->IsPost);
+        $this->connector->AddParameter("?price_mode", $this->PriceMode);
         $this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteNonQuery();
         if ($rs == 1) {

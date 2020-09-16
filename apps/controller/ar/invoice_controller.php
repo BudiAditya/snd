@@ -30,7 +30,7 @@ class InvoiceController extends AppController {
         $settings["columns"][] = array("name" => "a.invoice_no", "display" => "No. Invoice", "width" => 80);
         $settings["columns"][] = array("name" => "concat(b.cus_code,' - ',b.cus_name)", "display" => "Nama Customer", "width" => 230);
         //$settings["columns"][] = array("name" => "a.invoice_descs", "display" => "Keterangan", "width" => 150);
-        $settings["columns"][] = array("name" => "if(a.payment_type = 0,'Cash','Credit')", "display" => "Cara Bayar", "width" => 55);
+        $settings["columns"][] = array("name" => "if(a.payment_type = 0,'Cash','Credit')", "display" => "C/B", "width" => 40);
         $settings["columns"][] = array("name" => "a.invoice_date + INTERVAL a.credit_terms DAY", "display" => "JTP", "width" => 60);
         $settings["columns"][] = array("name" => "format(a.base_amount - a.disc_amount + a.ppn_amount + a.other_costs_amount,0)", "display" => "Nilai Penjualan", "width" => 70, "align" => "right");
         $settings["columns"][] = array("name" => "format(a.return_amount,0)", "display" => "Retur", "width" => 70, "align" => "right");
@@ -38,8 +38,10 @@ class InvoiceController extends AppController {
         $settings["columns"][] = array("name" => "format(a.base_amount - a.disc_amount + a.ppn_amount + a.other_costs_amount - (a.paid_amount + a.return_amount),0)", "display" => "OutStanding", "width" => 70, "align" => "right");
         $settings["columns"][] = array("name" => "c.sales_name", "display" => "Salesman", "width" => 120);
         $settings["columns"][] = array("name" => "if(a.invoice_status = 0,'Draft',if(a.invoice_status = 1,'Posted',if(a.invoice_status = 2,'Approved','Void')))", "display" => "Status", "width" => 50);
-        $settings["columns"][] = array("name" => "coalesce(d.user_id,'-')", "display" => "Admin", "width" => 80);
-        $settings["columns"][] = array("name" => "coalesce(a.create_time,'-')", "display" => "Waktu Input", "width" => 100);
+        $settings["columns"][] = array("name" => "coalesce(d.user_id,'-')", "display" => "Input By", "width" => 60);
+        $settings["columns"][] = array("name" => "coalesce(a.create_time,'-')", "display" => "Input Time", "width" => 100);
+        $settings["columns"][] = array("name" => "coalesce(e.user_id,'-')", "display" => "Approve By", "width" => 60);
+        $settings["columns"][] = array("name" => "coalesce(a.approve_time,'-')", "display" => "Approve Time", "width" => 100);
 
         $settings["filters"][] = array("name" => "a.invoice_no", "display" => "No. Invoice");
         $settings["filters"][] = array("name" => "a.invoice_date", "display" => "Tanggal");
@@ -66,15 +68,15 @@ class InvoiceController extends AppController {
             }
             if ($acl->CheckUserAccess("ar.invoice", "edit")) {
                 $settings["actions"][] = array("Text" => "<b>Edit</b>", "Url" => "ar.invoice/edit/%s", "Class" => "bt_edit", "ReqId" => 1,
-                    "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu sebelum proses edit.\nPERHATIAN: Pilih tepat 1 data rekonsil",
+                    "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu sebelum proses edit.\nPERHATIAN: Pilih tepat 1 data Invoice",
                     "Confirm" => "");
             }
             if ($acl->CheckUserAccess("ar.invoice", "delete")) {
                 $settings["actions"][] = array("Text" => "<b>Void</b>", "Url" => "ar.invoice/void/%s", "Class" => "bt_delete", "ReqId" => 1);
             }
             if ($acl->CheckUserAccess("ar.invoice", "view")) {
-                $settings["actions"][] = array("Text" => "<b>View</b>", "Url" => "ar.invoice/view/%s", "Class" => "bt_view", "ReqId" => 1,
-                    "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data rekonsil","Confirm" => "");
+                $settings["actions"][] = array("Text" => "<b>View</b>", "Url" => "ar.invoice/view/0/%s", "Class" => "bt_view", "ReqId" => 1,
+                    "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data Invoice","Confirm" => "");
             }
             $settings["actions"][] = array("Text" => "separator", "Url" => null);
             if ($acl->CheckUserAccess("ar.invoice", "print")) {
@@ -89,6 +91,7 @@ class InvoiceController extends AppController {
 
             if ($acl->CheckUserAccess("ar.invoice", "approve")) {
                 $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                /*
                 $settings["actions"][] = array("Text" => "<b>Approval Invoice</b>", "Url" => "ar.invoice/approve/1", "Class" => "bt_approve", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Penjualan terlebih dahulu sebelum proses approval.",
                     "Confirm" => "Apakah anda menyetujui data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
@@ -97,11 +100,14 @@ class InvoiceController extends AppController {
                     "Confirm" => "Apakah anda mau membatalkan approval data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
                 $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "<b>Proses Approval</b>", "Url" => "ar.invoice/approval", "Class" => "bt_approve", "ReqId" => 0);
+                */
+                $settings["actions"][] = array("Text" => "<b>Approval</b> (Periksa & Setujui Invoice)", "Url" => "ar.invoice/view/1/%s", "Class" => "bt_approve", "ReqId" => 1,
+                    "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data Invoice","Confirm" => "");
             }
 
         } else {
             //$settings["from"] = "vw_ar_invoice_master AS a";
-            $settings["from"] = "t_ar_invoice_master AS a JOIN m_customer AS b ON a.customer_id = b.id JOIN m_salesman AS c ON a.sales_id = c.id LEFT JOIN sys_users d ON a.createby_id = d.user_uid";
+            $settings["from"] = "t_ar_invoice_master AS a JOIN m_customer AS b ON a.customer_id = b.id JOIN m_salesman AS c ON a.sales_id = c.id LEFT JOIN sys_users d ON a.createby_id = d.user_uid LEFT JOIN sys_users e ON a.approveby_id = e.user_uid";
             if ($_GET["query"] == "") {
                 $_GET["query"] = null;
                 $settings["where"] = "a.is_deleted = 0 And a.cabang_id = " . $this->userCabangId ." And year(a.invoice_date) = ".$this->trxYear." And month(a.invoice_date) = ".$this->trxMonth;
@@ -393,7 +399,7 @@ class InvoiceController extends AppController {
         $this->Set("discPrev", $discprev);
     }
 
-    public function view($invoiceId = null) {
+    public function view($isApproval = 0, $invoiceId = 0) {
         require_once(MODEL . "master/cabang.php");
         require_once(MODEL . "master/warehouse.php");
         require_once(MODEL . "master/salesman.php");
@@ -443,6 +449,7 @@ class InvoiceController extends AppController {
         //load customer
         $loader = new Customer($invoice->CustomerId);
         $this->Set("custdata", $loader);
+        $this->Set("isApproval", $isApproval);
     }
 
     public function delete($invoiceId) {
@@ -557,76 +564,72 @@ class InvoiceController extends AppController {
                 //$invoicedetail->PphAmount = $this->GetPostValue("aPphAmount");
                 $invoicedetail->PpnPct = $this->GetPostValue("aPpnPct");
                 $invoicedetail->PpnAmount = $this->GetPostValue("aPpnAmount");
-                // insert ke table
-                $flagSuccess = false;
-                $this->connector->BeginTransaction();
-                $rs = $invoicedetail->Insert() == 1;
-                if ($rs > 0){
-                    //pasti adalah item ini
-                    $items = new Items($invoicedetail->ItemId);
-                    $stock = new Stock();
-                    $stocks = $stock->LoadStocksFifo($this->trxYear,$invoicedetail->ItemId,$items->SuomCode,$invoice->GudangId);
-                    // Set variable-variable pendukung
-                    $remainingQty = $invoicedetail->SalesQty;
-                    $invoicedetail->ItemHpp = 0;
-                    $hpp = 0;
-                    /** @var $stocks Stock[] */
-                    foreach ($stocks as $stock) {
-                        // Buat object stock keluarnya
-                        $issue = new Stock();
-                        $issue->TrxYear = $this->trxYear;
-                        $issue->CreatedById = $this->userUid;
-                        $issue->StockTypeCode = 101;                // Item Issue dari IS
-                        $issue->ReffId = $invoicedetail->Id;
-                        $issue->TrxDate = $invoice->InvoiceDate;
-                        $issue->WarehouseId = $invoice->GudangId;    // Gudang asal!
-                        $issue->ItemId = $invoicedetail->ItemId;
-                        //$issue->Qty = $stock->QtyBalance;			// Depend on case...
-                        $issue->UomCode = $items->SuomCode;
-                        $issue->Price = $stock->Price;                // Ya pastilah pake angka ini...
-                        $issue->UseStockId = $stock->Id;            // Kasi tau kalau issue ini based on stock id mana
-                        $issue->QtyBalance = null;                    // Klo issue harus NULL
+                $invoicedetail->PriceMode = $this->GetPostValue("aPriceMode");
+                //check price disini
+                $cprice = 0;
+                $dprice = array();
+                $cprice = $this->retItemSalePrice($invoice->CustomerId,$invoicedetail->ItemId);
+                $dprice = explode("|",$cprice);
+                $cprice = strval($dprice[1]);
+                if (($cprice != $invoicedetail->Price) && $invoicedetail->PriceMode == 0){
+                    echo json_encode(array('errorMsg' => 'Terjadi kesalahan harga!'));
+                }else{
+                    // insert ke table
+                    $flagSuccess = false;
+                    $this->connector->BeginTransaction();
+                    $rs = $invoicedetail->Insert() == 1;
+                    if ($rs > 0){
+                        //pasti adalah item ini
+                        $items = new Items($invoicedetail->ItemId);
+                        $stock = new Stock();
+                        $stocks = $stock->LoadStocksFifo($this->trxYear,$invoicedetail->ItemId,$items->SuomCode,$invoice->GudangId);
+                        // Set variable-variable pendukung
+                        $remainingQty = $invoicedetail->SalesQty;
+                        $invoicedetail->ItemHpp = 0;
+                        $hpp = 0;
+                        /** @var $stocks Stock[] */
+                        foreach ($stocks as $stock) {
+                            // Buat object stock keluarnya
+                            $issue = new Stock();
+                            $issue->TrxYear = $this->trxYear;
+                            $issue->CreatedById = $this->userUid;
+                            $issue->StockTypeCode = 101;                // Item Issue dari IS
+                            $issue->ReffId = $invoicedetail->Id;
+                            $issue->TrxDate = $invoice->InvoiceDate;
+                            $issue->WarehouseId = $invoice->GudangId;    // Gudang asal!
+                            $issue->ItemId = $invoicedetail->ItemId;
+                            //$issue->Qty = $stock->QtyBalance;			// Depend on case...
+                            $issue->UomCode = $items->SuomCode;
+                            $issue->Price = $stock->Price;                // Ya pastilah pake angka ini...
+                            $issue->UseStockId = $stock->Id;            // Kasi tau kalau issue ini based on stock id mana
+                            $issue->QtyBalance = null;                    // Klo issue harus NULL
 
-                        $stock->UpdatedById = $this->userUid;
+                            $stock->UpdatedById = $this->userUid;
 
-                        if ($remainingQty > $stock->QtyBalance) {
-                            // Waduh stock pertama ga cukup... gpp kita coba habiskan dulu...
-                            $issue->Qty = $stock->QtyBalance;            // Berhubung barang yang dikeluarkan tidak cukup ambil dari sisanya
-                            $remainingQty -= $stock->QtyBalance;        // Kita masih perlu...
-                            $stock->QtyBalance = 0;                        // Habis...
-                        } else {
-                            // Barang di gudang mencukupi atau PAS
-                            $issue->Qty = $remainingQty;
-                            $stock->QtyBalance -= $remainingQty;
-                            $remainingQty = 0;
-                        }
-                        $hpp+= $issue->Qty * $issue->Price;
-                        // Apapun yang terjadi masukkan data issue stock
-                        if ($issue->Insert() > 0) {
-                            $flagSuccess = true;
-                        } else {
-                            $flagSuccess = false;
-                            $errors[] = sprintf("%s -> Item: [%s] %s Message: Stock tidak cukup!", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName);
-                            break;        // Break loop stocks
-                        }
-                        // update hpp detail
-                        if ($hpp > 0) {
-                            $flagSuccess = true;
-                            $invoicedetail->ItemHpp = round($hpp / $invoicedetail->SalesQty, 2);
-                            $invoicedetail->IsPost = 1;
-                            if ($invoicedetail->UpdateHpp() > 0) {
+                            if ($remainingQty > $stock->QtyBalance) {
+                                // Waduh stock pertama ga cukup... gpp kita coba habiskan dulu...
+                                $issue->Qty = $stock->QtyBalance;            // Berhubung barang yang dikeluarkan tidak cukup ambil dari sisanya
+                                $remainingQty -= $stock->QtyBalance;        // Kita masih perlu...
+                                $stock->QtyBalance = 0;                        // Habis...
+                            } else {
+                                // Barang di gudang mencukupi atau PAS
+                                $issue->Qty = $remainingQty;
+                                $stock->QtyBalance -= $remainingQty;
+                                $remainingQty = 0;
+                            }
+                            $hpp+= $issue->Qty * $issue->Price;
+                            // Apapun yang terjadi masukkan data issue stock
+                            if ($issue->Insert() > 0) {
                                 $flagSuccess = true;
                             } else {
-                                //$flagSuccess = false;
-                                //$errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                                //break;
+                                $flagSuccess = false;
+                                $errors[] = sprintf("%s -> Item: [%s] %s Message: Stock tidak cukup!", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName);
+                                break;        // Break loop stocks
                             }
-                        }else{
-                            $lhpp = new Stock();
-                            $lhpp = $lhpp->GetLastHpp($this->trxYear,$invoice->GudangId,$invoicedetail->ItemId);
-                            if ($lhpp > 0){
+                            // update hpp detail
+                            if ($hpp > 0) {
                                 $flagSuccess = true;
-                                $invoicedetail->ItemHpp = $lhpp;
+                                $invoicedetail->ItemHpp = round($hpp / $invoicedetail->SalesQty, 2);
                                 $invoicedetail->IsPost = 1;
                                 if ($invoicedetail->UpdateHpp() > 0) {
                                     $flagSuccess = true;
@@ -636,11 +639,11 @@ class InvoiceController extends AppController {
                                     //break;
                                 }
                             }else{
-                                $flagSuccess = true;
-                                $dhpp = new Stock();
-                                $dhpp = $dhpp->GetDefaultHpp($invoicedetail->ItemId);
-                                if ($dhpp > 0) {
-                                    $invoicedetail->ItemHpp = round($dhpp / $invoicedetail->SalesQty, 2);
+                                $lhpp = new Stock();
+                                $lhpp = $lhpp->GetLastHpp($this->trxYear,$invoice->GudangId,$invoicedetail->ItemId);
+                                if ($lhpp > 0){
+                                    $flagSuccess = true;
+                                    $invoicedetail->ItemHpp = $lhpp;
                                     $invoicedetail->IsPost = 1;
                                     if ($invoicedetail->UpdateHpp() > 0) {
                                         $flagSuccess = true;
@@ -650,44 +653,61 @@ class InvoiceController extends AppController {
                                         //break;
                                     }
                                 }else{
-                                    //$flagSuccess = false;
-                                    //$errors[] = sprintf("%s -> Item: [%s] %s Message: HPP Tidak dihitung (Kosong) ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                                    //break;
+                                    $flagSuccess = true;
+                                    $dhpp = new Stock();
+                                    $dhpp = $dhpp->GetDefaultHpp($invoicedetail->ItemId);
+                                    if ($dhpp > 0) {
+                                        $invoicedetail->ItemHpp = round($dhpp / $invoicedetail->SalesQty, 2);
+                                        $invoicedetail->IsPost = 1;
+                                        if ($invoicedetail->UpdateHpp() > 0) {
+                                            $flagSuccess = true;
+                                        } else {
+                                            //$flagSuccess = false;
+                                            //$errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update hpp item invoice ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                            //break;
+                                        }
+                                    }else{
+                                        //$flagSuccess = false;
+                                        //$errors[] = sprintf("%s -> Item: [%s] %s Message: HPP Tidak dihitung (Kosong) ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                        //break;
+                                    }
                                 }
                             }
-                        }
-                        // Update Qty Balance
-                        if ($stock->Update($stock->Id) > 0) {
-                            $flagSuccess = true;
-                        } else {
-                            $flagSuccess = false;
-                            $errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update data stock ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
-                            break;        // Break loop stocks
-                        }
-                        // OK jangan lupa update data cost
-                        //$invoicedetail->Hpp += $issue->Qty * $issue->Price;
-                        if ($remainingQty <= 0) {
-                            $flagSuccess = true;
-                            // Barang yang di issue sudah mencukupi... (TIDAK ERROR !)
-                            break;
+                            // Update Qty Balance
+                            if ($stock->Update($stock->Id) > 0) {
+                                $flagSuccess = true;
+                            } else {
+                                $flagSuccess = false;
+                                $errors[] = sprintf("%s -> Item: [%s] %s Message: Gagal update data stock ! Message: %s", $invoice->InvoiceNo, $items->ItemCode, $items->ItemName, $this->connector->GetErrorMessage());
+                                break;        // Break loop stocks
+                            }
+                            // OK jangan lupa update data cost
+                            //$invoicedetail->Hpp += $issue->Qty * $issue->Price;
+                            if ($remainingQty <= 0) {
+                                $flagSuccess = true;
+                                // Barang yang di issue sudah mencukupi... (TIDAK ERROR !)
+                                break;
+                            }
                         }
                     }
-                }
-                if ($flagSuccess) {
-                    $qts = $invoicedetail->SalesQty;
-                    if ($invoicedetail->ExSoId > 0 && $qts > 0){
-                        //update sales order send qty
-                        $this->connector->CommandText = "Update t_ar_order a Set a.send_qty = a.send_qty + $qts Where a.id = ".$invoicedetail->ExSoId;
-                        $rz = $this->connector->ExecuteNonQuery();
+                    if ($flagSuccess) {
+                        $qts = $invoicedetail->SalesQty;
+                        if ($invoicedetail->ExSoId > 0 && $qts > 0){
+                            //update sales order send qty
+                            $this->connector->CommandText = "Update t_ar_order a Set a.send_qty = a.send_qty + $qts Where a.id = ".$invoicedetail->ExSoId;
+                            $rz = $this->connector->ExecuteNonQuery();
+                        }
+                        $this->connector->CommitTransaction();
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemId . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
+                        echo json_encode(array());
+                    } else {
+                        $this->connector->RollbackTransaction();
+                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemId . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
+                        echo json_encode(array('errorMsg' =>$errors));
                     }
-                    $this->connector->CommitTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
-                    echo json_encode(array());
-                } else {
-                    $this->connector->RollbackTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
-                    echo json_encode(array('errorMsg' =>$errors));
                 }
+            }else{
+                echo json_encode(array('errorMsg' => 'No Data sended!'));
             }
         }else{
             echo json_encode(array('errorMsg' => 'Data Master belum ada!'));
@@ -721,6 +741,7 @@ class InvoiceController extends AppController {
                 $invoicedetail->IsFree = $this->GetPostValue("aIsFree");
                 $invoicedetail->PpnPct = $this->GetPostValue("aPpnPct");
                 $invoicedetail->PpnAmount = $this->GetPostValue("aPpnAmount");
+                $invoicedetail->PriceMode = $this->GetPostValue("aPriceMode");
                 // update ke table
                 $flagSuccess = false;
                 $this->connector->BeginTransaction();
@@ -879,11 +900,11 @@ class InvoiceController extends AppController {
                         $rz = $this->connector->ExecuteNonQuery();
                     }
                     $this->connector->CommitTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
+                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item ID: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Success');
                     echo json_encode(array());
                 } else {
                     $this->connector->RollbackTransaction();
-                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item Code: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
+                    $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Add Invoice detail -> Item ID: ' . $invoicedetail->ItemCode . ' = ' . $invoicedetail->SalesQty, $invoice->InvoiceNo, 'Failed');
                     echo json_encode(array('errorMsg' =>$errors));
                 }
             }
@@ -932,11 +953,11 @@ class InvoiceController extends AppController {
         }
         if($flagSuccess){
             $this->connector->CommitTransaction();
-            $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice detail -> Item Code: '.$invoicedetail->ItemCode.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Success');
+            $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice detail -> Item ID: '.$invoicedetail->ItemId.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Success');
             printf("Data Detail Invoice ID: %d berhasil dihapus!",$id);
         }else{
             $this->connector->RollbackTransaction();
-            $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice detail -> Item Code: '.$invoicedetail->ItemCode.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Failed');
+            $log = $log->UserActivityWriter($this->userCabangId,'ar.invoice','Delete Invoice detail -> Item ID: '.$invoicedetail->ItemId.' = '.$invoicedetail->SalesQty,$invoicedetail->InvoiceId,'Failed');
             printf("Maaf, Data Detail Invoice ID: %d gagal dihapus!",$id);
         }
     }
@@ -1282,7 +1303,7 @@ class InvoiceController extends AppController {
     }
 
     public function report(){
-        // report rekonsil process
+        // report Invoice process
         require_once(MODEL . "ar/customer.php");
         require_once(MODEL . "master/company.php");
         require_once(MODEL . "master/cabang.php");
@@ -1446,14 +1467,20 @@ class InvoiceController extends AppController {
             // process invoice
             if ($token == 1) {
                 if ($invoice->InvoiceStatus == 1) {
-                    $rs = $invoice->Approve($invoice->Id, $uid);
-                    if ($rs) {
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Approve Invoice', $invoice->InvoiceNo, 'Success');
-                        $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-approve.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
-                    } else {
-                        $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Approve Invoice', $invoice->InvoiceNo, 'Failed');
-                        $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
+                    //user yang sama tdk boleh approve sendiri inputannya.
+                    if ($invoice->CreatebyId <> $uid) {
+                        $rs = $invoice->Approve($invoice->Id, $uid);
+                        if ($rs) {
+                            $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Approve Invoice', $invoice->InvoiceNo, 'Success');
+                            $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-approve.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
+                        } else {
+                            $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Approve Invoice', $invoice->InvoiceNo, 'Failed');
+                            $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
+                        }
+                    }else{
+                        $errors[] = sprintf("Maaf, Gagal proses approve Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, "User tidak boleh Approve inputan sendiri!");
                     }
+
                 } else {
                     $errors[] = sprintf("Data Invoice No.%s sudah berstatus -Approved- !", $invoice->InvoiceNo);
                 }
@@ -1464,13 +1491,18 @@ class InvoiceController extends AppController {
                         //}elseif($invoice->QtyReturn($invoice->Id) > 0){
                         //    $errors[] = sprintf("Data Invoice No.%s ada item yg diretur !", $invoice->InvoiceNo);
                     }else {
-                        $rs = $invoice->Unapprove($invoice->Id, $uid);
-                        if ($rs) {
-                            $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Success');
-                            $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-batalkan.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
-                        } else {
-                            $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Failed');
-                            $errors[] = sprintf("Maaf, Gagal proses pembatalan Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
+                        //user yang sama tdk boleh approve sendiri inputannya.
+                        if ($invoice->CreatebyId <> $uid) {
+                            $rs = $invoice->Unapprove($invoice->Id, $uid);
+                            if ($rs) {
+                                $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Success');
+                                $infos[] = sprintf("Data Invoice No.: '%s' (%s) telah berhasil di-batalkan.", $invoice->InvoiceNo, $invoice->InvoiceDescs);
+                            } else {
+                                $log = $log->UserActivityWriter($this->userCabangId, 'ar.invoice', 'Un-approve Invoice', $invoice->InvoiceNo, 'Failed');
+                                $errors[] = sprintf("Maaf, Gagal proses pembatalan approval Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, $this->connector->GetErrorMessage());
+                            }
+                        }else{
+                            $errors[] = sprintf("Maaf, Gagal proses pembatalan approval Data Invoice: '%s'. Message: %s", $invoice->InvoiceNo, "User tidak boleh batalkan Approval inputan sendiri!");
                         }
                     }
                 }else{
@@ -1787,6 +1819,7 @@ class InvoiceController extends AppController {
         }
         redirect_url("ar.invoice/create");
     }
+
 }
 
 

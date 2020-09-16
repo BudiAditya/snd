@@ -603,6 +603,7 @@ class TransferController extends AppController {
             // proses rekap disini
             $sCabangId = $this->GetPostValue("CabangId");
             $sGudangId = $this->GetPostValue("GudangId");
+            $sStatus = $this->GetPostValue("NpbStatus");
             $sStartDate = strtotime($this->GetPostValue("StartDate"));
             $sEndDate = strtotime($this->GetPostValue("EndDate"));
             $sJnsLaporan = $this->GetPostValue("JnsLaporan");
@@ -610,13 +611,14 @@ class TransferController extends AppController {
             // ambil data yang diperlukan
             $transfer = new Transfer();
             if ($sJnsLaporan == 1) {
-                $reports = $transfer->Load4Reports($this->userCabangId, $sGudangId, $sStartDate, $sEndDate);
+                $reports = $transfer->Load4Reports($this->userCabangId, $sGudangId, $sStartDate, $sEndDate, $sStatus);
             }else{
-                $reports = $transfer->LoadRekap4Reports($this->userCabangId, $sGudangId, $sStartDate, $sEndDate);
+                $reports = $transfer->LoadRekap4Reports($this->userCabangId, $sGudangId, $sStartDate, $sEndDate, $sStatus);
             }
         }else{
             $sCabangId = 0;
             $sGudangId = 0;
+            $sStatus = -1;
             $sStartDate = mktime(0, 0, 0, $month, 1, $year);
             //$sStartDate = date('d-m-Y',$sStartDate);
             $sEndDate = time();
@@ -646,6 +648,7 @@ class TransferController extends AppController {
         $this->Set("userCabName", $cabName);
         $this->Set("CabangId",$sCabangId);
         $this->Set("GudangId",$sGudangId);
+        $this->Set("NpbStatus",$sStatus);
         $this->Set("cabangs", $cabang);
         $this->Set("gudangs", $gudang);
         $this->Set("StartDate",$sStartDate);

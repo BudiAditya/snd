@@ -52,7 +52,7 @@ if ($JnsLaporan == 1) {
     $sheet->setCellValue("C$row", "Ke");
     $sheet->setCellValue("D$row", "Tanggal");
     $sheet->setCellValue("E$row", "No. Bukti");
-    $sheet->setCellValue("F$row", "Keterangan");
+    $sheet->setCellValue("F$row", "Status");
     $sheet->setCellValue("G$row", "Kode Barang");
     $sheet->setCellValue("H$row", "Nama Barang");
     $sheet->setCellValue("I$row", "Satuan");
@@ -73,7 +73,15 @@ if ($JnsLaporan == 1) {
                 $sheet->setCellValue("C$row", $rpt["to_cabang_code"]);
                 $sheet->setCellValue("D$row", date('d-m-Y', strtotime($rpt["npb_date"])));
                 $sheet->setCellValue("E$row", $rpt["npb_no"]);
-                $sheet->setCellValue("F$row", $rpt["npb_descs"]);
+                if ($rpt["npb_status"] == 0) {
+                    $sheet->setCellValue("F$row", "Draft");
+                }elseif ($rpt["npb_status"] == 1) {
+                    $sheet->setCellValue("F$row", "Posted");
+                }elseif ($rpt["npb_status"] == 2) {
+                    $sheet->setCellValue("F$row", "Approved");
+                }else{
+                    $sheet->setCellValue("F$row", "Void");
+                }
             }
             $sheet->setCellValue("G$row", $rpt["item_code"]);
             $sheet->setCellValue("H$row", $rpt["item_name"]);
