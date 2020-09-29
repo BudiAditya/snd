@@ -67,7 +67,7 @@
             });
 
             $("#bHapus").click(function(){
-                if (confirm('Anda yakin akam membatalkan Invoice ini?')){
+                if (confirm('Anda yakin akan membatalkan Invoice ini?')){
                     location.href="<?php print($helper->site_url("ar.invoice/void/").$invoice->Id); ?>";
                 }
             });
@@ -79,7 +79,7 @@
             });
 
             $("#bApprove").click(function(){
-                if (confirm('Approve Invoice ini?')){
+                if (confirm("Proses Approve data Invoice yang dipilih?\n** Pastikan data Invoice sudah benar dan valid!")) {
                     location.href="<?php print($helper->site_url("ar.invoice/approve/1?&id[]=$invoice->Id")); ?>";
                 }
             });
@@ -148,6 +148,8 @@ $bpdf = base_url('public/images/button/').'pdf.png';
             <td><input type="text" class="f1 easyui-datebox" id="InvoiceDate" name="InvoiceDate" style="width: 150px" value="<?php print($invoice->FormatInvoiceDate(SQL_DATEONLY));?>" disabled data-options="formatter:myformatter,parser:myparser"/></td>
             <td>No. Invoice</td>
             <td><input type="text" class="f1 easyui-textbox" maxlength="20" style="width: 150px" id="InvoiceNo" name="InvoiceNo" value="<?php print($invoice->InvoiceNo != null ? $invoice->InvoiceNo : '-'); ?>" disabled/></td>
+            <td align="right">Input by:</td>
+            <td colspan="2"><span style="color: #00bbee"><?=$invoice->AdminName." - ".$invoice->CreateTime;?></span></td>
         </tr>
         <tr>
             <td>Customer</td>
@@ -177,6 +179,8 @@ $bpdf = base_url('public/images/button/').'pdf.png';
                 <input type="hidden" id="InvoiceStatus" name="InvoiceStatus" value="<?php print($invoice->InvoiceStatus);?>"/>
                 <input type="hidden" id="DbAccId" name="DbAccId" value="<?=$invoice->DbAccId;?>"/>
             </td>
+            <td align="right">Approved by:</td>
+            <td colspan="2"><span style="color: #00bbee"><?=$appUserName." - ".$invoice->ApproveTime;?></span></td>
         </tr>
         <tr>
             <td>Keterangan</td>

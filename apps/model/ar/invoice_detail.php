@@ -151,7 +151,7 @@ VALUES(?price_mode,?l_qty,?m_qty,?s_qty,?is_post,?ex_so_id,?by_angkut,?is_free,?
         $this->connector->AddParameter("?exp_date", null);
         $this->connector->AddParameter("?by_angkut", $this->ByAngkut);
         $this->connector->AddParameter("?is_post", $this->IsPost);
-        $this->connector->AddParameter("?price_mode", $this->PriceMode);
+        $this->connector->AddParameter("?price_mode", $this->PriceMode == null ? 0 : $this->PriceMode);
 		$rs = $this->connector->ExecuteNonQuery();
         $rsx = null;
         $did = 0;
@@ -224,7 +224,7 @@ WHERE id = ?id";
         $this->connector->AddParameter("?exp_date", null);
         $this->connector->AddParameter("?by_angkut", $this->ByAngkut);
         $this->connector->AddParameter("?is_post", $this->IsPost);
-        $this->connector->AddParameter("?price_mode", $this->PriceMode);
+        $this->connector->AddParameter("?price_mode", $this->PriceMode == null ? 0 : $this->PriceMode);
         $this->connector->AddParameter("?id", $id);
         $rs = $this->connector->ExecuteNonQuery();
         if ($rs == 1) {

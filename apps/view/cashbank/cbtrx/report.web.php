@@ -131,8 +131,17 @@ if ($Reports != null){ ?>
             $nmr = 1;
             $tdebet = 0;
             $tkredit = 0;
-            $saldo = 0;
+            $saldo = $SaldoAwal;
             $url = null;
+            if ($saldo <> 0){
+                print("<tr valign='Top'>");
+                printf("<td>%s</td>",$nmr);
+                print("<td colspan='9'>Saldo lalu ...</td>");
+                printf("<td align='right'>%s</td>",number_format($saldo,0));
+                print("<td colspan='2'>&nbsp;</td>");
+                print("</tr>");
+                $nmr++;
+            }
             while ($row = $Reports->FetchAssoc()) {
                 $url = $helper->site_url("cashbank.cbtrx/view/".$row["id"]);
                 $debet = 0;

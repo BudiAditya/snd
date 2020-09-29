@@ -98,11 +98,11 @@ class InvoiceController extends AppController {
                 $settings["actions"][] = array("Text" => "<b>Batal Approval</b>", "Url" => "ar.invoice/approve/0", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Penjualan terlebih dahulu sebelum proses pembatalan.",
                     "Confirm" => "Apakah anda mau membatalkan approval data pembelian yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
-                $settings["actions"][] = array("Text" => "separator", "Url" => null);
-                $settings["actions"][] = array("Text" => "<b>Proses Approval</b>", "Url" => "ar.invoice/approval", "Class" => "bt_approve", "ReqId" => 0);
                 */
                 $settings["actions"][] = array("Text" => "<b>Approval</b> (Periksa & Setujui Invoice)", "Url" => "ar.invoice/view/1/%s", "Class" => "bt_approve", "ReqId" => 1,
                     "Error" => "Maaf anda harus memilih Data Invoice terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data Invoice","Confirm" => "");
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "<b>Proses Approval</b> (Masal)", "Url" => "ar.invoice/approval", "Class" => "bt_approve", "ReqId" => 0);
             }
 
         } else {
@@ -450,6 +450,15 @@ class InvoiceController extends AppController {
         $loader = new Customer($invoice->CustomerId);
         $this->Set("custdata", $loader);
         $this->Set("isApproval", $isApproval);
+        //load approvan
+        $appUserName = null;
+        if ($invoice->InvoiceStatus == 2){
+            require_once(MODEL . "master/user_admin.php");
+            $loader = new UserAdmin();
+            $user = $loader->FindById($invoice->ApprovebyId);
+            $appUserName = $user->UserId;
+        }
+        $this->Set("appUserName", $appUserName);
     }
 
     public function delete($invoiceId) {

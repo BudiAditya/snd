@@ -168,16 +168,19 @@ class FakturController extends AppController {
         if (count($this->postData) > 0) {
             $tahun = $this->GetPostValue("Tahun");
             $bulan = $this->GetPostValue("Bulan");
+            $ptype = $this->GetPostValue("Ptype");
             $output = $this->GetPostValue("Output");
         }else{
             $tahun = $this->trxYear;
             $bulan = $this->trxMonth;
+            $ptype = -1;
             $output = 0;
         }
         $loader = new Faktur();
-        $dfaktur = $loader->LoadAllByMonth($this->userCompanyId,$tahun,$bulan);
+        $dfaktur = $loader->LoadAllByMonth($this->userCompanyId,$tahun,$bulan,$ptype);
         $this->Set("tahun", $tahun);
         $this->Set("bulan", $bulan);
+        $this->Set("ptype", $ptype);
         $this->Set("output", $output);
         $this->Set("dfaktur", $dfaktur);
     }
@@ -213,9 +216,9 @@ class FakturController extends AppController {
                     }else{
                         $alamat = $row['alamat_lengkap'];
                     }
-                    $detail.= '"' . $row['kode'] .'","'. $row['kd_jenis_pajak'] .'","'. $row['fg_pengganti'] .'","'. $row['nomor_faktur'] .'","'. $row['masa_pajak'] .'","'. $row['tahun_pajak'] .'","'. date('d/m/Y',strtotime($row['tanggal_faktur'])) .'","'. $npwp.'","'. $row['nama'] .'","'. $alamat .'","'. $row['jumlah_dpp'] .'","'. $row['jumlah_ppn'] .'","'. $row['jumlah_ppnbm'] .'","'. $row['id_keterangan_tambahan'] .'","'. $row['fg_uang_muka'] .'","'. $row['uang_muka_dpp'] .'","'. $row['uang_muka_ppn'] .'","'. $row['uang_muka_ppnbm'] .'","'. $row['referensi'] . '"'. PHP_EOL;
+                    $detail.= '"' . $row['kode'] .'","'. $row['kd_jenis_pajak'] .'","'. $row['fg_pengganti'] .'","'. $row['nomor_faktur'] .'","'. $row['masa_pajak'] .'","'. $row['tahun_pajak'] .'","'. date('d/m/Y',strtotime($row['tanggal_faktur'])) .'","'. $npwp.'","'. $row['nama'] .'","'. $alamat .'","'. intval($row['jumlah_dpp']) .'","'. intval($row['jumlah_ppn']) .'","'. intval($row['jumlah_ppnbm']) .'","'. $row['id_keterangan_tambahan'] .'","'. intval($row['fg_uang_muka']) .'","'. intval($row['uang_muka_dpp']) .'","'. intval($row['uang_muka_ppn']) .'","'. intval($row['uang_muka_ppnbm']) .'","'. $row['referensi'] . '"'. PHP_EOL;
                 }
-                $detail.= '"' . $row['of_kode'] .'","'. $row['kode_objek'] .'","'. $row['nm_barang'] .'","'. $row['harga_satuan'] .'","'. $row['jumlah_barang'] .'","'. $row['harga_total'] .'","'. $row['diskon'] .'","'. $row['dpp'] .'","'. $row['ppn'] .'","'. $row['tarif_ppnbm'] .'","'. $row['ppnbm'] .'"'. PHP_EOL;
+                $detail.= '"' . $row['of_kode'] .'","'. $row['kode_objek'] .'","'. $row['nm_barang'] .'","'. intval($row['harga_satuan']) .'","'. intval($row['jumlah_barang']) .'","'. intval($row['harga_total']) .'","'. intval($row['diskon']) .'","'. intval($row['dpp']) .'","'. intval($row['ppn']) .'","'. intval($row['tarif_ppnbm']) .'","'. intval($row['ppnbm']) .'"'. PHP_EOL;
                 $invid = $row['invoice_id'];
             }
             //save file

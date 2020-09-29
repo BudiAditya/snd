@@ -87,6 +87,7 @@ $menu = $root->AddNode("CASH BOOK", null, "menu");
     $menu->AddNode("Master Data", null, "title");
         $menu->AddNode("Daftar Bank", "master.bank");
         $menu->AddNode("Data Kas/Bank", "master.kasbank");
+        $menu->AddNode("Saldo Awal Kas/Bank", "cashbank.awal");
     $menu->AddNode("Transaksi Kas/Bank", null, "title");
         //$menu->AddNode("Nota Permintaan Kas/Bank", "cashbank.npkb");
         $menu->AddNode("Transaksi Kas/Bank", "cashbank.cbtrx");

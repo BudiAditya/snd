@@ -21,7 +21,7 @@
                 if (test.length == 0) {
                     alert("Belum ada data yang dipilih!");
                 }else {
-                    if (confirm("Proses Approve data yang dipilih?")) {
+                    if (confirm("Proses Approve data Invoice yang dipilih?\n** Pastikan data Invoice sudah benar dan valid!")) {
                         $("#frd").attr('action', ura).submit();
                     }
                 }
@@ -115,7 +115,7 @@ if ($invoices != null) {
         $tppn = 0;
         $ttot = 0;
         while ($data = $invoices->FetchAssoc()) {
-            $url = $helper->site_url("ar.invoice/view/" . $data["id"]);
+            $url = $helper->site_url("ar.invoice/view/1/" . $data["id"]);
             print('<tr>');
             printf('<td>%d</td>', $nmr++);
             printf('<td nowrap="nowrap">%s</td>', $data["invoice_date"]);

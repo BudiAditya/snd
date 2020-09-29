@@ -512,6 +512,11 @@ class CbTrxController extends AppController {
             if (date("Y",$sStartDate) == date("Y",$sEndDate)){
                 // ambil data yang diperlukan
                 $cbtrx = new cbtrx();
+                if ($sCoaBankId > 0 && $sTrxMode == 0 && $sTrxTypeId == 0){
+                    $sSaldoAwal = $cbtrx->GetSaldoAwal($sCabangId,$sCoaBankId,$sStartDate);
+                }else{
+                    $sSaldoAwal = 0;
+                }
                 $reports = $cbtrx->Load4Reports($this->userCompanyId,$sCabangId,$sTrxTypeId,$sTrxMode,$sCoaBankId,$sTrxStatus,$sStartDate,$sEndDate);
             }else{
                 $reports = null;
@@ -522,6 +527,7 @@ class CbTrxController extends AppController {
             $sCabangId = 0;
             $sTrxMode = 0;
             $sCoaBankId = 0;
+            $sSaldoAwal = 0;
             $sTrxStatus = -1;
             $sTrxTypeId = 0;
             $sStartDate = mktime(0, 0, 0, $month, 1, $year);
@@ -548,6 +554,7 @@ class CbTrxController extends AppController {
         $this->Set("CoaBankId",$sCoaBankId);
         $this->Set("StartDate",$sStartDate);
         $this->Set("EndDate",$sEndDate);
+        $this->Set("SaldoAwal",$sSaldoAwal);
         $this->Set("TrxStatus",$sTrxStatus);
         $this->Set("Output",$sOutput);
         $this->Set("Reports",$reports);
@@ -595,7 +602,7 @@ class CbTrxController extends AppController {
         $coaBanks = $loader->LoadCashBookAccount();
         //load data cabang
         $loader = new Cabang();
-        $cabangs = $loader->LoadByEntityId($this->userCompanyId);
+        $cabangs = $loader->LoadByCompanyId($this->userCompanyId);
         //load data kas/bank
         $loader = new CoaDetail($sCoaBankId);
         $sBankName = $loader->Perkiraan;

@@ -172,6 +172,8 @@ if ($JnsLaporan < 3) {
     $nmr = 0;
     $str = $row;
     if ($Reports != null) {
+        $lqty = 0;
+        $sqty = 0;
         while ($rpt = $Reports->FetchAssoc()) {
             $row++;
             $nmr++;
@@ -180,12 +182,21 @@ if ($JnsLaporan < 3) {
             }else{
                 $cqty = 0;
             }
+            if ($rpt['sum_qty'] >= $rpt['s_uom_qty'] && $rpt['s_uom_qty'] > 0){
+                $lqty = floor($rpt['sum_qty']/$rpt['s_uom_qty']);
+                $sqty = $rpt['sum_qty'] - ($lqty * $rpt['s_uom_qty']);
+            }else{
+                $lqty = 0;
+                $sqty = $rpt['sum_qty'];
+            }
             $sheet->setCellValue("A$row", $nmr);
             $sheet->setCellValue("B$row", $rpt['brand_name']);
             $sheet->setCellValueExplicit("C$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
             $sheet->setCellValue("D$row", $rpt['item_name']);
-            $sheet->setCellValue("E$row", $rpt['sum_lqty']);
-            $sheet->setCellValue("F$row", $rpt['sum_sqty']);
+            //$sheet->setCellValue("E$row", $rpt['sum_lqty']);
+            //$sheet->setCellValue("F$row", $rpt['sum_sqty']);
+            $sheet->setCellValue("E$row", $lqty);
+            $sheet->setCellValue("F$row", $sqty);
             $sheet->setCellValue("G$row", $rpt['sum_qty']);
             $sheet->setCellValue("H$row", $cqty);
             $sheet->setCellValue("I$row", $rpt['sum_dpp']);
@@ -273,20 +284,21 @@ if ($JnsLaporan < 3) {
     $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($center, $allBorders));
     $nmr = 0;
     $str = $row;
+    $qqty = 0;
+    $lqty = 0;
+    $sqty = 0;
+    $cqty = 0;
     if ($Reports != null) {
         while ($rpt = $Reports->FetchAssoc()) {
             $row++;
             $nmr++;
-            $qqty = $rpt["sum_qty"];
-            if ($qqty >= $rpt["s_uom_qty"] && $rpt["s_uom_qty"] > 0){
-                $aqty = array();
-                $sqty = round($qqty/$rpt["s_uom_qty"],2);
-                $aqty = explode('.',$sqty);
-                $lqty = $aqty[0];
-                $sqty = $qqty - ($lqty * $rpt["s_uom_qty"]);
-            }else {
+            $qqty = $rpt['sum_qty'];
+            if ($rpt['sum_qty'] >= $rpt['s_uom_qty'] && $rpt['s_uom_qty'] > 0){
+                $lqty = floor($rpt['sum_qty']/$rpt['s_uom_qty']);
+                $sqty = $rpt['sum_qty'] - ($lqty * $rpt['s_uom_qty']);
+            }else{
                 $lqty = 0;
-                $sqty = $qqty;
+                $sqty = $rpt['sum_qty'];
             }
             if ($rpt["entity_id"] == 1) {
                 $cqty = round($qqty * $rpt["qty_convert"], 2);
@@ -298,7 +310,7 @@ if ($JnsLaporan < 3) {
             $sheet->setCellValue("C$row", $rpt['brand_name']);
             $sheet->setCellValue("D$row", $rpt['item_name']);
             $sheet->setCellValue("E$row", $lqty);
-            $sheet->setCellValue("F$row", $lqty);
+            $sheet->setCellValue("F$row", $sqty);
             $sheet->setCellValue("G$row", $qqty);
             $sheet->setCellValue("H$row", $cqty);
             $sheet->setCellValue("I$row", $rpt["sum_dpp"] + $rpt["sum_ppn"]);
@@ -310,9 +322,10 @@ if ($JnsLaporan < 3) {
         $sheet->mergeCells("A$row:D$row");
         $sheet->getStyle("A$row")->applyFromArray($center);
         $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+        $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
         $sheet->setCellValue("I$row","=SUM(I$str:I$edr)");
         $sheet->getStyle("D$str:I$row")->applyFromArray($idrFormat);
-        $sheet->getStyle("A$row:i$row")->applyFromArray(array_merge($allBorders));
+        $sheet->getStyle("A$row:I$row")->applyFromArray(array_merge($allBorders));
     }
 }elseif ($JnsLaporan == 6){
     // omset salesman

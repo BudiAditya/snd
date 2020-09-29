@@ -40,7 +40,7 @@
 <form id="frm" name="frmReport" method="post">
     <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
         <tr>
-            <th class="bold" colspan="7">LAPORAN FAKTUR PPN KELUARAN</th>
+            <th class="bold" colspan="9">LAPORAN FAKTUR PPN KELUARAN</th>
             <th class="bold">Action</th>
         </tr>
         <tr>
@@ -72,6 +72,14 @@
                     <option value="10" <?php print($bulan == 10 ? 'selected="selected"' : '');?>>10 - Oktober</option>
                     <option value="11" <?php print($bulan == 11 ? 'selected="selected"' : '');?>>11 - Nopember</option>
                     <option value="12" <?php print($bulan == 12 ? 'selected="selected"' : '');?>>12 - Desember</option>
+                </select>
+            </td>
+            <td><label for="Ptype">Cara Bayar :</label></td>
+            <td>
+                <select id="Ptype" name="Ptype" required>
+                    <option value="-1" <?php print($ptype == -1 ? 'selected="selected"' : '');?>>- Semua -</option>
+                    <option value="0" <?php print($ptype == 0 ? 'selected="selected"' : '');?>>0 - Cash</option>
+                    <option value="1" <?php print($ptype == 1 ? 'selected="selected"' : '');?>>1 - Kredit</option>
                 </select>
             </td>
             <td><label for="Output">Output :</label></td>
@@ -114,7 +122,7 @@ if ($dfaktur != null) {
             <th>P P N</th>
             <th>Jumlah</th>
             <th>Ex Invoice</th>
-            <th>Outlet</th>
+            <th>Mode</th>
             <th>Pilih <input type="checkbox" id="cbAll" checked="checked"></th>
         </tr>
     <?php
@@ -133,7 +141,11 @@ if ($dfaktur != null) {
         printf('<td nowrap="nowrap" align="right">%s</td>',number_format($row["jumlah_ppn"],0));
         printf('<td nowrap="nowrap" align="right">%s</td>',number_format($row["jumlah_dpp"]+$row["jumlah_ppn"],0));
         printf('<td nowrap="nowrap">%s</td>',$row["referensi"]);
-        printf('<td nowrap="nowrap">%s</td>',$row["kode_outlet"]);
+        if ($row["payment_type"] == 1){
+            print('<td>Kredit</td>');
+        }else{
+            print('<td>Cash</td>');
+        }
         printf('<td class="center"><input type="checkbox" class="cbIds" name="ids[]" value="%d" checked="checked"/></td>',$row["id"]);
         print('</tr>');
         $dpp+= $row["jumlah_dpp"];

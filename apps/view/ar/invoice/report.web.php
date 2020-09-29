@@ -249,7 +249,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 $sma = false;
                 while ($row = $Reports->FetchAssoc()) {
                     $nmr++;
-                    $url = $helper->site_url("ar.invoice/view/" . $row["id"]);
+                    $url = $helper->site_url("ar.invoice/view/0/" . $row["id"]);
                     print("<tr valign='Top'>");
                     printf("<td>%s</td>", $nmr);
                     printf("<td nowrap='nowrap'>%s</td>", $row["cabang_code"]);
@@ -360,21 +360,32 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                 }else{
                     $cqty = 0;
                 }
+                if ($row['sum_qty'] >= $row['s_uom_qty'] && $row['s_uom_qty'] > 0){
+                    $lqty = floor($row['sum_qty']/$row['s_uom_qty']);
+                    $sqty = $row['sum_qty'] - ($lqty * $row['s_uom_qty']);
+                }else{
+                    $lqty = 0;
+                    $sqty = $row['sum_qty'];
+                }
                 print("<tr valign='Top'>");
                 printf("<td>%s</td>", $nmr);
                 printf("<td>%s</td>",$row['brand_name']);
                 printf("<td>%s</td>",$row['item_code']);
                 printf("<td>%s</td>",$row['item_name']);
-                printf("<td align='right'>%s</td>", $row['sum_lqty'] == 0 ? '' : number_format($row['sum_lqty'],0));
-                printf("<td align='right'>%s</td>", $row['sum_sqty'] == 0 ? '' : number_format($row['sum_sqty'],0));
+                //printf("<td align='right'>%s</td>", $row['sum_lqty'] == 0 ? '' : number_format($row['sum_lqty'],0));
+                //printf("<td align='right'>%s</td>", $row['sum_sqty'] == 0 ? '' : number_format($row['sum_sqty'],0));
+                printf("<td align='right'>%s</td>", $lqty == 0 ? '' : number_format($lqty,0));
+                printf("<td align='right'>%s</td>", $sqty == 0 ? '' : number_format($sqty,0));
                 printf("<td align='right'>%s</td>", $row['sum_qty'] == 0 ? '' : number_format($row['sum_qty'],0));
                 printf("<td align='right'>%s</td>",$cqty == 0 ? '' : number_format($cqty,2));
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_ppn'],0));
                 printf("<td align='right'>%s</td>",number_format($row['sum_dpp']+$row['sum_ppn'],0));
                 print("</tr>");
-                $tlqty+= $row['sum_lqty'];
-                $tsqty+= $row['sum_sqty'];
+                //$tlqty+= $row['sum_lqty'];
+                //$tsqty+= $row['sum_sqty'];
+                $tlqty+= $lqty;
+                $tsqty+= $sqty;
                 $tqty+= $row['sum_qty'];
                 $tcqty+= $cqty;
                 $tdpp+= $row['sum_dpp'];
@@ -422,7 +433,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             $ivn = null;
             $sma = false;
             while ($row = $Reports->FetchAssoc()) {
-                $url = $helper->site_url("ar.invoice/view/" . $row["id"]);
+                $url = $helper->site_url("ar.invoice/view/0/" . $row["id"]);
                 print("<tr valign='Top'>");
                 printf("<td>%s</td>", $nmr);
                 printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["invoice_date"])));
@@ -483,15 +494,12 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             while ($row = $Reports->FetchAssoc()) {
                 $nmr++;
                 $qqty = $row["sum_qty"];
-                if ($qqty >= $row["s_uom_qty"] && $row["s_uom_qty"] > 0){
-                    $aqty = array();
-                    $sqty = round($qqty/$row["s_uom_qty"],2);
-                    $aqty = explode('.',$sqty);
-                    $lqty = $aqty[0];
-                    $sqty = $qqty - ($lqty * $row["s_uom_qty"]);
-                }else {
+                if ($row['sum_qty'] >= $row['s_uom_qty'] && $row['s_uom_qty'] > 0){
+                    $lqty = floor($row['sum_qty']/$row['s_uom_qty']);
+                    $sqty = $row['sum_qty'] - ($lqty * $row['s_uom_qty']);
+                }else{
                     $lqty = 0;
-                    $sqty = $qqty;
+                    $sqty = $row['sum_qty'];
                 }
                 print("<tr valign='Top'>");
                 printf("<td>%s</td>", $nmr);
